@@ -1,0 +1,3 @@
+"""
+Quantum Intelligence Hub — Configuration
+"""

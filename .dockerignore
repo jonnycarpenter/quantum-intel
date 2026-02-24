@@ -1,0 +1,36 @@
+# Local data (SQLite, ChromaDB, debug files)
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Environment / secrets
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# Not needed in production image
+tests/
+deploy/
+ingestion_REFERENCE_template/
+frontend/
+frontend-react/
+
+# Build / cache
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+*.pyc
+*.pyo
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Docs / config
+*.md
+cloudbuild.yaml

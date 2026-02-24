@@ -1,0 +1,30 @@
+# Local data
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# Environment / secrets
+.env
+.env.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Windows reserved device name
+nul
+
+# Claude Code temp files
+tmpclaude-*
+.claude/

@@ -1,0 +1,49 @@
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel:$SHORT_SHA'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel:latest'
+      - '.'
+
+  # Push both tags
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '--all-tags', 'us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel']
+
+  # Update all Cloud Run Jobs to use the new image
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        IMAGE="us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel:$SHORT_SHA"
+        for JOB in \
+          quantum-rss-ingestion \
+          ai-rss-ingestion \
+          quantum-tavily-ingestion \
+          quantum-arxiv-ingestion \
+          quantum-earnings \
+          quantum-sec \
+          quantum-podcasts \
+          quantum-weekly-briefing \
+          quantum-digest; do
+          echo "Updating $${JOB} -> $${IMAGE}"
+          gcloud run jobs update "$${JOB}" \
+            --image "$${IMAGE}" \
+            --region us-central1 \
+            --project "$PROJECT_ID" \
+            2>/dev/null || echo "  (job $${JOB} not yet created, skipping)"
+        done
+
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel:$SHORT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+
+timeout: '900s'
