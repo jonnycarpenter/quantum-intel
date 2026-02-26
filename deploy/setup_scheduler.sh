@@ -12,8 +12,10 @@
 #   10:00 Sunday    — Podcasts
 #   11:00 1st/month — Earnings transcripts
 #   11:00 2nd/month — SEC filings
-#   12:00 Monday    — Weekly briefing
+#   12:00 Monday    — AI weekly briefing
+#   12:45 Monday    — Quantum weekly briefing
 #   13:00 daily     — Digest (after RSS completes)
+#   22:00 Mon-Fri   — Stocks (after US market close)
 #
 # Usage:
 #   chmod +x deploy/setup_scheduler.sh
@@ -55,9 +57,10 @@ create_schedule() {
 }
 
 # Daily
-create_schedule "quantum-rss-daily"       "0 6 * * *"   "quantum-rss-ingestion"
-create_schedule "ai-rss-daily"            "0 7 * * *"   "ai-rss-ingestion"
-create_schedule "quantum-digest-daily"    "0 13 * * *"  "quantum-digest"
+create_schedule "quantum-rss-daily"       "0 6 * * *"     "quantum-rss-ingestion"
+create_schedule "ai-rss-daily"            "0 7 * * *"     "ai-rss-ingestion"
+create_schedule "quantum-stocks-daily"    "0 22 * * 1-5"  "quantum-stocks-ingestion"
+create_schedule "quantum-digest-daily"    "0 13 * * *"    "quantum-digest"
 
 # Twice weekly (Tue & Fri)
 create_schedule "quantum-tavily-biweekly" "0 8 * * 2,5" "quantum-tavily-ingestion"
@@ -65,7 +68,8 @@ create_schedule "quantum-tavily-biweekly" "0 8 * * 2,5" "quantum-tavily-ingestio
 # Weekly
 create_schedule "quantum-arxiv-weekly"    "0 9 * * 0"   "quantum-arxiv-ingestion"
 create_schedule "quantum-podcasts-weekly" "0 10 * * 0"  "quantum-podcasts"
-create_schedule "quantum-briefing-weekly" "0 12 * * 1"  "quantum-weekly-briefing"
+create_schedule "ai-briefing-weekly"      "0 12 * * 1"  "ai-weekly-briefing"
+create_schedule "quantum-briefing-weekly" "45 12 * * 1" "quantum-weekly-briefing"
 
 # Monthly
 create_schedule "quantum-earnings-monthly" "0 11 1 * *"  "quantum-earnings"

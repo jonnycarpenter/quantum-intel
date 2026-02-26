@@ -28,7 +28,9 @@ steps:
           quantum-earnings \
           quantum-sec \
           quantum-podcasts \
+          quantum-stocks-ingestion \
           quantum-weekly-briefing \
+          ai-weekly-briefing \
           quantum-digest; do
           echo "Updating $${JOB} -> $${IMAGE}"
           gcloud run jobs update "$${JOB}" \

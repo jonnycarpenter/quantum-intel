@@ -9,12 +9,9 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
 import type { Domain } from '../api'
 import ArticleCard from '../components/ArticleCard'
+import DomainToggle from '../components/DomainToggle'
 import { SectionHeader, EmptyState, LensChip } from '../components/ui'
 import { Search } from 'lucide-react'
-
-interface Props {
-  domain: Domain
-}
 
 // Lens presets: domain-aware
 type Lens = { label: string; categories?: string[] }
@@ -63,7 +60,8 @@ const TIME_RANGES = [
   { label: '90d', hours: 2160 },
 ]
 
-export default function ExplorePage({ domain }: Props) {
+export default function ExplorePage() {
+  const [domain, setDomain] = useState<Domain>('quantum')
   const [activeLens, setActiveLens] = useState(0)
   const [category, setCategory] = useState<string>('')
   const [priority, setPriority] = useState<string>('')
@@ -110,7 +108,10 @@ export default function ExplorePage({ domain }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto space-y-4">
-      <h1 className="text-xl font-bold text-text-primary">Explore</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-text-primary">Explore</h1>
+        <DomainToggle domain={domain} onChange={setDomain} />
+      </div>
 
       {/* Lens Chips */}
       <div className="flex flex-wrap gap-2">
@@ -158,11 +159,10 @@ export default function ExplorePage({ domain }: Props) {
             <button
               key={tr.hours}
               onClick={() => setHours(tr.hours)}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                hours === tr.hours
+              className={`px-3 py-1.5 text-xs font-medium transition-colors ${hours === tr.hours
                   ? 'text-accent-blue bg-accent-blue/10'
                   : 'text-text-muted hover:text-text-secondary'
-              }`}
+                }`}
             >
               {tr.label}
             </button>

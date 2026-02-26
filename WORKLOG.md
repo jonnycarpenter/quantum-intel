@@ -35,20 +35,33 @@
 - Created `README_GCP_DEPLOYMENT.md` with full deployment guide
 - Local SQLite path preserved — factory pattern switches based on environment
 
+### Session 5 (Feb 2026) — GCP Deployment Complete
+- Deployed full infrastructure to GCP: Cloud Run Jobs, Cloud Scheduler, BigQuery, Vertex AI
+- Set up Cloud Build CI/CD (push to `master` triggers build → deploy)
+- Configured `min-instances: 1` for warm starts
+- All 10 Cloud Run Jobs operational with cron schedules
+- Verified end-to-end: ingestion, SEC, earnings, podcasts running in production
+### Session 6 (Feb 2026) — Weekly Briefings + Page-Level Domain Selectors
+- Added `ai-weekly-briefing` Cloud Run Job (separate from quantum)
+- Staggered Monday scheduling: AI at 12:00 UTC, Quantum at 12:45 UTC
+- Updated `cloudbuild.yaml`, `cloud_run_jobs.sh`, `setup_scheduler.sh`
+- Created reusable `DomainToggle` component for page-level domain switching
+- Migrated domain toggle from App header into each page (Briefing, Explore, Markets, Research, Filings)
+- Each page now manages its own domain state independently
+- Generated and saved manual briefings for both quantum and AI domains
+- TypeScript compiles cleanly with all changes
+
 ---
 
-## Next Session
-
-### Deploy to GCP
-1. Run `deploy/setup_infra.sh` to create infrastructure
-2. Populate secrets in Secret Manager
-3. Run `deploy/cloud_run_jobs.sh` to create Cloud Run Jobs
-4. Run `deploy/setup_scheduler.sh` to create cron triggers
-5. Test: `gcloud run jobs execute quantum-rss-ingestion --region us-central1`
-6. Optional: Run `scripts/migrate_sqlite_to_bigquery.py` to backfill existing data
+## Next Up
 
 ### Remaining Work
 - Write `tests/test_bigquery_storage.py` and `tests/test_vertex_embeddings.py`
 - Write `scripts/migrate_sqlite_to_bigquery.py` for one-time data migration
 - Create BigQuery vector index on `article_embeddings.embedding` column
 - Monitor costs and tune Cloud Run Job resource limits
+
+### Weekly Briefings
+- Implement weekly briefing generation pipeline
+- Separate quantum vs AI briefings (domain-aware, schema already supports `domain` field)
+- Schedule briefing jobs via Cloud Scheduler

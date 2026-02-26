@@ -7,10 +7,8 @@ import {
   FlaskConical,
   FileText,
   Settings,
-  MessageSquare,
   PanelRightClose,
   PanelRightOpen,
-  Atom,
   Bot,
 } from 'lucide-react'
 
@@ -23,7 +21,7 @@ import SettingsPage from './pages/SettingsPage'
 import ChatPanel from './components/ChatPanel'
 import StatusBar from './components/StatusBar'
 
-type Domain = 'quantum' | 'ai'
+
 
 const NAV_ITEMS = [
   { path: '/', label: 'Briefing', icon: Newspaper },
@@ -34,7 +32,6 @@ const NAV_ITEMS = [
 ]
 
 export default function App() {
-  const [domain, setDomain] = useState<Domain>('quantum')
   const [chatOpen, setChatOpen] = useState(true)
   const location = useLocation()
 
@@ -46,35 +43,17 @@ export default function App() {
       {/* ─── Header ─── */}
       <header className="flex items-center justify-between px-6 py-3 bg-bg-secondary border-b border-border">
         <div className="flex items-center gap-3">
-          <Atom className="w-6 h-6 text-accent-cyan" />
+          <img
+            src="/ketzero_logo_teal_transparent.png"
+            alt="Ket Zero"
+            className="h-7 w-auto"
+          />
           <span className="text-lg font-semibold tracking-tight text-text-primary">
-            KetZero Intel
+            Ket Zero Intelligence
           </span>
         </div>
 
-        {/* Domain Toggle */}
-        <div className="flex items-center bg-bg-tertiary rounded-lg p-0.5">
-          <button
-            onClick={() => setDomain('quantum')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              domain === 'quantum'
-                ? 'bg-accent-cyan/20 text-accent-cyan'
-                : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            Quantum
-          </button>
-          <button
-            onClick={() => setDomain('ai')}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              domain === 'ai'
-                ? 'bg-accent-purple/20 text-accent-purple'
-                : 'text-text-muted hover:text-text-secondary'
-            }`}
-          >
-            AI
-          </button>
-        </div>
+
 
         <div className="flex items-center gap-3">
           <NavLink to="/settings" className="text-text-muted hover:text-text-secondary transition-colors">
@@ -91,10 +70,9 @@ export default function App() {
             to={path}
             end={path === '/'}
             className={({ isActive }) =>
-              `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-bg-tertiary text-accent-blue'
-                  : 'text-text-muted hover:bg-bg-hover hover:text-text-secondary'
+              `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
+                ? 'bg-bg-tertiary text-accent-blue'
+                : 'text-text-muted hover:bg-bg-hover hover:text-text-secondary'
               }`
             }
           >
@@ -109,12 +87,12 @@ export default function App() {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto p-6">
           <Routes>
-            <Route path="/" element={<BriefingPage domain={domain} />} />
-            <Route path="/explore" element={<ExplorePage domain={domain} />} />
-            <Route path="/markets" element={<MarketsPage domain={domain} />} />
-            <Route path="/research" element={<ResearchPage domain={domain} />} />
-            <Route path="/filings" element={<FilingsPage domain={domain} />} />
-            <Route path="/settings" element={<SettingsPage domain={domain} />} />
+            <Route path="/" element={<BriefingPage />} />
+            <Route path="/explore" element={<ExplorePage />} />
+            <Route path="/markets" element={<MarketsPage />} />
+            <Route path="/research" element={<ResearchPage />} />
+            <Route path="/filings" element={<FilingsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>
 
@@ -138,7 +116,7 @@ export default function App() {
                 </button>
               </div>
             </div>
-            <ChatPanel currentPage={currentPage} domain={domain} />
+            <ChatPanel currentPage={currentPage} domain="quantum" />
           </aside>
         ) : (
           <button

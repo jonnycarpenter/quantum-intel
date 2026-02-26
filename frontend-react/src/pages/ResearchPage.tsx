@@ -8,16 +8,15 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
 import { Card, SectionHeader, EmptyState } from '../components/ui'
+import DomainToggle from '../components/DomainToggle'
 import { ExternalLink, FileText, Search } from 'lucide-react'
-
-interface Props {
-  domain: string
-}
+import type { Domain } from '../api'
 
 const PAPER_TYPES = ['breakthrough', 'incremental', 'review', 'theoretical']
 const READINESS_LEVELS = ['near_term', 'mid_term', 'long_term', 'theoretical']
 
-export default function ResearchPage({ domain }: Props) {
+export default function ResearchPage() {
+  const [domain, setDomain] = useState<Domain>('quantum')
   const [days, setDays] = useState(30)
   const [paperType, setPaperType] = useState<string>('')
   const [readiness, setReadiness] = useState<string>('')
@@ -39,7 +38,10 @@ export default function ResearchPage({ domain }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto space-y-4">
-      <h1 className="text-xl font-bold text-text-primary">Research</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-text-primary">Research</h1>
+        <DomainToggle domain={domain} onChange={setDomain} />
+      </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -73,11 +75,10 @@ export default function ResearchPage({ domain }: Props) {
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                days === d
-                  ? 'text-accent-blue bg-accent-blue/10'
-                  : 'text-text-muted hover:text-text-secondary'
-              }`}
+              className={`px-3 py-1.5 text-xs font-medium transition-colors ${days === d
+                ? 'text-accent-blue bg-accent-blue/10'
+                : 'text-text-muted hover:text-text-secondary'
+                }`}
             >
               {d}d
             </button>
@@ -132,20 +133,18 @@ export default function ResearchPage({ domain }: Props) {
                       </span>
                     )}
                     {p.paper_type && (
-                      <span className={`text-xs px-2 py-0.5 rounded ${
-                        p.paper_type === 'breakthrough'
-                          ? 'bg-accent-red/10 text-accent-red font-medium'
-                          : 'bg-accent-blue/10 text-accent-blue'
-                      }`}>
+                      <span className={`text-xs px-2 py-0.5 rounded ${p.paper_type === 'breakthrough'
+                        ? 'bg-accent-red/10 text-accent-red font-medium'
+                        : 'bg-accent-blue/10 text-accent-blue'
+                        }`}>
                         {p.paper_type}
                       </span>
                     )}
                     {p.commercial_readiness && (
-                      <span className={`text-xs px-2 py-0.5 rounded ${
-                        p.commercial_readiness === 'near_term'
-                          ? 'bg-accent-green/10 text-accent-green'
-                          : 'bg-bg-tertiary text-text-muted'
-                      }`}>
+                      <span className={`text-xs px-2 py-0.5 rounded ${p.commercial_readiness === 'near_term'
+                        ? 'bg-accent-green/10 text-accent-green'
+                        : 'bg-bg-tertiary text-text-muted'
+                        }`}>
                         {p.commercial_readiness.replace(/_/g, ' ')}
                       </span>
                     )}

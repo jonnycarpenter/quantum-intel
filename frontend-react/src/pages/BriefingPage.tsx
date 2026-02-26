@@ -6,6 +6,7 @@
  * and research frontier. Powered by the 2-agent pipeline.
  */
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
 import type {
@@ -16,6 +17,7 @@ import type {
   WeeklyBriefingCitation,
 } from '../api'
 import { Card, EmptyState } from '../components/ui'
+import DomainToggle from '../components/DomainToggle'
 import { Quote, ExternalLink, TrendingUp, TrendingDown, BookOpen } from 'lucide-react'
 
 // ─── Priority Tag Styles ──────────────────────────────
@@ -171,11 +173,8 @@ function BriefingSectionCard({ section }: { section: WeeklyBriefingSection }) {
 
 // ─── Main Page ────────────────────────────────────────
 
-interface Props {
-  domain: Domain
-}
-
-export default function BriefingPage({ domain }: Props) {
+export default function BriefingPage() {
+  const [domain, setDomain] = useState<Domain>('quantum')
   const { data, isLoading, error } = useQuery({
     queryKey: ['weekly-briefing', domain],
     queryFn: () => api.getWeeklyBriefing(domain),
@@ -209,23 +208,26 @@ export default function BriefingPage({ domain }: Props) {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold text-text-primary">
-          {domain === 'ai' ? 'AI' : 'Quantum'} Weekly Briefing
-        </h1>
-        <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-text-muted">
-          <span>Week of {briefing.week_of}</span>
-          <span>-</span>
-          <span>{briefing.articles_analyzed} articles analyzed</span>
-          <span>-</span>
-          <span>{briefing.sections_active} of {briefing.sections_total} sections active</span>
-          {briefing.generation_cost_usd > 0 && (
-            <>
-              <span>-</span>
-              <span>${briefing.generation_cost_usd.toFixed(4)}</span>
-            </>
-          )}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-text-primary">
+            {domain === 'ai' ? 'AI' : 'Quantum'} Weekly Briefing
+          </h1>
+          <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-text-muted">
+            <span>Week of {briefing.week_of}</span>
+            <span>-</span>
+            <span>{briefing.articles_analyzed} articles analyzed</span>
+            <span>-</span>
+            <span>{briefing.sections_active} of {briefing.sections_total} sections active</span>
+            {briefing.generation_cost_usd > 0 && (
+              <>
+                <span>-</span>
+                <span>${briefing.generation_cost_usd.toFixed(4)}</span>
+              </>
+            )}
+          </div>
         </div>
+        <DomainToggle domain={domain} onChange={setDomain} />
       </div>
 
       {/* Priority Sections */}
@@ -266,9 +268,8 @@ export default function BriefingPage({ domain }: Props) {
                     <td className="px-4 py-2 text-right">
                       {mm.close != null ? `$${mm.close.toFixed(2)}` : '-'}
                     </td>
-                    <td className={`px-4 py-2 text-right font-medium flex items-center justify-end gap-1 ${
-                      mm.change_pct >= 0 ? 'text-accent-green' : 'text-accent-red'
-                    }`}>
+                    <td className={`px-4 py-2 text-right font-medium flex items-center justify-end gap-1 ${mm.change_pct >= 0 ? 'text-accent-green' : 'text-accent-red'
+                      }`}>
                       {mm.change_pct >= 0 ? (
                         <TrendingUp className="w-3.5 h-3.5" />
                       ) : (

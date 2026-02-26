@@ -4,14 +4,12 @@
  * System status, API key status, storage info, about.
  */
 
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
+import type { Domain } from '../api'
 import { Card, SectionHeader } from '../components/ui'
 import { Server, Key, Database, Info, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
-
-interface Props {
-  domain: string
-}
 
 function StatusDot({ ok }: { ok: boolean }) {
   return ok
@@ -19,7 +17,8 @@ function StatusDot({ ok }: { ok: boolean }) {
     : <XCircle className="w-4 h-4 text-accent-red" />
 }
 
-export default function SettingsPage({ domain }: Props) {
+export default function SettingsPage() {
+  const [domain] = useState<Domain>('quantum')
   const { data: stats, isLoading, refetch, isFetching } = useQuery({
     queryKey: ['stats'],
     queryFn: api.getStats,

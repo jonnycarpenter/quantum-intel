@@ -107,11 +107,22 @@ create_job "quantum-podcasts" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest,ASSEMBLYAI_API_KEY=assemblyai-api-key:latest" \
   "" "4Gi" "2" "7200"
 
-# --- Weekly Briefing (weekly) ---
+# --- Weekly Briefing: Quantum (Monday 12:45 UTC) ---
 create_job "quantum-weekly-briefing" \
   "scripts/run_weekly_briefing.py,--domain,quantum,--save" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest" \
   "" "4Gi" "2" "3600"
+
+# --- Weekly Briefing: AI (Monday 12:00 UTC) ---
+create_job "ai-weekly-briefing" \
+  "scripts/run_weekly_briefing.py,--domain,ai,--save" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest" \
+  "" "4Gi" "2" "3600"
+
+# --- Stocks (daily, after market close) ---
+create_job "quantum-stocks-ingestion" \
+  "scripts/run_ingestion.py,--sources,stocks" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest"
 
 # --- Digest (daily) ---
 create_job "quantum-digest" \

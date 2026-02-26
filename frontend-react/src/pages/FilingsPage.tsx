@@ -8,11 +8,9 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
 import { Card, SectionHeader, EmptyState, LensChip } from '../components/ui'
+import DomainToggle from '../components/DomainToggle'
 import { Quote, ShieldAlert } from 'lucide-react'
-
-interface Props {
-  domain: string
-}
+import type { Domain } from '../api'
 
 type Tab = 'sec' | 'earnings'
 
@@ -26,7 +24,8 @@ const QUOTE_TYPES = [
   'timeline_outlook', 'risk_factor', 'analyst_pressure', 'revenue_metric',
 ]
 
-export default function FilingsPage({ domain: _domain }: Props) {
+export default function FilingsPage() {
+  const [domain, setDomain] = useState<Domain>('quantum')
   const [tab, setTab] = useState<Tab>('sec')
   const [secTicker, setSecTicker] = useState('')
   const [secType, setSecType] = useState('')
@@ -57,7 +56,10 @@ export default function FilingsPage({ domain: _domain }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto space-y-4">
-      <h1 className="text-xl font-bold text-text-primary">Filings</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-text-primary">Filings</h1>
+        <DomainToggle domain={domain} onChange={setDomain} />
+      </div>
 
       {/* Tab Toggle */}
       <div className="flex gap-2">
@@ -107,9 +109,8 @@ export default function FilingsPage({ domain: _domain }: Props) {
               {secData!.nuggets.map(n => (
                 <Card key={n.nugget_id} className="p-4">
                   <div className="flex items-start gap-3">
-                    <ShieldAlert className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
-                      n.is_new_disclosure ? 'text-accent-red' : 'text-accent-orange'
-                    }`} />
+                    <ShieldAlert className={`w-5 h-5 flex-shrink-0 mt-0.5 ${n.is_new_disclosure ? 'text-accent-red' : 'text-accent-orange'
+                      }`} />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-xs font-medium text-accent-blue">{n.ticker}</span>
@@ -121,11 +122,10 @@ export default function FilingsPage({ domain: _domain }: Props) {
                             NEW DISCLOSURE
                           </span>
                         )}
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          n.risk_level === 'high'
-                            ? 'bg-accent-red/10 text-accent-red'
-                            : 'bg-bg-tertiary text-text-muted'
-                        }`}>
+                        <span className={`text-xs px-2 py-0.5 rounded ${n.risk_level === 'high'
+                          ? 'bg-accent-red/10 text-accent-red'
+                          : 'bg-bg-tertiary text-text-muted'
+                          }`}>
                           {n.risk_level} risk
                         </span>
                       </div>
@@ -214,21 +214,19 @@ export default function FilingsPage({ domain: _domain }: Props) {
                         <span className="text-xs px-2 py-0.5 rounded bg-accent-purple/10 text-accent-purple">
                           {q.quote_type.replace(/_/g, ' ')}
                         </span>
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          q.confidence_level === 'definitive'
-                            ? 'bg-accent-green/10 text-accent-green'
-                            : q.confidence_level === 'hedged'
+                        <span className={`text-xs px-2 py-0.5 rounded ${q.confidence_level === 'definitive'
+                          ? 'bg-accent-green/10 text-accent-green'
+                          : q.confidence_level === 'hedged'
                             ? 'bg-accent-red/10 text-accent-red'
                             : 'bg-accent-yellow/10 text-accent-yellow'
-                        }`}>
+                          }`}>
                           {q.confidence_level}
                         </span>
                         {q.sentiment && q.sentiment !== 'neutral' && (
-                          <span className={`text-xs px-2 py-0.5 rounded ${
-                            q.sentiment === 'bullish'
-                              ? 'bg-accent-green/10 text-accent-green'
-                              : 'bg-accent-red/10 text-accent-red'
-                          }`}>
+                          <span className={`text-xs px-2 py-0.5 rounded ${q.sentiment === 'bullish'
+                            ? 'bg-accent-green/10 text-accent-green'
+                            : 'bg-accent-red/10 text-accent-red'
+                            }`}>
                             {q.sentiment}
                           </span>
                         )}

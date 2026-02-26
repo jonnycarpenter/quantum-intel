@@ -8,13 +8,12 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
 import { Card, SectionHeader, EmptyState } from '../components/ui'
+import DomainToggle from '../components/DomainToggle'
 import { TrendingUp, TrendingDown, Quote, ShieldAlert, ExternalLink } from 'lucide-react'
+import type { Domain } from '../api'
 
-interface Props {
-  domain: string
-}
-
-export default function MarketsPage({ domain: _domain }: Props) {
+export default function MarketsPage() {
+  const [domain, setDomain] = useState<Domain>('quantum')
   const [selectedTicker, setSelectedTicker] = useState<string | null>(null)
   const [days, setDays] = useState(30)
 
@@ -31,7 +30,10 @@ export default function MarketsPage({ domain: _domain }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <h1 className="text-xl font-bold text-text-primary">Markets</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-text-primary">Markets</h1>
+        <DomainToggle domain={domain} onChange={setDomain} />
+      </div>
 
       {/* Overview Table */}
       <div>
@@ -57,18 +59,16 @@ export default function MarketsPage({ domain: _domain }: Props) {
                   <tr
                     key={s.ticker}
                     onClick={() => setSelectedTicker(s.ticker)}
-                    className={`border-t border-border cursor-pointer transition-colors ${
-                      selectedTicker === s.ticker
+                    className={`border-t border-border cursor-pointer transition-colors ${selectedTicker === s.ticker
                         ? 'bg-accent-blue/5 border-l-2 border-l-accent-blue'
                         : 'hover:bg-bg-hover'
-                    }`}
+                      }`}
                   >
                     <td className="px-4 py-2.5 font-medium text-accent-blue">{s.ticker}</td>
                     <td className="px-4 py-2.5 text-text-secondary">{s.company}</td>
                     <td className="px-4 py-2.5 text-right">${s.close?.toFixed(2) ?? '–'}</td>
-                    <td className={`px-4 py-2.5 text-right font-medium ${
-                      (s.change_percent ?? 0) >= 0 ? 'text-accent-green' : 'text-accent-red'
-                    }`}>
+                    <td className={`px-4 py-2.5 text-right font-medium ${(s.change_percent ?? 0) >= 0 ? 'text-accent-green' : 'text-accent-red'
+                      }`}>
                       <span className="inline-flex items-center gap-1">
                         {(s.change_percent ?? 0) >= 0
                           ? <TrendingUp className="w-3 h-3" />
@@ -109,11 +109,10 @@ export default function MarketsPage({ domain: _domain }: Props) {
                 <button
                   key={d}
                   onClick={() => setDays(d)}
-                  className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                    days === d
+                  className={`px-3 py-1.5 text-xs font-medium transition-colors ${days === d
                       ? 'text-accent-blue bg-accent-blue/10'
                       : 'text-text-muted hover:text-text-secondary'
-                  }`}
+                    }`}
                 >
                   {d}d
                 </button>
@@ -167,11 +166,10 @@ export default function MarketsPage({ domain: _domain }: Props) {
                         <p className="text-sm text-text-primary italic">"{q.quote_text}"</p>
                         <div className="text-xs text-text-muted mt-1">
                           {q.speaker_name} • {q.speaker_role.toUpperCase()} • Q{q.quarter} {q.year}
-                          <span className={`ml-2 px-1.5 py-0.5 rounded ${
-                            q.confidence_level === 'definitive'
+                          <span className={`ml-2 px-1.5 py-0.5 rounded ${q.confidence_level === 'definitive'
                               ? 'bg-accent-green/10 text-accent-green'
                               : 'bg-accent-yellow/10 text-accent-yellow'
-                          }`}>
+                            }`}>
                             {q.confidence_level}
                           </span>
                         </div>
@@ -191,9 +189,8 @@ export default function MarketsPage({ domain: _domain }: Props) {
                 {detail.nuggets.slice(0, 5).map(n => (
                   <Card key={n.nugget_id} className="p-3">
                     <div className="flex items-start gap-2">
-                      <ShieldAlert className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
-                        n.is_new_disclosure ? 'text-accent-red' : 'text-accent-orange'
-                      }`} />
+                      <ShieldAlert className={`w-4 h-4 flex-shrink-0 mt-0.5 ${n.is_new_disclosure ? 'text-accent-red' : 'text-accent-orange'
+                        }`} />
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs text-text-muted">
