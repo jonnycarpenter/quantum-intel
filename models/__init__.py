@@ -35,3 +35,10 @@ from models.weekly_briefing import (
     PreBrief,
     PreBriefObservation,
 )
+from models.case_study import (
+    CaseStudy,
+    CaseStudyExtractionResult,
+    CaseStudySourceType,
+    OutcomeType,
+    ReadinessLevel,
+)

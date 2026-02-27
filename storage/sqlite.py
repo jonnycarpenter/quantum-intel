@@ -21,6 +21,7 @@ from models.earnings import EarningsTranscript, ExtractedQuote
 from models.sec_filing import SecFiling, SecNugget
 from models.podcast import PodcastTranscript, PodcastQuote
 from models.weekly_briefing import WeeklyBriefing, BriefingSection, MarketMover, ResearchPaper
+from models.case_study import CaseStudy
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -1068,3 +1069,161 @@ class SQLiteStorage(StorageBackend):
             generation_cost_usd=data.get("generation_cost_usd", 0.0),
             pre_brief_id=data.get("pre_brief_id"),
         )
+
+    # =========================================================================
+    # Case Study Operations (Phase 6)
+    # =========================================================================
+
+    async def save_case_studies(self, case_studies: List[CaseStudy]) -> int:
+        """Save extracted case studies. Returns count saved."""
+        saved = 0
+        for cs in case_studies:
+            try:
+                data = cs.to_dict()
+                cursor = self._conn.execute(
+                    """INSERT OR IGNORE INTO case_studies (
+                        case_study_id, source_type, source_id, domain,
+                        grounding_quote, context_text,
+                        use_case_title, use_case_summary, company, industry,
+                        technology_stack,
+                        department, implementation_detail, teams_impacted,
+                        scale, timeline, readiness_level,
+                        outcome_metric, outcome_type, outcome_quantified,
+                        speaker, speaker_role, speaker_company,
+                        companies_mentioned, technologies_mentioned,
+                        people_mentioned, competitors_mentioned,
+                        qubit_type, gate_fidelity, commercial_viability,
+                        scientific_significance,
+                        ai_model_used, roi_metric, deployment_type,
+                        relevance_score, confidence,
+                        metadata,
+                        extracted_at, extraction_model, extraction_confidence
+                    ) VALUES (
+                        ?, ?, ?, ?,
+                        ?, ?,
+                        ?, ?, ?, ?,
+                        ?,
+                        ?, ?, ?,
+                        ?, ?, ?,
+                        ?, ?, ?,
+                        ?, ?, ?,
+                        ?, ?,
+                        ?, ?,
+                        ?, ?, ?,
+                        ?,
+                        ?, ?, ?,
+                        ?, ?,
+                        ?,
+                        ?, ?, ?
+                    )""",
+                    (
+                        data["case_study_id"], data["source_type"],
+                        data["source_id"], data["domain"],
+                        data["grounding_quote"], data["context_text"],
+                        data["use_case_title"], data["use_case_summary"],
+                        data["company"], data["industry"],
+                        data["technology_stack"],
+                        data["department"], data["implementation_detail"],
+                        data["teams_impacted"],
+                        data["scale"], data["timeline"], data["readiness_level"],
+                        data["outcome_metric"], data["outcome_type"],
+                        int(data["outcome_quantified"]),
+                        data["speaker"], data["speaker_role"], data["speaker_company"],
+                        data["companies_mentioned"], data["technologies_mentioned"],
+                        data["people_mentioned"], data["competitors_mentioned"],
+                        data["qubit_type"], data["gate_fidelity"],
+                        data["commercial_viability"],
+                        data["scientific_significance"],
+                        data["ai_model_used"], data["roi_metric"],
+                        data["deployment_type"],
+                        data["relevance_score"], data["confidence"],
+                        data["metadata"],
+                        data["extracted_at"], data["extraction_model"],
+                        data["extraction_confidence"],
+                    ),
+                )
+                if cursor.rowcount > 0:
+                    saved += 1
+            except Exception as e:
+                logger.warning(f"[CASE_STUDY] Save error: {e}")
+
+        self._conn.commit()
+        return saved
+
+    async def get_case_studies_by_source(
+        self, source_type: str, source_id: str
+    ) -> List[CaseStudy]:
+        """Get case studies for a specific source item."""
+        cursor = self._conn.execute(
+            "SELECT * FROM case_studies WHERE source_type = ? AND source_id = ? "
+            "ORDER BY relevance_score DESC",
+            (source_type, source_id),
+        )
+        return [CaseStudy.from_dict(dict(row)) for row in cursor.fetchall()]
+
+    async def get_case_studies(
+        self,
+        domain: Optional[str] = None,
+        company: Optional[str] = None,
+        industry: Optional[str] = None,
+        source_type: Optional[str] = None,
+        limit: int = 50,
+    ) -> List[CaseStudy]:
+        """Get case studies with optional filters."""
+        where_parts = []
+        params: list = []
+
+        if domain:
+            where_parts.append("domain = ?")
+            params.append(domain)
+        if company:
+            where_parts.append("company = ?")
+            params.append(company)
+        if industry:
+            where_parts.append("industry = ?")
+            params.append(industry)
+        if source_type:
+            where_parts.append("source_type = ?")
+            params.append(source_type)
+
+        where_clause = " AND ".join(where_parts) if where_parts else "1=1"
+        params.append(limit)
+
+        cursor = self._conn.execute(
+            f"SELECT * FROM case_studies WHERE {where_clause} "
+            f"ORDER BY relevance_score DESC LIMIT ?",
+            params,
+        )
+        return [CaseStudy.from_dict(dict(row)) for row in cursor.fetchall()]
+
+    async def case_studies_exist_for_source(
+        self, source_type: str, source_id: str
+    ) -> bool:
+        """Check if case studies already extracted for this source."""
+        cursor = self._conn.execute(
+            "SELECT 1 FROM case_studies WHERE source_type = ? AND source_id = ? LIMIT 1",
+            (source_type, source_id),
+        )
+        return cursor.fetchone() is not None
+
+    async def search_case_studies(
+        self, query: str, domain: Optional[str] = None, limit: int = 30
+    ) -> List[CaseStudy]:
+        """Search case studies by text."""
+        search_pattern = f"%{query}%"
+        params: list = [search_pattern, search_pattern, search_pattern, search_pattern]
+        domain_filter = ""
+        if domain:
+            domain_filter = " AND domain = ?"
+            params.append(domain)
+        params.append(limit)
+
+        cursor = self._conn.execute(
+            f"""SELECT * FROM case_studies
+                WHERE (use_case_title LIKE ? OR use_case_summary LIKE ?
+                       OR grounding_quote LIKE ? OR company LIKE ?)
+                {domain_filter}
+                ORDER BY relevance_score DESC LIMIT ?""",
+            params,
+        )
+        return [CaseStudy.from_dict(dict(row)) for row in cursor.fetchall()]

@@ -34,6 +34,7 @@ from config.ai_earnings_tickers import (
 from fetchers.earnings import EarningsFetcher
 from processing.quote_extractor import QuoteExtractor
 from storage import get_storage
+from storage import get_embeddings_store
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -108,6 +109,14 @@ async def run_earnings_pipeline(
                 f"[EARNINGS_PIPELINE] {transcript.unique_key}: "
                 f"{saved} quotes saved"
             )
+
+            # Index embeddings for semantic search
+            try:
+                earnings_embeddings = get_embeddings_store(content_type="earnings_quotes")
+                embedded = await earnings_embeddings.index_items(result.quotes)
+                logger.info(f"[EARNINGS_PIPELINE] {transcript.unique_key}: {embedded} quotes embedded")
+            except Exception as e:
+                logger.warning(f"[EARNINGS_PIPELINE] Embedding error (non-fatal): {e}")
         else:
             logger.warning(
                 f"[EARNINGS_PIPELINE] No quotes extracted from {transcript.unique_key}"

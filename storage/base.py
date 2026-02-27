@@ -26,6 +26,7 @@ from models.earnings import EarningsTranscript, ExtractedQuote
 from models.sec_filing import SecFiling, SecNugget
 from models.podcast import PodcastTranscript, PodcastQuote
 from models.weekly_briefing import WeeklyBriefing
+from models.case_study import CaseStudy
 
 
 @dataclass
@@ -381,6 +382,48 @@ class StorageBackend(ABC):
     @abstractmethod
     async def get_weekly_briefing_by_week(self, domain: str, week_of: str) -> Optional[WeeklyBriefing]:
         """Get a specific week's briefing."""
+        ...
+
+    # =========================================================================
+    # Case Study Operations (Phase 6)
+    # =========================================================================
+
+    @abstractmethod
+    async def save_case_studies(self, case_studies: List[CaseStudy]) -> int:
+        """Save extracted case studies. Returns count saved."""
+        ...
+
+    @abstractmethod
+    async def get_case_studies_by_source(
+        self, source_type: str, source_id: str
+    ) -> List[CaseStudy]:
+        """Get case studies for a specific source item."""
+        ...
+
+    @abstractmethod
+    async def get_case_studies(
+        self,
+        domain: Optional[str] = None,
+        company: Optional[str] = None,
+        industry: Optional[str] = None,
+        source_type: Optional[str] = None,
+        limit: int = 50,
+    ) -> List[CaseStudy]:
+        """Get case studies with optional filters."""
+        ...
+
+    @abstractmethod
+    async def case_studies_exist_for_source(
+        self, source_type: str, source_id: str
+    ) -> bool:
+        """Check if case studies already extracted for this source."""
+        ...
+
+    @abstractmethod
+    async def search_case_studies(
+        self, query: str, domain: Optional[str] = None, limit: int = 30
+    ) -> List[CaseStudy]:
+        """Search case studies by text."""
         ...
 
     @abstractmethod

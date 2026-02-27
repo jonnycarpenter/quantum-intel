@@ -20,14 +20,15 @@ Multi-agent AI system monitoring the quantum computing and AI ecosystems.
 ### Module Layout
 ```
 config/       - Configuration constants (feeds, queries, tickers, prompts)
-models/       - Dataclasses for articles, papers, stocks, earnings, SEC filings
+models/       - Dataclasses for articles, papers, stocks, earnings, SEC filings, case studies
 fetchers/     - Data source clients (RSS, Tavily, ArXiv, yfinance, StockNews, SEC EDGAR, API Ninjas)
-processing/   - Classification, dedup, scoring, quote extraction, nugget extraction
+processing/   - Classification, dedup, scoring, quote extraction, nugget extraction, case study extraction
 storage/      - SQLite/BigQuery backends + ChromaDB/Vertex embeddings
 utils/        - Logger, LLM client, date utilities
 agents/       - Intelligence + router agents (Phase 3)
 tools/        - Agent tools: corpus search, web search, stock data (Phase 3)
-scripts/      - CLI entry points (run_ingestion, run_digest, run_earnings, run_sec)
+scripts/      - CLI entry points (run_ingestion, run_digest, run_earnings, run_sec, run_case_studies)
+deploy/       - GCP deploy scripts (setup_infra, cloud_run_jobs, setup_scheduler)
 tests/        - pytest tests per module
 ```
 
@@ -88,14 +89,32 @@ Key patterns to follow:
 - StockNews: `fetchers/stocknews.py` → existing article classify pipeline
 - Run standalone: `python scripts/run_earnings.py`, `python scripts/run_sec.py`, `python scripts/run_podcast.py`
 
+### Phase 6: Case Study Extraction
+- **Model:** `models/case_study.py` — CaseStudy dataclass with ~40 fields, enums (SourceType, OutcomeType, ReadinessLevel)
+- **Extractor:** `processing/case_study_extractor.py` — 10 domain+source prompt combinations (2 domains × 5 source types)
+- **Config:** `config/settings.py` → `CaseStudyConfig` (model, temperature, chunking, dedup thresholds)
+- **Storage:** `case_studies` table in SQLite/BigQuery, 5 methods on StorageBackend ABC
+- **Embeddings:** `case_study_embeddings` table, registered in `storage/embeddings_config.py`
+- **Run standalone:** `python scripts/run_case_studies.py --domain ai --sources articles,sec,earnings --max-items 10`
+- Extracts structured narratives (company, industry, implementation, quantified outcomes) from already-ingested content
+- Polymorphic FK: `source_type` + `source_id` links to articles, transcripts, filings, papers
+- Standalone batch script — does not modify existing ingestion pipelines
+
 ### Phase 5: GCP Production Backend
 - **BigQuery storage:** `storage/bigquery.py` — implements StorageBackend ABC with BigQuery
-- **BigQuery schemas:** `storage/bigquery_schemas.py` — DDL for all 12 BigQuery tables
+- **BigQuery schemas:** `storage/bigquery_schemas.py` — DDL for all 17 BigQuery tables (incl. case_studies + case_study_embeddings)
 - **Vertex AI embeddings:** `storage/vertex_embeddings.py` — text-embedding-005 + VECTOR_SEARCH
 - **Factory routing:** `storage/__init__.py` — auto-selects backend based on `GCP_PROJECT_ID`
 - **Docker:** Single `Dockerfile`, different entrypoints per Cloud Run Job
+- **CI/CD:** Push to `master` on GitHub triggers Cloud Build → builds image → updates all jobs
+- **Cloud Build config:** `cloudbuild.yaml` — build, push, update 10 Cloud Run Jobs
 - **Deploy scripts:** `deploy/setup_infra.sh`, `deploy/cloud_run_jobs.sh`, `deploy/setup_scheduler.sh`
-- **9 Cloud Run Jobs** with Cloud Scheduler (see `README_GCP_DEPLOYMENT.md`)
+- **10 Cloud Run Jobs** with Cloud Scheduler (see `README_GCP_DEPLOYMENT.md`)
+- **GitHub repo:** `jonnycarpenter/quantum-intel` (public)
+
+### Dependencies
+- **`requirements.txt`** — Production-only (slim, no PyTorch/CUDA/ChromaDB/Streamlit)
+- **`requirements-local.txt`** — All deps including local dev (ChromaDB, Streamlit, pytest)
 
 ### Documentation Convention
 Every core pipeline must have its own README. These live at the project root:

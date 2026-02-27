@@ -110,25 +110,31 @@ async def close_storage() -> None:
         logger.info("[STORAGE] Storage connection closed")
 
 
-# Embeddings store singleton
-_embeddings_instance = None
+# Embeddings store singletons (keyed by content_type)
+_embeddings_instances: dict = {}
 
 
 def get_embeddings_store(
+    content_type: str = "articles",
     persist_directory: Optional[str] = None,
     force_new: bool = False,
 ):
     """
-    Factory function to get embeddings/vector store.
+    Factory function to get embeddings/vector store for a specific content type.
 
     Selects backend based on environment:
     - If GCP_PROJECT_ID is set -> Vertex AI + BigQuery Vector Search
     - Otherwise -> ChromaDB + sentence-transformers (local)
-    """
-    global _embeddings_instance
 
-    if _embeddings_instance is not None and not force_new:
-        return _embeddings_instance
+    Args:
+        content_type: One of "articles", "sec_nuggets", "earnings_quotes", "podcast_quotes"
+        persist_directory: Override ChromaDB persist directory
+        force_new: Force create new instance (ignore singleton)
+    """
+    global _embeddings_instances
+
+    if content_type in _embeddings_instances and not force_new:
+        return _embeddings_instances[content_type]
 
     try:
         from dotenv import load_dotenv
@@ -146,16 +152,21 @@ def get_embeddings_store(
 
     if use_vertex:
         from .vertex_embeddings import VertexEmbeddingsStore
-        _embeddings_instance = VertexEmbeddingsStore(
+        instance = VertexEmbeddingsStore(
             project_id=gcp_project,
             dataset_id=os.getenv("BQ_DATASET_ID", "quantum_ai_hub"),
             location=os.getenv("GCP_REGION", "us-central1"),
+            content_type=content_type,
         )
-        logger.info("[EMBEDDINGS] Using Vertex AI + BigQuery Vector Search")
+        logger.info(f"[EMBEDDINGS] Using Vertex AI for {content_type}")
     else:
         path = persist_directory or os.getenv("EMBEDDINGS_PATH", "data/embeddings")
         from .embeddings import get_chromadb_store
-        _embeddings_instance = get_chromadb_store(persist_directory=path)
-        logger.info(f"[EMBEDDINGS] Using ChromaDB: {path}")
+        instance = get_chromadb_store(
+            persist_directory=path,
+            content_type=content_type,
+        )
+        logger.info(f"[EMBEDDINGS] Using ChromaDB for {content_type}: {path}")
 
-    return _embeddings_instance
+    _embeddings_instances[content_type] = instance
+    return instance

@@ -34,6 +34,7 @@ from config.ai_earnings_tickers import (
 from fetchers.sec import SecFetcher
 from processing.nugget_extractor import NuggetExtractor
 from storage import get_storage
+from storage import get_embeddings_store
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -110,6 +111,14 @@ async def run_sec_pipeline(
                 f"[SEC_PIPELINE] {filing.unique_key}: "
                 f"{saved} nuggets saved"
             )
+
+            # Index embeddings for semantic search
+            try:
+                sec_embeddings = get_embeddings_store(content_type="sec_nuggets")
+                embedded = await sec_embeddings.index_items(result.nuggets)
+                logger.info(f"[SEC_PIPELINE] {filing.unique_key}: {embedded} nuggets embedded")
+            except Exception as e:
+                logger.warning(f"[SEC_PIPELINE] Embedding error (non-fatal): {e}")
         else:
             logger.warning(
                 f"[SEC_PIPELINE] No nuggets extracted from {filing.unique_key}"

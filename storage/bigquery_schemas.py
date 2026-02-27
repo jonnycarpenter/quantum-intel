@@ -384,6 +384,153 @@ CREATE TABLE IF NOT EXISTS `{table}` (
 """
 
 # ============================================================================
+# SEC Nugget Embeddings (for Vertex AI vector search)
+# ============================================================================
+
+BQ_SEC_NUGGET_EMBEDDINGS_DDL = """
+CREATE TABLE IF NOT EXISTS `{table}` (
+  nugget_id STRING NOT NULL,
+  ticker STRING,
+  company_name STRING,
+  filing_type STRING,
+  nugget_type STRING,
+  themes STRING,
+  signal_strength STRING,
+  risk_level STRING,
+  relevance_score FLOAT64,
+  domain STRING,
+  filing_date TIMESTAMP,
+  document_text STRING,
+  embedding ARRAY<FLOAT64>
+)
+"""
+
+# ============================================================================
+# Earnings Quote Embeddings (for Vertex AI vector search)
+# ============================================================================
+
+BQ_EARNINGS_QUOTE_EMBEDDINGS_DDL = """
+CREATE TABLE IF NOT EXISTS `{table}` (
+  quote_id STRING NOT NULL,
+  ticker STRING,
+  company_name STRING,
+  speaker_name STRING,
+  speaker_role STRING,
+  quote_type STRING,
+  themes STRING,
+  sentiment STRING,
+  relevance_score FLOAT64,
+  domain STRING,
+  year INT64,
+  quarter INT64,
+  document_text STRING,
+  embedding ARRAY<FLOAT64>
+)
+"""
+
+# ============================================================================
+# Podcast Quote Embeddings (for Vertex AI vector search)
+# ============================================================================
+
+BQ_PODCAST_QUOTE_EMBEDDINGS_DDL = """
+CREATE TABLE IF NOT EXISTS `{table}` (
+  quote_id STRING NOT NULL,
+  podcast_name STRING,
+  episode_title STRING,
+  speaker_name STRING,
+  speaker_role STRING,
+  quote_type STRING,
+  themes STRING,
+  sentiment STRING,
+  relevance_score FLOAT64,
+  published_at TIMESTAMP,
+  document_text STRING,
+  embedding ARRAY<FLOAT64>
+)
+"""
+
+# ============================================================================
+# Case Studies (Phase 6)
+# ============================================================================
+
+BQ_CASE_STUDIES_DDL = """
+CREATE TABLE IF NOT EXISTS `{table}` (
+  case_study_id STRING NOT NULL,
+  source_type STRING NOT NULL,
+  source_id STRING NOT NULL,
+  domain STRING,
+
+  grounding_quote STRING NOT NULL,
+  context_text STRING,
+
+  use_case_title STRING NOT NULL,
+  use_case_summary STRING,
+  company STRING,
+  industry STRING,
+  technology_stack ARRAY<STRING>,
+
+  department STRING,
+  implementation_detail STRING,
+  teams_impacted ARRAY<STRING>,
+  scale STRING,
+  timeline STRING,
+  readiness_level STRING,
+
+  outcome_metric STRING,
+  outcome_type STRING,
+  outcome_quantified BOOL,
+
+  speaker STRING,
+  speaker_role STRING,
+  speaker_company STRING,
+
+  companies_mentioned ARRAY<STRING>,
+  technologies_mentioned ARRAY<STRING>,
+  people_mentioned ARRAY<STRING>,
+  competitors_mentioned ARRAY<STRING>,
+
+  qubit_type STRING,
+  gate_fidelity STRING,
+  commercial_viability STRING,
+  scientific_significance STRING,
+
+  ai_model_used STRING,
+  roi_metric STRING,
+  deployment_type STRING,
+
+  relevance_score FLOAT64,
+  confidence FLOAT64,
+
+  metadata JSON,
+
+  extracted_at TIMESTAMP NOT NULL,
+  extraction_model STRING,
+  extraction_confidence FLOAT64
+)
+"""
+
+# ============================================================================
+# Case Study Embeddings (for Vertex AI vector search)
+# ============================================================================
+
+BQ_CASE_STUDY_EMBEDDINGS_DDL = """
+CREATE TABLE IF NOT EXISTS `{table}` (
+  case_study_id STRING NOT NULL,
+  source_type STRING,
+  company STRING,
+  industry STRING,
+  use_case_title STRING,
+  outcome_type STRING,
+  readiness_level STRING,
+  relevance_score FLOAT64,
+  domain STRING,
+  extracted_at TIMESTAMP,
+  document_text STRING,
+  embedding ARRAY<FLOAT64>
+)
+"""
+
+# ============================================================================
 # Table registry — maps logical name to DDL template
 # ============================================================================
 
@@ -400,6 +547,11 @@ BQ_TABLE_REGISTRY = {
     "podcast_quotes": BQ_PODCAST_QUOTES_DDL,
     "weekly_briefings": BQ_WEEKLY_BRIEFINGS_DDL,
     "article_embeddings": BQ_ARTICLE_EMBEDDINGS_DDL,
+    "sec_nugget_embeddings": BQ_SEC_NUGGET_EMBEDDINGS_DDL,
+    "earnings_quote_embeddings": BQ_EARNINGS_QUOTE_EMBEDDINGS_DDL,
+    "podcast_quote_embeddings": BQ_PODCAST_QUOTE_EMBEDDINGS_DDL,
+    "case_studies": BQ_CASE_STUDIES_DDL,
+    "case_study_embeddings": BQ_CASE_STUDY_EMBEDDINGS_DDL,
 }
 
 

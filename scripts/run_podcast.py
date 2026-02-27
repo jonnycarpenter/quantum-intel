@@ -33,6 +33,7 @@ from config.podcast_sources import (
 from fetchers.podcast import PodcastFetcher
 from processing.podcast_quote_extractor import PodcastQuoteExtractor
 from storage import get_storage
+from storage import get_embeddings_store
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -190,6 +191,14 @@ async def run_podcast_pipeline(
                     f"[PODCAST_PIPELINE] {ep.title}: "
                     f"{saved} quotes saved (cost=${result.extraction_cost_usd:.4f})"
                 )
+
+                # Index embeddings for semantic search
+                try:
+                    podcast_embeddings = get_embeddings_store(content_type="podcast_quotes")
+                    embedded = await podcast_embeddings.index_items(result.quotes)
+                    logger.info(f"[PODCAST_PIPELINE] {ep.title}: {embedded} quotes embedded")
+                except Exception as e:
+                    logger.warning(f"[PODCAST_PIPELINE] Embedding error (non-fatal): {e}")
             else:
                 logger.warning(
                     f"[PODCAST_PIPELINE] No quotes extracted from: {ep.title}"

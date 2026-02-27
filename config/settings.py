@@ -240,6 +240,28 @@ class WeeklyBriefingConfig:
 
 
 # ============================================================================
+# Case Study Config (Phase 6)
+# ============================================================================
+
+@dataclass
+class CaseStudyConfig:
+    """Configuration for the Case Study extraction pipeline."""
+
+    extraction_model: str = field(
+        default_factory=lambda: os.getenv(
+            "CASE_STUDY_EXTRACTION_MODEL", "claude-sonnet-4-6"
+        )
+    )
+    extraction_temperature: float = 0.1
+    extraction_max_tokens: int = 16_000
+    max_source_chars: int = 150_000      # Truncate long sources
+    chunk_size: int = 30_000             # For long content
+    chunk_overlap: int = 3_000
+    dedup_similarity: float = 0.85
+    max_case_studies_per_source: int = 10  # Cap per source item
+
+
+# ============================================================================
 # SOURCE BLOCKLISTS
 # ============================================================================
 

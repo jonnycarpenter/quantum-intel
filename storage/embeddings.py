@@ -3,13 +3,17 @@ ChromaDB Embeddings Store
 =========================
 
 Local vector search using ChromaDB + sentence-transformers.
-For semantic search over articles and paper abstracts.
+For semantic search over articles, SEC nuggets, earnings quotes, and podcast quotes.
+
+Supports multiple content types via the content_type parameter.
 """
 
 import os
 import logging
 from dataclasses import dataclass, field
 from typing import List, Optional, Dict, Any
+
+from .embeddings_config import CONTENT_TYPE_CONFIG, VALID_CONTENT_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +34,12 @@ except ImportError:
 @dataclass
 class SearchResult:
     """A single search result."""
-    article_id: str
+    item_id: str
     title: str
     url: str
     summary: str
-    score: float  # similarity score (lower = more similar in ChromaDB)
+    score: float  # similarity score (higher = more similar)
+    source_type: str = "articles"
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
@@ -50,25 +55,47 @@ class EmbeddingsStore:
     """
     ChromaDB-based vector store for semantic search.
 
-    Indexes article summaries and paper abstracts for semantic retrieval.
-    Uses sentence-transformers for local embedding generation.
+    Indexes content for semantic retrieval using sentence-transformers
+    for local embedding generation.
+
+    Supports multiple content types via the content_type parameter:
+    - "articles" (default): quantum_articles collection
+    - "sec_nuggets": quantum_sec_nuggets collection
+    - "earnings_quotes": quantum_earnings_quotes collection
+    - "podcast_quotes": quantum_podcast_quotes collection
     """
 
     def __init__(
         self,
         persist_directory: str = "data/embeddings",
-        collection_name: str = "quantum_articles",
+        collection_name: Optional[str] = None,
         model_name: str = "all-MiniLM-L6-v2",
+        content_type: str = "articles",
     ):
         if not HAS_CHROMADB:
             raise ImportError("chromadb not installed. Run: pip install chromadb")
 
+        if content_type not in VALID_CONTENT_TYPES:
+            raise ValueError(
+                f"Unknown content type: {content_type}. "
+                f"Valid types: {VALID_CONTENT_TYPES}"
+            )
+
+        # Content type configuration
+        self.content_type = content_type
+        self._config = CONTENT_TYPE_CONFIG[content_type]
+        self._id_field = self._config["id_field"]
+        self._source_type = self._config["source_type"]
+
         self.persist_directory = persist_directory
         os.makedirs(persist_directory, exist_ok=True)
 
+        # Use explicit collection_name if provided, otherwise from config
+        resolved_collection = collection_name or self._config["chromadb_collection"]
+
         self.client = chromadb.PersistentClient(path=persist_directory)
         self.collection = self.client.get_or_create_collection(
-            name=collection_name,
+            name=resolved_collection,
             metadata={"hnsw:space": "cosine"},
         )
 
@@ -94,50 +121,179 @@ class EmbeddingsStore:
         embeddings = self.model.encode(texts, show_progress_bar=False)
         return embeddings.tolist()
 
-    async def index_articles(self, articles: List[Any]) -> int:
-        """
-        Index articles for semantic search.
+    # =========================================================================
+    # Content-type-aware helpers
+    # =========================================================================
 
-        Args:
-            articles: List of ClassifiedArticle objects
+    def _get_item_id(self, item: Any) -> str:
+        """Extract the unique ID from an item based on content type."""
+        if self.content_type == "articles":
+            return getattr(item, "id", getattr(item, "url", ""))
+        return getattr(item, self._id_field, "")
+
+    def _build_document_text(self, item: Any) -> str:
+        """Build the text string to embed, based on content type."""
+        if self.content_type == "articles":
+            parts = [item.title]
+            if hasattr(item, "ai_summary") and item.ai_summary:
+                parts.append(item.ai_summary)
+            elif hasattr(item, "summary") and item.summary:
+                parts.append(item.summary)
+            if hasattr(item, "key_takeaway") and item.key_takeaway:
+                parts.append(item.key_takeaway)
+            return " | ".join(parts)
+
+        elif self.content_type == "sec_nuggets":
+            parts = [item.nugget_text]
+            if item.context_text:
+                parts.append(item.context_text)
+            return " | ".join(parts)
+
+        elif self.content_type in ("earnings_quotes", "podcast_quotes"):
+            parts = []
+            ctx_before = getattr(item, "context_before", None)
+            if ctx_before:
+                parts.append(ctx_before)
+            parts.append(item.quote_text)
+            ctx_after = getattr(item, "context_after", None)
+            if ctx_after:
+                parts.append(ctx_after)
+            return " | ".join(parts)
+
+        elif self.content_type == "case_studies":
+            parts = [item.use_case_title]
+            if item.use_case_summary:
+                parts.append(item.use_case_summary)
+            if item.grounding_quote:
+                parts.append(item.grounding_quote)
+            if item.outcome_metric:
+                parts.append(item.outcome_metric)
+            return " | ".join(parts)
+
+        return ""
+
+    def _build_metadata(self, item: Any) -> Dict[str, Any]:
+        """Build metadata dict for the item, based on content type."""
+        def _enum_val(v):
+            """Safely extract .value from enum or return string as-is."""
+            return v.value if hasattr(v, "value") else str(v)
+
+        if self.content_type == "articles":
+            return {
+                "title": getattr(item, "title", "")[:200],
+                "url": getattr(item, "url", ""),
+                "source_name": getattr(item, "source_name", ""),
+                "primary_category": getattr(item, "primary_category", ""),
+                "priority": getattr(item, "priority", "medium"),
+                "relevance_score": float(getattr(item, "relevance_score", 0.5)),
+                "domain": getattr(item, "domain", "quantum"),
+                "published_at": (
+                    item.published_at.strftime("%Y-%m-%d")
+                    if getattr(item, "published_at", None) else ""
+                ),
+            }
+
+        elif self.content_type == "sec_nuggets":
+            themes = item.themes
+            if isinstance(themes, list):
+                themes = ",".join(themes)
+            return {
+                "ticker": item.ticker,
+                "company_name": item.company_name,
+                "filing_type": _enum_val(item.filing_type),
+                "nugget_type": _enum_val(item.nugget_type),
+                "themes": themes,
+                "signal_strength": _enum_val(item.signal_strength),
+                "risk_level": item.risk_level,
+                "relevance_score": float(item.relevance_score),
+                "domain": getattr(item, "domain", "quantum"),
+                "filing_date": (
+                    item.filing_date.strftime("%Y-%m-%d")
+                    if getattr(item, "filing_date", None) else ""
+                ),
+            }
+
+        elif self.content_type == "earnings_quotes":
+            themes = item.themes
+            if isinstance(themes, list):
+                themes = ",".join(themes)
+            return {
+                "ticker": item.ticker,
+                "company_name": item.company_name,
+                "speaker_name": item.speaker_name,
+                "speaker_role": _enum_val(item.speaker_role),
+                "quote_type": _enum_val(item.quote_type),
+                "themes": themes,
+                "sentiment": item.sentiment,
+                "relevance_score": float(item.relevance_score),
+                "domain": getattr(item, "domain", "quantum"),
+                "year": item.year,
+                "quarter": item.quarter,
+            }
+
+        elif self.content_type == "podcast_quotes":
+            themes = item.themes
+            if isinstance(themes, list):
+                themes = ",".join(themes)
+            return {
+                "podcast_name": item.podcast_name,
+                "episode_title": item.episode_title,
+                "speaker_name": item.speaker_name,
+                "speaker_role": item.speaker_role,
+                "quote_type": item.quote_type,
+                "themes": themes,
+                "sentiment": item.sentiment,
+                "relevance_score": float(item.relevance_score),
+                "published_at": item.published_at if isinstance(item.published_at, str) else (
+                    item.published_at.strftime("%Y-%m-%d") if getattr(item, "published_at", None) else ""
+                ),
+            }
+
+        elif self.content_type == "case_studies":
+            tech_stack = item.technology_stack
+            if isinstance(tech_stack, list):
+                tech_stack = ",".join(tech_stack)
+            return {
+                "case_study_id": item.case_study_id,
+                "source_type": item.source_type,
+                "company": item.company or "",
+                "industry": item.industry or "",
+                "use_case_title": item.use_case_title or "",
+                "outcome_type": item.outcome_type or "",
+                "readiness_level": item.readiness_level or "",
+                "technology_stack": tech_stack,
+                "relevance_score": float(item.relevance_score),
+                "domain": getattr(item, "domain", "quantum"),
+            }
+
+        return {}
+
+    # =========================================================================
+    # Core methods
+    # =========================================================================
+
+    async def index_items(self, items: List[Any]) -> int:
+        """
+        Index items for semantic search.
+
+        Content-type-aware: builds text and metadata based on self.content_type.
 
         Returns:
-            Number of chunks indexed
+            Number of items indexed.
         """
         ids = []
         documents = []
         metadatas = []
 
-        for article in articles:
-            # Build searchable text from article
-            text_parts = [article.title]
-            if hasattr(article, "ai_summary") and article.ai_summary:
-                text_parts.append(article.ai_summary)
-            elif hasattr(article, "summary") and article.summary:
-                text_parts.append(article.summary)
-            if hasattr(article, "key_takeaway") and article.key_takeaway:
-                text_parts.append(article.key_takeaway)
-
-            doc_text = " | ".join(text_parts)
+        for item in items:
+            doc_text = self._build_document_text(item)
             if not doc_text.strip():
                 continue
 
-            article_id = getattr(article, "id", getattr(article, "url", ""))
-            ids.append(article_id)
+            item_id = self._get_item_id(item)
+            ids.append(item_id)
             documents.append(doc_text)
-            metadatas.append({
-                "title": article.title[:200],
-                "url": getattr(article, "url", ""),
-                "source_name": getattr(article, "source_name", ""),
-                "primary_category": getattr(article, "primary_category", ""),
-                "priority": getattr(article, "priority", "medium"),
-                "relevance_score": float(getattr(article, "relevance_score", 0.5)),
-                "domain": getattr(article, "domain", "quantum"),
-                "published_at": (
-                    article.published_at.strftime("%Y-%m-%d")
-                    if getattr(article, "published_at", None) else ""
-                ),
-            })
+            metadatas.append(self._build_metadata(item))
 
         if not ids:
             return 0
@@ -153,8 +309,12 @@ class EmbeddingsStore:
             metadatas=metadatas,
         )
 
-        logger.info(f"[EMBEDDINGS] Indexed {len(ids)} articles")
+        logger.info(f"[EMBEDDINGS] Indexed {len(ids)} {self.content_type}")
         return len(ids)
+
+    async def index_articles(self, articles: List[Any]) -> int:
+        """Backward-compatible alias for index_items."""
+        return await self.index_items(articles)
 
     async def search(
         self,
@@ -163,7 +323,7 @@ class EmbeddingsStore:
         filters: Optional[Dict[str, Any]] = None,
     ) -> SearchResults:
         """
-        Semantic search over indexed articles.
+        Semantic search over indexed content.
 
         Args:
             query: Search query text
@@ -194,12 +354,33 @@ class EmbeddingsStore:
                 metadata = results["metadatas"][0][i] if results["metadatas"] else {}
                 distance = results["distances"][0][i] if results["distances"] else 1.0
 
+                # Build display title based on content type
+                if self.content_type == "articles":
+                    title = metadata.get("title", "")
+                elif self.content_type == "sec_nuggets":
+                    ticker = metadata.get("ticker", "")
+                    ntype = metadata.get("nugget_type", "")
+                    title = f"{ticker} SEC: {ntype}" if ticker else ntype
+                elif self.content_type == "earnings_quotes":
+                    speaker = metadata.get("speaker_name", "")
+                    ticker = metadata.get("ticker", "")
+                    title = f"{speaker} ({ticker})" if speaker else ticker
+                elif self.content_type == "podcast_quotes":
+                    speaker = metadata.get("speaker_name", "")
+                    podcast = metadata.get("podcast_name", "")
+                    title = f"{speaker} on {podcast}" if speaker else podcast
+                else:
+                    title = ""
+
+                url = metadata.get("url", "")
+
                 search_results.append(SearchResult(
-                    article_id=doc_id,
-                    title=metadata.get("title", ""),
-                    url=metadata.get("url", ""),
+                    item_id=doc_id,
+                    title=title,
+                    url=url,
                     summary=results["documents"][0][i] if results["documents"] else "",
                     score=1.0 - distance,  # Convert distance to similarity
+                    source_type=self._source_type,
                     metadata=metadata,
                 ))
 
@@ -216,10 +397,12 @@ class EmbeddingsStore:
 
 def get_chromadb_store(
     persist_directory: str = "data/embeddings",
-    collection_name: str = "quantum_articles",
+    collection_name: Optional[str] = None,
+    content_type: str = "articles",
 ) -> EmbeddingsStore:
     """Factory function for ChromaDB embeddings store."""
     return EmbeddingsStore(
         persist_directory=persist_directory,
         collection_name=collection_name,
+        content_type=content_type,
     )

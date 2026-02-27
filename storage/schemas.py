@@ -435,11 +435,95 @@ WEEKLY_BRIEFINGS_INDEXES = [
     "CREATE INDEX IF NOT EXISTS idx_wb_created ON weekly_briefings(created_at DESC);",
 ]
 
+# ============================================================================
+# Case Studies Table (Phase 6)
+# ============================================================================
+
+CASE_STUDIES_TABLE = """
+CREATE TABLE IF NOT EXISTS case_studies (
+    case_study_id TEXT PRIMARY KEY,
+    source_type TEXT NOT NULL,
+    source_id TEXT NOT NULL,
+    domain TEXT DEFAULT 'quantum',
+
+    -- Grounding
+    grounding_quote TEXT NOT NULL,
+    context_text TEXT,
+
+    -- Core fields
+    use_case_title TEXT NOT NULL,
+    use_case_summary TEXT,
+    company TEXT,
+    industry TEXT,
+    technology_stack TEXT DEFAULT '',
+
+    -- Implementation
+    department TEXT,
+    implementation_detail TEXT,
+    teams_impacted TEXT DEFAULT '',
+    scale TEXT,
+    timeline TEXT,
+    readiness_level TEXT DEFAULT 'announced',
+
+    -- Outcome
+    outcome_metric TEXT,
+    outcome_type TEXT,
+    outcome_quantified INTEGER DEFAULT 0,
+
+    -- Speaker (podcast/earnings)
+    speaker TEXT,
+    speaker_role TEXT,
+    speaker_company TEXT,
+
+    -- Entities
+    companies_mentioned TEXT DEFAULT '',
+    technologies_mentioned TEXT DEFAULT '',
+    people_mentioned TEXT DEFAULT '',
+    competitors_mentioned TEXT DEFAULT '',
+
+    -- Quantum-specific
+    qubit_type TEXT,
+    gate_fidelity TEXT,
+    commercial_viability TEXT,
+    scientific_significance TEXT,
+
+    -- AI-specific
+    ai_model_used TEXT,
+    roi_metric TEXT,
+    deployment_type TEXT,
+
+    -- Relevance
+    relevance_score REAL DEFAULT 0.5,
+    confidence REAL DEFAULT 0.8,
+
+    -- Metadata overflow
+    metadata TEXT DEFAULT '{}',
+
+    -- Audit
+    extracted_at TEXT NOT NULL,
+    extraction_model TEXT,
+    extraction_confidence REAL DEFAULT 0.8
+);
+"""
+
+CASE_STUDIES_INDEXES = [
+    "CREATE INDEX IF NOT EXISTS idx_cs_source_type ON case_studies(source_type);",
+    "CREATE INDEX IF NOT EXISTS idx_cs_source_id ON case_studies(source_id);",
+    "CREATE INDEX IF NOT EXISTS idx_cs_domain ON case_studies(domain);",
+    "CREATE INDEX IF NOT EXISTS idx_cs_company ON case_studies(company);",
+    "CREATE INDEX IF NOT EXISTS idx_cs_industry ON case_studies(industry);",
+    "CREATE INDEX IF NOT EXISTS idx_cs_outcome_type ON case_studies(outcome_type);",
+    "CREATE INDEX IF NOT EXISTS idx_cs_relevance ON case_studies(relevance_score DESC);",
+    "CREATE INDEX IF NOT EXISTS idx_cs_readiness ON case_studies(readiness_level);",
+    "CREATE INDEX IF NOT EXISTS idx_cs_extracted_at ON case_studies(extracted_at DESC);",
+]
+
 ALL_TABLES = [
     ARTICLES_TABLE, DIGESTS_TABLE, PAPERS_TABLE, STOCKS_TABLE,
     EARNINGS_TRANSCRIPTS_TABLE, EARNINGS_QUOTES_TABLE,
     SEC_FILINGS_TABLE, SEC_NUGGETS_TABLE,
     PODCAST_TRANSCRIPTS_TABLE, PODCAST_QUOTES_TABLE,
     WEEKLY_BRIEFINGS_TABLE,
+    CASE_STUDIES_TABLE,
 ]
-ALL_INDEXES = ARTICLES_INDEXES + PAPERS_INDEXES + STOCKS_INDEXES + EARNINGS_INDEXES + SEC_INDEXES + PODCAST_INDEXES + WEEKLY_BRIEFINGS_INDEXES
+ALL_INDEXES = ARTICLES_INDEXES + PAPERS_INDEXES + STOCKS_INDEXES + EARNINGS_INDEXES + SEC_INDEXES + PODCAST_INDEXES + WEEKLY_BRIEFINGS_INDEXES + CASE_STUDIES_INDEXES

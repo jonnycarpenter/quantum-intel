@@ -5,16 +5,40 @@ Production deployment of the Quantum + AI Intelligence Hub on Google Cloud Platf
 ## Architecture
 
 ```
+GitHub (jonnycarpenter/quantum-intel)
+    ↓ push to master
+Cloud Build (cloudbuild.yaml)
+    ↓ builds Docker image → updates Cloud Run Jobs
 Cloud Scheduler (cron)
     ↓ triggers
-Cloud Run Jobs (9 jobs)
+Cloud Run Jobs (10 jobs)
     ↓ reads/writes
-BigQuery (quantum_ai_hub dataset, 12 tables)
+BigQuery (quantum_ai_hub dataset, 15 tables)
     ↓ embeddings
 Vertex AI text-embedding-005 → BigQuery VECTOR_SEARCH
 ```
 
 **Local path preserved:** Set `STORAGE_BACKEND=sqlite` (or omit `GCP_PROJECT_ID`) to keep using SQLite + ChromaDB locally.
+
+## CI/CD Pipeline
+
+Every push to `master` triggers Cloud Build via a Developer Connect GitHub trigger:
+
+1. Builds slim Docker image (production deps only — no PyTorch/CUDA/ChromaDB/Streamlit)
+2. Pushes to Artifact Registry with `$SHORT_SHA` and `latest` tags
+3. Updates all 10 Cloud Run Jobs to use the new image
+
+Config: `cloudbuild.yaml` at project root.
+
+## Deploying changes
+
+After initial setup, deploying is just a git push:
+
+```bash
+git add -A && git commit -m "your change" && git push origin master
+```
+
+Cloud Build triggers automatically, builds the slim image, and updates all jobs.
 
 ## Prerequisites
 
@@ -22,7 +46,7 @@ Vertex AI text-embedding-005 → BigQuery VECTOR_SEARCH
 - Billing enabled on the GCP project
 - `gcloud auth application-default login` (for local testing with BigQuery)
 
-## Quick Start
+## First-Time Setup
 
 ```bash
 # 1. One-time infrastructure setup
@@ -50,12 +74,13 @@ gcloud run jobs execute quantum-rss-ingestion --region us-central1
 
 | Resource | Name | Purpose |
 |----------|------|---------|
-| BigQuery Dataset | `quantum_ai_hub` | 12 tables for all pipeline data |
+| BigQuery Dataset | `quantum_ai_hub` | 15 tables for all pipeline data |
 | Artifact Registry | `quantum-intel` | Docker images |
+| Cloud Build Trigger | `quantum-intel-deploy` | GitHub push → build → deploy |
 | GCS Bucket | `quantum-ai-hub-data` | Future file storage |
 | Secret Manager | 6 secrets | API keys |
-| Cloud Run Jobs | 9 jobs | Pipeline execution |
-| Cloud Scheduler | 9 schedules | Cron triggers |
+| Cloud Run Jobs | 10 jobs | Pipeline execution |
+| Cloud Scheduler | 10 schedules | Cron triggers |
 
 ## Environment Variables
 
@@ -85,6 +110,7 @@ gcloud run jobs execute quantum-rss-ingestion --region us-central1
 | SEC Filings | 2nd of month | 11:00 | `quantum-sec` |
 | Weekly Briefing | Monday | 12:00 | `quantum-weekly-briefing` |
 | Digest | Daily | 13:00 | `quantum-digest` |
+| Stocks | Mon-Fri | 22:00 | `quantum-stocks-ingestion` |
 
 ## Monitoring
 
@@ -120,12 +146,17 @@ bq query --project_id=gen-lang-client-0436975498 \
 The local SQLite path is unchanged. If `GCP_PROJECT_ID` is not set, everything runs locally:
 
 ```bash
+# Install all deps including local-only (ChromaDB, Streamlit, pytest)
+pip install -r requirements-local.txt
+
 # Local mode (default)
 python scripts/run_ingestion.py --sources rss --max-classify 5
 
 # Force BigQuery locally (requires gcloud auth)
 GCP_PROJECT_ID=gen-lang-client-0436975498 python scripts/run_ingestion.py --sources rss --max-classify 3
 ```
+
+**Note:** `requirements.txt` contains production-only deps (slim, no PyTorch). For local dev, use `requirements-local.txt` which includes ChromaDB, Streamlit, and pytest.
 
 ## Troubleshooting
 

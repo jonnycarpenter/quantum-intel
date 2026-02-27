@@ -28,6 +28,7 @@ from models.earnings import EarningsTranscript, ExtractedQuote
 from models.sec_filing import SecFiling, SecNugget
 from models.podcast import PodcastTranscript, PodcastQuote
 from models.weekly_briefing import WeeklyBriefing, BriefingSection, MarketMover, ResearchPaper
+from models.case_study import CaseStudy
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -1280,3 +1281,179 @@ class BigQueryStorage(StorageBackend):
             generation_cost_usd=data.get("generation_cost_usd", 0.0),
             pre_brief_id=data.get("pre_brief_id"),
         )
+
+    # =========================================================================
+    # Case Study Operations (Phase 6)
+    # =========================================================================
+
+    async def save_case_studies(self, case_studies: List[CaseStudy]) -> int:
+        """Save extracted case studies. Returns count saved."""
+        if not case_studies:
+            return 0
+
+        rows = []
+        for cs in case_studies:
+            rows.append({
+                "case_study_id": cs.case_study_id,
+                "source_type": cs.source_type,
+                "source_id": cs.source_id,
+                "domain": cs.domain,
+                "grounding_quote": cs.grounding_quote,
+                "context_text": cs.context_text,
+                "use_case_title": cs.use_case_title,
+                "use_case_summary": cs.use_case_summary,
+                "company": cs.company,
+                "industry": cs.industry,
+                "technology_stack": self._ensure_list(cs.technology_stack),
+                "department": cs.department,
+                "implementation_detail": cs.implementation_detail,
+                "teams_impacted": self._ensure_list(cs.teams_impacted),
+                "scale": cs.scale,
+                "timeline": cs.timeline,
+                "readiness_level": cs.readiness_level,
+                "outcome_metric": cs.outcome_metric,
+                "outcome_type": cs.outcome_type,
+                "outcome_quantified": bool(cs.outcome_quantified),
+                "speaker": cs.speaker,
+                "speaker_role": cs.speaker_role,
+                "speaker_company": cs.speaker_company,
+                "companies_mentioned": self._ensure_list(cs.companies_mentioned),
+                "technologies_mentioned": self._ensure_list(cs.technologies_mentioned),
+                "people_mentioned": self._ensure_list(cs.people_mentioned),
+                "competitors_mentioned": self._ensure_list(cs.competitors_mentioned),
+                "qubit_type": cs.qubit_type,
+                "gate_fidelity": cs.gate_fidelity,
+                "commercial_viability": cs.commercial_viability,
+                "scientific_significance": cs.scientific_significance,
+                "ai_model_used": cs.ai_model_used,
+                "roi_metric": cs.roi_metric,
+                "deployment_type": cs.deployment_type,
+                "relevance_score": cs.relevance_score,
+                "confidence": cs.confidence,
+                "metadata": json.dumps(cs.metadata or {}),
+                "extracted_at": self._dt_to_iso(cs.extracted_at),
+                "extraction_model": cs.extraction_model,
+                "extraction_confidence": cs.extraction_confidence,
+            })
+
+        return await self._insert_if_not_exists("case_studies", rows, ["case_study_id"])
+
+    async def get_case_studies_by_source(
+        self, source_type: str, source_id: str
+    ) -> List[CaseStudy]:
+        """Get case studies for a specific source item."""
+        query = (
+            f"SELECT * FROM {self._table('case_studies')} "
+            f"WHERE source_type = @source_type AND source_id = @source_id "
+            f"ORDER BY relevance_score DESC"
+        )
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=[
+                bigquery.ScalarQueryParameter("source_type", "STRING", source_type),
+                bigquery.ScalarQueryParameter("source_id", "STRING", source_id),
+            ]
+        )
+        rows = await self._run_sync(
+            lambda: list(self.client.query(query, job_config=job_config).result())
+        )
+        return [CaseStudy.from_dict(self._bq_row_to_cs_dict(r)) for r in rows]
+
+    async def get_case_studies(
+        self,
+        domain: Optional[str] = None,
+        company: Optional[str] = None,
+        industry: Optional[str] = None,
+        source_type: Optional[str] = None,
+        limit: int = 50,
+    ) -> List[CaseStudy]:
+        """Get case studies with optional filters."""
+        where_parts = ["1=1"]
+        params = []
+
+        if domain:
+            where_parts.append("domain = @domain")
+            params.append(bigquery.ScalarQueryParameter("domain", "STRING", domain))
+        if company:
+            where_parts.append("company = @company")
+            params.append(bigquery.ScalarQueryParameter("company", "STRING", company))
+        if industry:
+            where_parts.append("industry = @industry")
+            params.append(bigquery.ScalarQueryParameter("industry", "STRING", industry))
+        if source_type:
+            where_parts.append("source_type = @source_type")
+            params.append(bigquery.ScalarQueryParameter("source_type", "STRING", source_type))
+
+        params.append(bigquery.ScalarQueryParameter("lim", "INT64", limit))
+        where_clause = " AND ".join(where_parts)
+
+        query = (
+            f"SELECT * FROM {self._table('case_studies')} "
+            f"WHERE {where_clause} ORDER BY relevance_score DESC LIMIT @lim"
+        )
+        job_config = bigquery.QueryJobConfig(query_parameters=params)
+        rows = await self._run_sync(
+            lambda: list(self.client.query(query, job_config=job_config).result())
+        )
+        return [CaseStudy.from_dict(self._bq_row_to_cs_dict(r)) for r in rows]
+
+    async def case_studies_exist_for_source(
+        self, source_type: str, source_id: str
+    ) -> bool:
+        """Check if case studies already extracted for this source."""
+        query = (
+            f"SELECT 1 FROM {self._table('case_studies')} "
+            f"WHERE source_type = @source_type AND source_id = @source_id LIMIT 1"
+        )
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=[
+                bigquery.ScalarQueryParameter("source_type", "STRING", source_type),
+                bigquery.ScalarQueryParameter("source_id", "STRING", source_id),
+            ]
+        )
+        rows = await self._run_sync(
+            lambda: list(self.client.query(query, job_config=job_config).result())
+        )
+        return len(rows) > 0
+
+    async def search_case_studies(
+        self, query: str, domain: Optional[str] = None, limit: int = 30
+    ) -> List[CaseStudy]:
+        """Search case studies by text."""
+        params = [
+            bigquery.ScalarQueryParameter("q", "STRING", query),
+        ]
+        where = (
+            "(CONTAINS_SUBSTR(use_case_title, @q) OR "
+            "CONTAINS_SUBSTR(use_case_summary, @q) OR "
+            "CONTAINS_SUBSTR(grounding_quote, @q) OR "
+            "CONTAINS_SUBSTR(company, @q))"
+        )
+        if domain:
+            where += " AND domain = @domain"
+            params.append(bigquery.ScalarQueryParameter("domain", "STRING", domain))
+        params.append(bigquery.ScalarQueryParameter("lim", "INT64", limit))
+
+        sql = (
+            f"SELECT * FROM {self._table('case_studies')} "
+            f"WHERE {where} ORDER BY relevance_score DESC LIMIT @lim"
+        )
+        job_config = bigquery.QueryJobConfig(query_parameters=params)
+        rows = await self._run_sync(
+            lambda: list(self.client.query(sql, job_config=job_config).result())
+        )
+        return [CaseStudy.from_dict(self._bq_row_to_cs_dict(r)) for r in rows]
+
+    def _bq_row_to_cs_dict(self, row) -> dict:
+        """Convert a BigQuery row to dict suitable for CaseStudy.from_dict()."""
+        data = dict(row)
+        # ARRAY fields come back as lists natively; list fields need no conversion
+        # JSON metadata
+        meta = data.get("metadata")
+        if meta is None:
+            data["metadata"] = {}
+        elif isinstance(meta, str):
+            try:
+                data["metadata"] = json.loads(meta)
+            except (json.JSONDecodeError, TypeError):
+                data["metadata"] = {}
+        return data

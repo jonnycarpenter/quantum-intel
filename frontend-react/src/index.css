@@ -1,18 +1,20 @@
 @import "tailwindcss";
 
-/* ─── Custom Theme ─── */
+/* ─── Ket Zero Brand Theme ─── */
 @theme {
-  --color-bg-primary: #0f1117;
-  --color-bg-secondary: #1a1d27;
-  --color-bg-tertiary: #242836;
-  --color-bg-hover: #2d3245;
-  --color-border: #2d3245;
-  --color-border-light: #3a3f52;
-  --color-text-primary: #e2e4e9;
-  --color-text-secondary: #9ca3b4;
-  --color-text-muted: #6b7280;
+  /* Brand palette — KetZero_Brand_Style_Guide_Jan2026 */
+  --color-bg-primary: #0F1115;       /* Charcoal (Primary) */
+  --color-bg-secondary: #1A1F2B;     /* Slate (Secondary) */
+  --color-bg-tertiary: #232938;      /* Slate lightened */
+  --color-bg-hover: #2B3347;         /* Hover surface */
+  --color-border: #2B3347;
+  --color-border-light: #394560;
+  --color-text-primary: #E8EAEF;
+  --color-text-secondary: #9CA3B4;
+  --color-text-muted: #6B7280;
+  --color-accent-teal: #2BB0A6;      /* Signal Teal — brand accent */
   --color-accent-blue: #60a5fa;
-  --color-accent-cyan: #22d3ee;
+  --color-accent-cyan: #2BB0A6;      /* Signal Teal (alias) */
   --color-accent-purple: #a78bfa;
   --color-accent-green: #34d399;
   --color-accent-yellow: #fbbf24;
