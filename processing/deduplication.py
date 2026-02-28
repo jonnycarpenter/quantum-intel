@@ -3,7 +3,7 @@ Deduplication Service
 =====================
 
 URL + fuzzy title matching for cross-source deduplication.
-Prevents duplicate articles from RSS + Tavily overlap.
+Prevents duplicate articles from RSS + Exa overlap.
 """
 
 import hashlib

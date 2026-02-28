@@ -51,17 +51,52 @@
 - Generated and saved manual briefings for both quantum and AI domains
 - TypeScript compiles cleanly with all changes
 
+### Session 7 (Feb 2026) — Phase 6 Case Study Extraction
+- Implemented full case study extraction layer (`models/case_study.py`, `processing/case_study_extractor.py`)
+- 10 domain+source LLM prompt combinations (2 domains x 5 source types)
+- Added `CaseStudyConfig` to `config/settings.py` (model, temperature, chunking, dedup thresholds)
+- Extended StorageBackend ABC with 5 case study methods, implemented in SQLite + BigQuery
+- Added `case_studies` + `case_study_embeddings` tables to BigQuery schemas
+- Registered case study embeddings in `storage/embeddings_config.py`
+- Created `scripts/run_case_studies.py` — standalone batch script with `--domain`, `--sources`, `--max-items`
+- ArXiv: abstract-only extraction (no PDF ingestion)
+
+### Session 8 (Feb 2026) — Case Studies Tab + Frontend Reskin
+- Built Case Studies frontend page (`CaseStudiesPage.tsx`) with stats dashboard, filters (source, readiness, outcome), search
+- Added backend API endpoints for case studies (`api/routes/case_studies.py`)
+- Added Case Studies nav item to App.tsx
+- Reskinned entire frontend from dark mode to light mode matching ketzerointelligence.ai
+  - Swapped `@theme` palette: charcoal → off-white/white backgrounds, dark text
+  - Adjusted badge opacity values across all pages for visibility on light backgrounds
+  - Teal-branded chat bubbles
+- Fixed `EARNINGS_TICKERS` → `EARNINGS_COMPANIES` import in `api/routes/earnings.py` and `api/routes/sec.py`
+
+### Session 9 (Feb 2026) — Tests, Migration Script, Vector Index
+- Wrote `tests/test_bigquery_storage.py` — 37 mock-based tests covering helpers, row conversion, all entity operations
+- Wrote `tests/test_vertex_embeddings.py` — 22 mock-based tests covering all 5 content types, indexing, search, count
+- All 59 new tests passing (no GCP credentials required)
+- Created `scripts/migrate_sqlite_to_bigquery.py` — one-time migration across 12 tables, supports `--dry-run`, `--tables`, `--batch-size`
+- Added `get_vector_index_ddl()` to `storage/bigquery_schemas.py` — IVF + COSINE indexes for all 5 embedding tables
+- Created `scripts/create_vector_indexes.py` — standalone script to apply vector indexes, supports `--dry-run`
+
+### Session 10 (Feb 2026) — Tavily → Exa Search Swap
+- Full replacement of Tavily with Exa search API for better `published_date` reliability
+- Created `fetchers/exa.py` — ExaFetcher using `search_and_contents()` with ISO 8601 date filtering
+- Renamed config files: `tavily_queries.py` → `exa_queries.py`, `ai_tavily_queries.py` → `exa_ai_queries.py`
+- Updated all variable names: `TAVILY_QUERIES` → `EXA_QUERIES`, `AI_TAVILY_QUERIES` → `AI_EXA_QUERIES`
+- Updated `config/settings.py`: `tavily_api_key` → `exa_api_key`, added `exa_max_characters`
+- Updated `orchestrator.py`, `scripts/run_ingestion.py`, `tools/web_search.py`, `api/routes/stats.py`
+- Updated deploy: `cloudbuild.yaml`, `cloud_run_jobs.sh`, `setup_scheduler.sh`, `setup_infra.sh`
+- Created `tests/test_exa.py` — 12 mock-based tests, all passing
+- Deleted `fetchers/tavily.py`, `tests/test_tavily.py`, root-level `exa.py` (reference template leftover)
+- Updated docs: `CLAUDE.md`, `README_INGESTION.md`, `.env.example`
+- Swapped dependency: `tavily-python` → `exa-py` in `requirements.txt`
+- **237 tests passing** (2 pre-existing failures in corpus_search.py unrelated to swap)
+
 ---
 
 ## Next Up
 
 ### Remaining Work
-- Write `tests/test_bigquery_storage.py` and `tests/test_vertex_embeddings.py`
-- Write `scripts/migrate_sqlite_to_bigquery.py` for one-time data migration
-- Create BigQuery vector index on `article_embeddings.embedding` column
 - Monitor costs and tune Cloud Run Job resource limits
-
-### Weekly Briefings
-- Implement weekly briefing generation pipeline
-- Separate quantum vs AI briefings (domain-aware, schema already supports `domain` field)
-- Schedule briefing jobs via Cloud Scheduler
+- Add `EXA_API_KEY` to GCP Secret Manager and `.env`

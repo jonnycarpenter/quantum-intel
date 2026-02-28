@@ -3,7 +3,7 @@ Test Agent Tools
 ================
 
 Tests for corpus search, stock data, arxiv search, and podcast search tools.
-Web search is tested with mocked Tavily client.
+Web search is tested with mocked Exa client.
 """
 
 import sys
@@ -284,7 +284,7 @@ async def test_web_search_no_api_key():
     """Test web search handles missing API key gracefully."""
     from tools.web_search import WebSearchTool
 
-    with patch.dict(os.environ, {"TAVILY_API_KEY": ""}, clear=False):
+    with patch.dict(os.environ, {"EXA_API_KEY": ""}, clear=False):
         tool = WebSearchTool()
         tool._client = None  # Reset any cached client
 

@@ -19,8 +19,8 @@ class IngestionConfig:
     anthropic_api_key: str = field(
         default_factory=lambda: os.getenv("ANTHROPIC_API_KEY", "")
     )
-    tavily_api_key: str = field(
-        default_factory=lambda: os.getenv("TAVILY_API_KEY", "")
+    exa_api_key: str = field(
+        default_factory=lambda: os.getenv("EXA_API_KEY", "")
     )
 
     # Ingestion Settings
@@ -46,9 +46,9 @@ class IngestionConfig:
         )
     )
 
-    # Tavily
-    tavily_search_depth: str = "advanced"  # "basic" or "advanced"
-    tavily_max_results_per_query: int = 10
+    # Exa
+    exa_max_results_per_query: int = 10
+    exa_max_characters: int = 2000
 
     # ArXiv
     arxiv_rate_limit_seconds: float = 3.0
@@ -69,8 +69,8 @@ class AgentConfig:
     anthropic_api_key: str = field(
         default_factory=lambda: os.getenv("ANTHROPIC_API_KEY", "")
     )
-    tavily_api_key: str = field(
-        default_factory=lambda: os.getenv("TAVILY_API_KEY", "")
+    exa_api_key: str = field(
+        default_factory=lambda: os.getenv("EXA_API_KEY", "")
     )
 
     # Router Agent

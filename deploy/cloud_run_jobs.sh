@@ -77,10 +77,10 @@ create_job "ai-rss-ingestion" \
   "scripts/run_ingestion.py,--sources,rss,--domain,ai" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest"
 
-# --- Quantum Tavily (twice weekly) ---
-create_job "quantum-tavily-ingestion" \
-  "scripts/run_ingestion.py,--sources,tavily,--domain,quantum" \
-  "ANTHROPIC_API_KEY=anthropic-api-key:latest,TAVILY_API_KEY=tavily-api-key:latest" \
+# --- Quantum Exa (twice weekly) ---
+create_job "quantum-exa-ingestion" \
+  "scripts/run_ingestion.py,--sources,exa,--domain,quantum" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest,EXA_API_KEY=EXA_API_KEY:latest" \
   "" "2Gi" "1" "3600"
 
 # --- Quantum ArXiv (weekly) ---

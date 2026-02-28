@@ -5,13 +5,13 @@ Fetches, deduplicates, classifies, and stores quantum computing intelligence fro
 ## Architecture
 
 ```
-RSS / Tavily / ArXiv / StockNews  →  Dedup  →  Classify (Claude)  →  SQLite + Embeddings
+RSS / Exa / ArXiv / StockNews  →  Dedup  →  Classify (Claude)  →  SQLite + Embeddings
 ```
 
 | Stage | Module | Description |
 |-------|--------|-------------|
 | Fetch | `fetchers/rss.py` | 20+ tiered RSS feeds |
-| Fetch | `fetchers/tavily.py` | 52 Tavily queries across 9 themes |
+| Fetch | `fetchers/exa.py` | 52 Exa queries across 9 themes |
 | Fetch | `fetchers/arxiv.py` | Quantum computing paper search |
 | Fetch | `fetchers/stocknews.py` | Stock market news for quantum tickers |
 | Fetch | `fetchers/stocks.py` | Price data via yfinance (20 tickers) |
@@ -26,8 +26,8 @@ RSS / Tavily / ArXiv / StockNews  →  Dedup  →  Classify (Claude)  →  SQLit
 |------|---------|
 | `config/rss_sources.py` | Quantum RSS feeds (4 tiers) |
 | `config/ai_rss_sources.py` | AI domain RSS feeds (4 tiers, for AI pipeline) |
-| `config/tavily_queries.py` | Quantum Tavily search queries |
-| `config/ai_tavily_queries.py` | AI Tavily search queries (for AI pipeline) |
+| `config/exa_queries.py` | Quantum Exa search queries |
+| `config/ai_exa_queries.py` | AI Exa search queries (for AI pipeline) |
 | `config/arxiv_queries.py` | ArXiv categories and search terms |
 | `config/tickers.py` | Stock tickers to track |
 | `config/settings.py` | `IngestionConfig` dataclass |
@@ -40,7 +40,7 @@ RSS / Tavily / ArXiv / StockNews  →  Dedup  →  Classify (Claude)  →  SQLit
 python scripts/run_ingestion.py
 
 # Specific sources only
-python scripts/run_ingestion.py --sources rss tavily
+python scripts/run_ingestion.py --sources rss exa
 
 # Quick test (5 articles max)
 python scripts/run_ingestion.py --sources rss --max-classify 5
@@ -53,7 +53,7 @@ python scripts/run_digest.py
 
 The pipeline is coordinated by `orchestrator.py`:
 
-1. **Fetch** — Pull articles from enabled sources (RSS, Tavily, ArXiv, StockNews)
+1. **Fetch** — Pull articles from enabled sources (RSS, Exa, ArXiv, StockNews)
 2. **Filter** — Remove blocked sources/domains
 3. **Dedup** — URL-based + title similarity deduplication
 4. **Classify** — Claude classifies: category, priority, relevance, entities, sentiment
@@ -74,5 +74,5 @@ Core ingestion runs on a recurring Cloud Run Job schedule. See `CLAUDE.md` for e
 
 The same pipeline architecture is being extended for AI-domain intelligence:
 - `config/ai_rss_sources.py` — 22 AI RSS feeds across 4 tiers (dedicated → vendor → academic → general tech)
-- `config/ai_tavily_queries.py` — AI-focused search queries
+- `config/ai_exa_queries.py` — AI-focused search queries
 - Uses the same orchestrator pattern with `domain="ai"` parameter

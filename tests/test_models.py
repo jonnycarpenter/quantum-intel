@@ -39,7 +39,7 @@ def test_priority_levels():
 def test_source_types():
     """Verify source types."""
     assert SourceType.RSS.value == "rss"
-    assert SourceType.TAVILY.value == "tavily"
+    assert SourceType.EXA.value == "exa"
     assert SourceType.ARXIV.value == "arxiv"
 
 

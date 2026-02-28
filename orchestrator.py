@@ -3,7 +3,7 @@ Ingestion Pipeline Orchestrator
 ===============================
 
 Coordinates the full ingestion pipeline:
-1. Fetch articles (RSS, Tavily, ArXiv, StockNews)
+1. Fetch articles (RSS, Exa, ArXiv, StockNews)
 2. Filter blocked sources
 3. Deduplicate (URL + title similarity)
 4. Classify (Claude)
@@ -26,14 +26,14 @@ from typing import List, Optional, Dict, Any
 
 from config.settings import IngestionConfig, BLOCKED_SOURCES, BLOCKED_DOMAINS
 from config.rss_sources import RSS_FEEDS
-from config.tavily_queries import TAVILY_QUERIES
+from config.exa_queries import EXA_QUERIES
 from config.ai_rss_sources import AI_RSS_FEEDS
 from config.arxiv_queries import ARXIV_QUERIES, ARXIV_GENERAL_QUERY
 from config.ai_arxiv_queries import AI_ARXIV_QUERIES, AI_ARXIV_GENERAL_QUERY
 from config.tickers import ALL_TICKERS
 from config.settings import StockNewsConfig
 from fetchers.rss import RSSFetcher
-from fetchers.tavily import TavilyFetcher
+from fetchers.exa import ExaFetcher
 from fetchers.arxiv import ArXivFetcher
 from fetchers.stocks import StockFetcher
 from fetchers.stocknews import StockNewsFetcher
@@ -55,7 +55,7 @@ class IngestionStats:
 
     # Fetch stats
     rss_fetched: int = 0
-    tavily_fetched: int = 0
+    exa_fetched: int = 0
     arxiv_fetched: int = 0
     stocks_fetched: int = 0
     stocknews_fetched: int = 0
@@ -98,7 +98,7 @@ class IngestionStats:
             "completed_at": self.completed_at.isoformat() if self.completed_at else None,
             "duration_seconds": self.duration_seconds,
             "rss_fetched": self.rss_fetched,
-            "tavily_fetched": self.tavily_fetched,
+            "exa_fetched": self.exa_fetched,
             "arxiv_fetched": self.arxiv_fetched,
             "stocks_fetched": self.stocks_fetched,
             "stocknews_fetched": self.stocknews_fetched,
@@ -126,7 +126,7 @@ class IngestionOrchestrator:
 
     Coordinates:
     - RSS feed fetching (Phase 1)
-    - Tavily search (Phase 2)
+    - Exa search (Phase 2)
     - ArXiv paper fetching (Phase 2)
     - Deduplication
     - Claude classification
@@ -142,7 +142,7 @@ class IngestionOrchestrator:
 
         # Components (initialized in initialize())
         self.rss_fetcher: Optional[RSSFetcher] = None
-        self.tavily_fetcher: Optional[TavilyFetcher] = None
+        self.exa_fetcher: Optional[ExaFetcher] = None
         self.arxiv_fetcher: Optional[ArXivFetcher] = None
         self.stock_fetcher: Optional[StockFetcher] = None
         self.stocknews_fetcher: Optional[StockNewsFetcher] = None
@@ -151,7 +151,7 @@ class IngestionOrchestrator:
         self.storage = None
         self.embeddings_store = None
 
-        self._tavily_themes: Optional[List[str]] = None
+        self._exa_themes: Optional[List[str]] = None
         self._initialized = False
 
     async def initialize(self):
@@ -181,16 +181,16 @@ class IngestionOrchestrator:
         self.rss_fetcher = RSSFetcher(self.config)
         logger.info(f"[ORCHESTRATOR] [{self.domain.upper()}] RSS feeds: {len(self._rss_feeds)}")
 
-        # Tavily (conditional on API key)
-        if self.config.tavily_api_key:
+        # Exa (conditional on API key)
+        if self.config.exa_api_key:
             try:
-                self.tavily_fetcher = TavilyFetcher(self.config)
-                tavily_queries = self._get_tavily_queries()
-                logger.info(f"[ORCHESTRATOR] [{self.domain.upper()}] Tavily: {len(tavily_queries)} queries configured")
+                self.exa_fetcher = ExaFetcher(self.config)
+                exa_queries = self._get_exa_queries()
+                logger.info(f"[ORCHESTRATOR] [{self.domain.upper()}] Exa: {len(exa_queries)} queries configured")
             except ValueError as e:
-                logger.warning(f"[ORCHESTRATOR] Tavily disabled: {e}")
+                logger.warning(f"[ORCHESTRATOR] Exa disabled: {e}")
         else:
-            logger.info("[ORCHESTRATOR] Tavily: disabled (no API key)")
+            logger.info("[ORCHESTRATOR] Exa: disabled (no API key)")
 
         # ArXiv (domain-aware)
         if self.domain == "ai":
@@ -238,13 +238,13 @@ class IngestionOrchestrator:
         sources: Optional[List[str]] = None,
         max_classify: Optional[int] = None,
         save_results: bool = True,
-        tavily_themes: Optional[List[str]] = None,
+        exa_themes: Optional[List[str]] = None,
     ) -> IngestionStats:
         """
         Run the ingestion pipeline.
 
         Args:
-            sources: List of sources to run ("rss", "tavily", "arxiv", "stocks", "stocknews").
+            sources: List of sources to run ("rss", "exa", "arxiv", "stocks", "stocknews").
                     If None, runs all enabled sources.
             max_classify: Limit classification count (for testing/cost control)
             save_results: Whether to persist to storage
@@ -256,7 +256,7 @@ class IngestionOrchestrator:
             await self.initialize()
 
         stats = IngestionStats()
-        self._tavily_themes = tavily_themes
+        self._exa_themes = exa_themes
         run_sources = set(s.lower() for s in sources) if sources else {"rss"}
         logger.info(f"[ORCHESTRATOR] [{self.domain.upper()}] Starting ingestion (sources: {', '.join(sorted(run_sources))})")
 
@@ -270,27 +270,27 @@ class IngestionOrchestrator:
             stats.rss_fetched = len(rss_articles)
             all_articles.extend(rss_articles)
 
-        if "tavily" in run_sources and self.tavily_fetcher:
+        if "exa" in run_sources and self.exa_fetcher:
             try:
                 # For AI domain, pass AI-specific queries directly
                 if self.domain == "ai":
-                    ai_queries = self._get_tavily_queries()
-                    if self._tavily_themes:
-                        from config.ai_tavily_queries import get_ai_queries_by_theme
+                    ai_queries = self._get_exa_queries()
+                    if self._exa_themes:
+                        from config.exa_ai_queries import get_ai_queries_by_theme
                         ai_queries = []
-                        for theme in self._tavily_themes:
+                        for theme in self._exa_themes:
                             ai_queries.extend(get_ai_queries_by_theme(theme))
-                    tavily_articles = await self.tavily_fetcher.fetch_all_queries(
+                    exa_articles = await self.exa_fetcher.fetch_all_queries(
                         queries=ai_queries,
                     )
                 else:
-                    tavily_articles = await self.tavily_fetcher.fetch_all_queries(
-                        themes=self._tavily_themes,
+                    exa_articles = await self.exa_fetcher.fetch_all_queries(
+                        themes=self._exa_themes,
                     )
-                stats.tavily_fetched = len(tavily_articles)
-                all_articles.extend(tavily_articles)
+                stats.exa_fetched = len(exa_articles)
+                all_articles.extend(exa_articles)
             except Exception as e:
-                logger.error(f"[ORCHESTRATOR] Tavily fetch error: {e}")
+                logger.error(f"[ORCHESTRATOR] Exa fetch error: {e}")
 
         if "arxiv" in run_sources and self.arxiv_fetcher:
             try:
@@ -584,16 +584,16 @@ class IngestionOrchestrator:
 
         return articles_to_save
 
-    def _get_tavily_queries(self) -> list:
-        """Get domain-appropriate Tavily queries."""
+    def _get_exa_queries(self) -> list:
+        """Get domain-appropriate Exa queries."""
         if self.domain == "ai":
             try:
-                from config.ai_tavily_queries import AI_TAVILY_QUERIES
-                return AI_TAVILY_QUERIES
+                from config.exa_ai_queries import AI_EXA_QUERIES
+                return AI_EXA_QUERIES
             except ImportError:
-                logger.warning("[ORCHESTRATOR] AI Tavily queries not yet configured")
+                logger.warning("[ORCHESTRATOR] AI Exa queries not yet configured")
                 return []
-        return TAVILY_QUERIES
+        return EXA_QUERIES
 
     async def get_recent_articles(
         self, hours: int = 24, priority: Optional[str] = None, limit: int = 100

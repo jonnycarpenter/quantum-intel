@@ -1,15 +1,15 @@
 """
-Tavily Search Queries — Quantum Computing Intelligence Hub
-==========================================================
+Exa Search Queries — Quantum Computing Intelligence Hub
+========================================================
 
 52 use-case oriented queries grouped by strategic theme.
-From spec §2.2. Run daily.
+From spec §2.2. Run biweekly.
 """
 
 from typing import List, Dict, Any
 
 
-TAVILY_QUERIES: List[Dict[str, Any]] = [
+EXA_QUERIES: List[Dict[str, Any]] = [
     # =========================================================================
     # Theme 1: Drug Discovery & Healthcare (8 queries)
     # =========================================================================
@@ -102,12 +102,12 @@ TAVILY_QUERIES: List[Dict[str, Any]] = [
 
 def get_queries_by_theme(theme: str) -> List[Dict[str, Any]]:
     """Get all queries for a specific theme."""
-    return [q for q in TAVILY_QUERIES if q["theme"] == theme]
+    return [q for q in EXA_QUERIES if q["theme"] == theme]
 
 
 def get_all_query_strings() -> List[str]:
     """Get just the query strings for execution."""
-    return [q["query"] for q in TAVILY_QUERIES]
+    return [q["query"] for q in EXA_QUERIES]
 
 
 THEMES = [

@@ -23,7 +23,7 @@ steps:
         for JOB in \
           quantum-rss-ingestion \
           ai-rss-ingestion \
-          quantum-tavily-ingestion \
+          quantum-exa-ingestion \
           quantum-arxiv-ingestion \
           quantum-earnings \
           quantum-sec \

@@ -78,7 +78,7 @@ CORPUS_SEARCH_TOOL = {
 WEB_SEARCH_TOOL = {
     "name": "web_search",
     "description": (
-        "Search the web for real-time information using Tavily. "
+        "Search the web for real-time information using Exa. "
         "Use this when corpus results are insufficient, for very recent events, "
         "or when the user asks about something not yet in the corpus."
     ),

@@ -37,7 +37,7 @@ async def get_system_stats():
     # API key status (masked)
     api_keys = {
         "anthropic": bool(os.getenv("ANTHROPIC_API_KEY")),
-        "tavily": bool(os.getenv("TAVILY_API_KEY")),
+        "exa": bool(os.getenv("EXA_API_KEY")),
         "api_ninjas": bool(os.getenv("API_NINJA_API_KEY")),
         "stocknews": bool(os.getenv("STOCKNEWS_API_KEY")),
     }

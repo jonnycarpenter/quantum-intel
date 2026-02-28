@@ -68,7 +68,7 @@ gcloud storage buckets create "gs://${BUCKET}" \
 echo "Creating secrets in Secret Manager..."
 for SECRET_NAME in \
   anthropic-api-key \
-  tavily-api-key \
+  EXA_API_KEY \
   api-ninja-key \
   secio-api-key \
   assemblyai-api-key \
@@ -93,7 +93,7 @@ SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
 # Secret access
 for SECRET_NAME in \
   anthropic-api-key \
-  tavily-api-key \
+  EXA_API_KEY \
   api-ninja-key \
   secio-api-key \
   assemblyai-api-key \

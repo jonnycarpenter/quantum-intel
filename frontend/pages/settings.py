@@ -24,10 +24,10 @@ def render_settings_page() -> None:
         st.markdown(f"Anthropic API: :{color}[**{status}**]")
 
     with col2:
-        tavily_key = os.getenv("TAVILY_API_KEY", "")
-        status = "Configured" if tavily_key else "Not Set"
-        color = "green" if tavily_key else "red"
-        st.markdown(f"Tavily API: :{color}[**{status}**]")
+        exa_key = os.getenv("EXA_API_KEY", "")
+        status = "Configured" if exa_key else "Not Set"
+        color = "green" if exa_key else "red"
+        st.markdown(f"Exa API: :{color}[**{status}**]")
 
     st.divider()
 

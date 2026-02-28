@@ -1,6 +1,6 @@
 """
-Tavily Search Queries — AI Use Case Intelligence
-==================================================
+Exa Search Queries — AI Use Case Intelligence
+===============================================
 
 198 use-case oriented queries for discovering AI implementations with proven ROI.
 100 industry-focused queries (20 industries x 5) + 98 department-focused queries (14 departments x 7).
@@ -9,7 +9,7 @@ Tavily Search Queries — AI Use Case Intelligence
 from typing import List, Dict, Any
 
 
-AI_TAVILY_QUERIES: List[Dict[str, Any]] = [
+AI_EXA_QUERIES: List[Dict[str, Any]] = [
     # =========================================================================
     # INDUSTRY QUERIES (100 queries, 20 industries x 5 each)
     # =========================================================================
@@ -286,7 +286,7 @@ AI_TAVILY_QUERIES: List[Dict[str, Any]] = [
 ]
 
 
-AI_TAVILY_THEMES: List[str] = [
+AI_EXA_THEMES: List[str] = [
     # Industry themes (20)
     "industry_retail", "industry_manufacturing", "industry_supply_chain",
     "industry_construction", "industry_healthcare", "industry_pharma",
@@ -305,10 +305,10 @@ AI_TAVILY_THEMES: List[str] = [
 
 
 def get_ai_queries_by_theme(theme: str) -> List[Dict[str, Any]]:
-    """Get AI Tavily queries filtered by theme."""
-    return [q for q in AI_TAVILY_QUERIES if q["theme"] == theme]
+    """Get AI Exa queries filtered by theme."""
+    return [q for q in AI_EXA_QUERIES if q["theme"] == theme]
 
 
 def get_all_ai_query_strings() -> List[str]:
     """Get all query strings (for cost estimation)."""
-    return [q["query"] for q in AI_TAVILY_QUERIES]
+    return [q["query"] for q in AI_EXA_QUERIES]

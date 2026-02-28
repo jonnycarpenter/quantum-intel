@@ -63,7 +63,7 @@ class Priority(str, Enum):
 class SourceType(str, Enum):
     """Source types for article ingestion."""
     RSS = "rss"
-    TAVILY = "tavily"
+    EXA = "exa"
     ARXIV = "arxiv"
     STOCK = "stock"
     PODCAST = "podcast"
@@ -91,7 +91,7 @@ class AgeStatus(str, Enum):
 @dataclass
 class RawArticle:
     """
-    Raw article data from any data source (RSS, Tavily, etc).
+    Raw article data from any data source (RSS, Exa, etc).
     """
     url: str
     title: str

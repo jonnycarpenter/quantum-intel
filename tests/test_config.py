@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config.settings import IngestionConfig
 from config.rss_sources import RSS_FEEDS
 from config.tickers import ALL_TICKERS, PURE_PLAY_TICKERS, MAJOR_TECH_TICKERS, PRIVATE_COMPANIES
-from config.tavily_queries import TAVILY_QUERIES, get_queries_by_theme, THEMES
+from config.exa_queries import EXA_QUERIES, get_queries_by_theme, THEMES
 from config.arxiv_queries import ARXIV_QUERIES, ARXIV_CATEGORIES
 
 
@@ -58,13 +58,13 @@ def test_private_companies():
     assert "PsiQuantum" in names
 
 
-def test_tavily_queries_count():
-    """Verify 52 Tavily queries across 9 themes."""
-    assert len(TAVILY_QUERIES) == 52
+def test_exa_queries_count():
+    """Verify 52 Exa queries across 9 themes."""
+    assert len(EXA_QUERIES) == 52
     assert len(THEMES) == 9
 
 
-def test_tavily_queries_by_theme():
+def test_exa_queries_by_theme():
     """Each theme should have queries."""
     for theme in THEMES:
         queries = get_queries_by_theme(theme)

@@ -2,13 +2,14 @@
 Web Search Tool
 ===============
 
-Real-time web search for quantum computing information using Tavily.
+Real-time web search for quantum computing information using Exa.
 Includes quantum-domain filtering with broad search fallback.
 """
 
 import json
 import logging
 import os
+from datetime import datetime, timedelta, timezone
 from typing import Optional, List
 
 logger = logging.getLogger(__name__)
@@ -30,19 +31,19 @@ QUANTUM_DOMAINS = [
 
 
 class WebSearchTool:
-    """Real-time web search via Tavily API."""
+    """Real-time web search via Exa API."""
 
     def __init__(self):
         self._client = None
 
     def _ensure_client(self) -> None:
-        """Lazy-initialize Tavily client."""
+        """Lazy-initialize Exa client."""
         if self._client is None:
-            api_key = os.getenv("TAVILY_API_KEY", "")
+            api_key = os.getenv("EXA_API_KEY", "")
             if not api_key:
-                raise ValueError("TAVILY_API_KEY not set")
-            from tavily import TavilyClient
-            self._client = TavilyClient(api_key=api_key)
+                raise ValueError("EXA_API_KEY not set")
+            from exa_py import Exa
+            self._client = Exa(api_key=api_key)
 
     async def execute(
         self,
@@ -115,17 +116,21 @@ class WebSearchTool:
 
         search_kwargs = {
             "query": query,
-            "max_results": max_results,
-            "search_depth": "advanced",
+            "num_results": max_results,
+            "type": "auto",
+            "text": {"max_characters": 500},
         }
         if days:
-            search_kwargs["days"] = days
+            end_date = datetime.now(timezone.utc)
+            start_date = end_date - timedelta(days=days)
+            search_kwargs["start_published_date"] = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+            search_kwargs["end_published_date"] = end_date.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         # First try with quantum domain filtering
         try:
             response = await asyncio.get_event_loop().run_in_executor(
                 None,
-                lambda: self._client.search(
+                lambda: self._client.search_and_contents(
                     include_domains=QUANTUM_DOMAINS,
                     **search_kwargs,
                 ),
@@ -139,19 +144,20 @@ class WebSearchTool:
         # Fallback: broad search without domain filter
         response = await asyncio.get_event_loop().run_in_executor(
             None,
-            lambda: self._client.search(**search_kwargs),
+            lambda: self._client.search_and_contents(**search_kwargs),
         )
         return self._parse_results(response)
 
-    def _parse_results(self, response: dict) -> List[dict]:
-        """Parse Tavily response into result dicts."""
+    def _parse_results(self, response) -> List[dict]:
+        """Parse Exa response into result dicts."""
         results = []
-        for item in response.get("results", []):
+        for item in (response.results if hasattr(response, "results") else []):
+            url = getattr(item, "url", "")
             results.append({
-                "title": item.get("title", ""),
-                "url": item.get("url", ""),
-                "content": (item.get("content", "") or "")[:500],
-                "published_date": item.get("published_date", ""),
-                "source": item.get("url", "").split("/")[2] if item.get("url") else "",
+                "title": getattr(item, "title", "") or "",
+                "url": url,
+                "content": ((getattr(item, "text", "") or "")[:500]),
+                "published_date": getattr(item, "published_date", "") or "",
+                "source": url.split("/")[2] if url and "/" in url else "",
             })
         return results

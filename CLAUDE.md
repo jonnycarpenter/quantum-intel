@@ -21,7 +21,7 @@ Multi-agent AI system monitoring the quantum computing and AI ecosystems.
 ```
 config/       - Configuration constants (feeds, queries, tickers, prompts)
 models/       - Dataclasses for articles, papers, stocks, earnings, SEC filings, case studies
-fetchers/     - Data source clients (RSS, Tavily, ArXiv, yfinance, StockNews, SEC EDGAR, API Ninjas)
+fetchers/     - Data source clients (RSS, Exa, ArXiv, yfinance, StockNews, SEC EDGAR, API Ninjas)
 processing/   - Classification, dedup, scoring, quote extraction, nugget extraction, case study extraction
 storage/      - SQLite/BigQuery backends + ChromaDB/Vertex embeddings
 utils/        - Logger, LLM client, date utilities
@@ -35,7 +35,7 @@ tests/        - pytest tests per module
 ### Environment Variables
 Required in `.env`:
 - `ANTHROPIC_API_KEY` — Claude API (classification + agents)
-- `TAVILY_API_KEY` — Web search (Phase 2)
+- `EXA_API_KEY` — Web search via Exa (Phase 2)
 
 Optional:
 - `API_NINJA_API_KEY` — Earnings transcripts (Phase 4A)
@@ -58,15 +58,15 @@ Optional:
 - CLI smoke tests:
   - Quantum: `python scripts/run_ingestion.py --sources rss --max-classify 5`
   - AI: `python scripts/run_ingestion.py --domain ai --sources rss --max-classify 5`
-  - AI Tavily: `python scripts/run_ingestion.py --domain ai --sources tavily --tavily-themes industry_retail --max-classify 5`
+  - AI Exa: `python scripts/run_ingestion.py --domain ai --sources exa --exa-themes industry_retail --max-classify 5`
   - AI ArXiv: `python scripts/run_ingestion.py --domain ai --sources arxiv --max-classify 5`
 
 ### Key Domain Constants
 - 29 content categories: 11 quantum-specific + 8 shared business + 10 AI-specific
 - 4 priority levels: critical, high, medium, low
 - 7 entity types: company, technology, product, person, institution, standard, use_case_domain
-- **Quantum:** 18 RSS feeds, 52 Tavily queries (9 themes), 6 ArXiv queries
-- **AI:** 19 RSS feeds, 198 Tavily queries (34 themes), 8 ArXiv queries
+- **Quantum:** 18 RSS feeds, 52 Exa queries (9 themes), 6 ArXiv queries
+- **AI:** 19 RSS feeds, 198 Exa queries (34 themes), 8 ArXiv queries
 - 20 stock tickers (pure-play quantum + major tech + ETF)
 - 14 earnings tickers with CIK mappings (core + secondary)
 - SEC filing types: 10-K, 10-Q, 8-K
@@ -121,7 +121,7 @@ Every core pipeline must have its own README. These live at the project root:
 
 | README | Covers |
 |--------|--------|
-| `README_INGESTION.md` | Core data ingestion (RSS, Tavily, ArXiv, StockNews) |
+| `README_INGESTION.md` | Core data ingestion (RSS, Exa, ArXiv, StockNews) |
 | `README_PODCASTS.md` | Podcast pipeline (discovery, transcription, quote extraction) |
 | `README_SEC_EARNINGS.md` | SEC EDGAR filings + earnings call transcripts |
 | `README_GCP_DEPLOYMENT.md` | GCP deployment: BigQuery, Vertex AI, Cloud Run, Scheduler |

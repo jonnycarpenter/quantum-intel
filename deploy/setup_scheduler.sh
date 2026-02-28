@@ -7,7 +7,7 @@
 # Schedule (all times UTC):
 #   06:00 daily     — Quantum RSS
 #   07:00 daily     — AI RSS
-#   08:00 Tue/Fri   — Tavily web search
+#   08:00 Tue/Fri   — Exa web search
 #   09:00 Sunday    — ArXiv papers
 #   10:00 Sunday    — Podcasts
 #   11:00 1st/month — Earnings transcripts
@@ -63,7 +63,7 @@ create_schedule "quantum-stocks-daily"    "0 22 * * 1-5"  "quantum-stocks-ingest
 create_schedule "quantum-digest-daily"    "0 13 * * *"    "quantum-digest"
 
 # Twice weekly (Tue & Fri)
-create_schedule "quantum-tavily-biweekly" "0 8 * * 2,5" "quantum-tavily-ingestion"
+create_schedule "quantum-exa-biweekly" "0 8 * * 2,5" "quantum-exa-ingestion"
 
 # Weekly
 create_schedule "quantum-arxiv-weekly"    "0 9 * * 0"   "quantum-arxiv-ingestion"
