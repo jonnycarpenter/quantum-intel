@@ -283,6 +283,15 @@ AI_EXA_QUERIES: List[Dict[str, Any]] = [
     {"query": "AI seasonal demand planning promotional forecasting improvement", "theme": "department_demand_planning", "id": 196},
     {"query": "machine learning demand planning stockout reduction customer service", "theme": "department_demand_planning", "id": 197},
     {"query": "AI demand planning collaboration consensus forecasting ROI", "theme": "department_demand_planning", "id": 198},
+
+    # =========================================================================
+    # FUNDING & VENTURE CAPITAL QUERIES (5 queries)
+    # =========================================================================
+    {"query": "AI artificial intelligence startup seed funding series A venture capital round", "theme": "startup_funding_vc", "id": 199},
+    {"query": "generative AI foundation model startup investment valuation raised", "theme": "startup_funding_vc", "id": 200},
+    {"query": "AI enterprise software startup stealth mode launch funding", "theme": "startup_funding_vc", "id": 201},
+    {"query": "artificial intelligence IPO public market debut valuation", "theme": "startup_funding_vc", "id": 202},
+    {"query": "AI startup ecosystem venture capital trends investment deals", "theme": "startup_funding_vc", "id": 203},
 ]
 
 
@@ -301,6 +310,8 @@ AI_EXA_THEMES: List[str] = [
     "department_procurement", "department_rd_product", "department_strategy",
     "department_risk", "department_quality", "department_training",
     "department_pricing", "department_demand_planning",
+    # Funding themes (1)
+    "startup_funding_vc",
 ]
 
 

@@ -19,6 +19,9 @@ You will be given an article with its title, source, and content. Analyze it and
     "relevance_score": <0.0-1.0 float>,
     "summary": "<2-3 sentence summary of the article>",
     "key_takeaway": "<single sentence key takeaway>",
+    "time_to_market_impact": "<estimated timeline to commercial availability or widespread adoption>",
+    "disrupted_industries": "<which industries are most likely to be disrupted by this development>",
+    "investment_signal": "<what this means for investors: e.g. validates approach, creates risk, early signal>",
     "companies_mentioned": ["<company names>"],
     "technologies_mentioned": ["<quantum technologies: trapped-ion, superconducting, photonic, neutral atom, etc.>"],
     "people_mentioned": ["<key researchers, CEOs, policy makers>"],
@@ -83,6 +86,9 @@ You will be given an article with its title, source, and content. Analyze it and
     "relevance_score": <0.0-1.0 float>,
     "summary": "<2-3 sentence summary of the article>",
     "key_takeaway": "<single sentence key takeaway>",
+    "time_to_market_impact": "<estimated timeline to commercial availability or widespread adoption>",
+    "disrupted_industries": "<which industries are most likely to be disrupted by this development>",
+    "investment_signal": "<what this means for investors: e.g. validates approach, creates risk, early signal>",
     "companies_mentioned": ["<company names>"],
     "technologies_mentioned": ["<AI technologies: LLM, computer vision, NLP, transformers, diffusion models, etc.>"],
     "people_mentioned": ["<key researchers, CEOs, policy makers>"],
@@ -635,3 +641,40 @@ BRIEFING_AGENT_PROMPTS = {
     "quantum": QUANTUM_BRIEFING_AGENT_PROMPT,
     "ai": AI_BRIEFING_AGENT_PROMPT,
 }
+
+
+# ============================================================================
+# FUNDING EXTRACTION PROMPT
+# ============================================================================
+
+FUNDING_EXTRACTOR_PROMPT = """You are an expert Venture Capital and Startup funding analyst. 
+Your job is to read news articles and press releases to extract precise data about funding rounds and investments.
+
+You will be given the article text and its domain (e.g., 'quantum' or 'ai'). Analyze it and extract the funding event(s).
+NOTE: If the article discusses multiple distinct funding events for different startups, extract all of them.
+
+Return a JSON array of objects representing each funding event:
+
+[
+  {
+    "startup_name": "<Exact company name>",
+    "funding_round": "<e.g., Seed, Series A, Series B, Venture Round, Grant>",
+    "funding_amount": "<e.g., $100M, €50M, Undisclosed>",
+    "valuation": "<e.g., $1B, Undisclosed>",
+    "lead_investors": ["<Exact names of main investors>"],
+    "other_investors": ["<Exact names of participating investors>"],
+    "investment_thesis": "<1-2 sentence summary of why they invested>",
+    "known_technologies": ["<Specific technologies mentioned, e.g., neutral atom qubits, LLMs>"],
+    "use_of_funds": "<What the startup plans to do with the money>",
+    "grounding_quote": "<Exact verbatim quote from the text that proves the funding amount and round>",
+    "confidence_score": <0.0 to 1.0 float>
+  }
+]
+
+RULES:
+- Be EXTREMELY precise. Do not hallucinate investor names or amounts.
+- If a value like 'valuation' or 'lead_investors' is not mentioned, return "Undisclosed" or an empty array `[]` as appropriate.
+- 'grounding_quote' MUST be an exact copy-paste substring from the article to prove the extraction is real.
+- If the article does NOT contain any funding events, return an empty array: `[]`
+- Return ONLY the JSON array, no markdown formatting blocks like ```json.
+"""

@@ -518,6 +518,44 @@ CASE_STUDIES_INDEXES = [
     "CREATE INDEX IF NOT EXISTS idx_cs_extracted_at ON case_studies(extracted_at DESC);",
 ]
 
+# ============================================================================
+# Funding Events Table (Phase 3)
+# ============================================================================
+
+FUNDING_EVENTS_TABLE = """
+CREATE TABLE IF NOT EXISTS funding_events (
+    id TEXT PRIMARY KEY,
+    article_id TEXT NOT NULL,
+    article_url TEXT NOT NULL,
+    domain TEXT DEFAULT 'quantum',
+    
+    -- Financial details
+    startup_name TEXT NOT NULL,
+    funding_round TEXT,
+    funding_amount TEXT,
+    valuation TEXT,
+    lead_investors TEXT DEFAULT '[]',
+    other_investors TEXT DEFAULT '[]',
+    
+    -- Context
+    investment_thesis TEXT,
+    known_technologies TEXT DEFAULT '[]',
+    use_of_funds TEXT,
+    
+    -- Metadata
+    extracted_at TEXT NOT NULL,
+    confidence_score REAL DEFAULT 0.8,
+    grounding_quote TEXT NOT NULL
+);
+"""
+
+FUNDING_EVENTS_INDEXES = [
+    "CREATE INDEX IF NOT EXISTS idx_funding_startup ON funding_events(startup_name);",
+    "CREATE INDEX IF NOT EXISTS idx_funding_round ON funding_events(funding_round);",
+    "CREATE INDEX IF NOT EXISTS idx_funding_domain ON funding_events(domain);",
+    "CREATE INDEX IF NOT EXISTS idx_funding_extracted ON funding_events(extracted_at DESC);",
+]
+
 ALL_TABLES = [
     ARTICLES_TABLE, DIGESTS_TABLE, PAPERS_TABLE, STOCKS_TABLE,
     EARNINGS_TRANSCRIPTS_TABLE, EARNINGS_QUOTES_TABLE,
@@ -525,5 +563,6 @@ ALL_TABLES = [
     PODCAST_TRANSCRIPTS_TABLE, PODCAST_QUOTES_TABLE,
     WEEKLY_BRIEFINGS_TABLE,
     CASE_STUDIES_TABLE,
+    FUNDING_EVENTS_TABLE,
 ]
-ALL_INDEXES = ARTICLES_INDEXES + PAPERS_INDEXES + STOCKS_INDEXES + EARNINGS_INDEXES + SEC_INDEXES + PODCAST_INDEXES + WEEKLY_BRIEFINGS_INDEXES + CASE_STUDIES_INDEXES
+ALL_INDEXES = ARTICLES_INDEXES + PAPERS_INDEXES + STOCKS_INDEXES + EARNINGS_INDEXES + SEC_INDEXES + PODCAST_INDEXES + WEEKLY_BRIEFINGS_INDEXES + CASE_STUDIES_INDEXES + FUNDING_EVENTS_INDEXES

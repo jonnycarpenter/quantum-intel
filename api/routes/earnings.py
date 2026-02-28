@@ -32,8 +32,8 @@ async def get_all_quotes(
     else:
         # Get quotes for all tracked tickers
         try:
-            from config.earnings_tickers import EARNINGS_TICKERS
-            tickers = [t["ticker"] for t in EARNINGS_TICKERS]
+            from config.earnings_tickers import EARNINGS_COMPANIES
+            tickers = [t["ticker"] for t in EARNINGS_COMPANIES]
         except ImportError:
             tickers = []
 
@@ -85,7 +85,7 @@ async def get_all_quotes(
 async def get_earnings_tickers():
     """Get all tickers with earnings data."""
     try:
-        from config.earnings_tickers import EARNINGS_TICKERS
-        return {"tickers": EARNINGS_TICKERS}
+        from config.earnings_tickers import ALL_EARNINGS_TICKERS
+        return {"tickers": ALL_EARNINGS_TICKERS}
     except ImportError:
         return {"tickers": []}

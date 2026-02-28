@@ -30,6 +30,15 @@ from typing import List, Optional, Dict, Any
 import uuid
 
 
+def _to_datetime(val) -> Optional[datetime]:
+    """Convert str or datetime to datetime (handles BigQuery native datetime)."""
+    if val is None:
+        return None
+    if isinstance(val, datetime):
+        return val
+    return datetime.fromisoformat(str(val))
+
+
 # =============================================================================
 # ENUMS — SEC Filing Taxonomy (Quantum-Specific)
 # =============================================================================
@@ -212,13 +221,13 @@ class SecFiling:
             cik=data.get("cik", ""),
             accession_number=data.get("accession_number", ""),
             filing_type=data.get("filing_type", "10-K"),
-            filing_date=datetime.fromisoformat(data["filing_date"]) if data.get("filing_date") else None,
+            filing_date=_to_datetime(data.get("filing_date")),
             fiscal_year=int(data.get("fiscal_year", 0)),
             fiscal_quarter=int(data["fiscal_quarter"]) if data.get("fiscal_quarter") else None,
             primary_document=data.get("primary_document", ""),
             filing_url=data.get("filing_url", ""),
             raw_content=data.get("raw_content"),
-            ingested_at=datetime.fromisoformat(data["ingested_at"]) if data.get("ingested_at") else datetime.now(timezone.utc),
+            ingested_at=_to_datetime(data.get("ingested_at")) or datetime.now(timezone.utc),
             char_count=int(data.get("char_count", 0)),
         )
 
@@ -360,9 +369,9 @@ class SecNugget:
             cik=data.get("cik", ""),
             fiscal_year=int(data.get("fiscal_year", 0)),
             fiscal_quarter=int(data["fiscal_quarter"]) if data.get("fiscal_quarter") else None,
-            filing_date=datetime.fromisoformat(data["filing_date"]) if data.get("filing_date") else None,
+            filing_date=_to_datetime(data.get("filing_date")),
             accession_number=data.get("accession_number"),
-            extracted_at=datetime.fromisoformat(data["extracted_at"]) if data.get("extracted_at") else datetime.now(timezone.utc),
+            extracted_at=_to_datetime(data.get("extracted_at")) or datetime.now(timezone.utc),
             extraction_model=data.get("extraction_model", "claude-sonnet-4-6-20250514"),
             extraction_confidence=float(data.get("extraction_confidence", 0.8)),
             domain=data.get("domain", "quantum"),

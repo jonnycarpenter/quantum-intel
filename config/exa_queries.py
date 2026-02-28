@@ -97,6 +97,15 @@ EXA_QUERIES: List[Dict[str, Any]] = [
     {"query": "quantum computing revenue commercial product launch", "theme": "industry_adoption", "id": 50},
     {"query": "quantum as a service cloud platform customer growth", "theme": "industry_adoption", "id": 51},
     {"query": "quantum computing skepticism timeline reality check", "theme": "industry_adoption", "id": 52},
+
+    # =========================================================================
+    # Theme 10: Venture Capital & Startup Funding (5 queries)
+    # =========================================================================
+    {"query": "quantum computing startup seed funding series A venture capital", "theme": "venture_capital_funding", "id": 53},
+    {"query": "quantum hardware software startup investment round raised", "theme": "venture_capital_funding", "id": 54},
+    {"query": "quantum computing new company launch stealth mode funding", "theme": "venture_capital_funding", "id": 55},
+    {"query": "quantum technology IPO SPAC public market valuation", "theme": "venture_capital_funding", "id": 56},
+    {"query": "quantum computing incubator accelerator startup ecosystem", "theme": "venture_capital_funding", "id": 57},
 ]
 
 
@@ -120,4 +129,5 @@ THEMES = [
     "hardware_error_correction",
     "government_defense",
     "industry_adoption",
+    "venture_capital_funding",
 ]

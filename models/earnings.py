@@ -28,6 +28,15 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from typing import List, Optional, Dict, Any
+
+
+def _to_datetime(val) -> Optional[datetime]:
+    """Convert str or datetime to datetime (handles BigQuery native datetime)."""
+    if val is None:
+        return None
+    if isinstance(val, datetime):
+        return val
+    return datetime.fromisoformat(str(val))
 import uuid
 
 
@@ -199,9 +208,9 @@ class EarningsTranscript:
             year=int(data.get("year", 0)),
             quarter=int(data.get("quarter", 0)),
             transcript_text=data.get("transcript_text", ""),
-            call_date=datetime.fromisoformat(data["call_date"]) if data.get("call_date") else None,
+            call_date=_to_datetime(data.get("call_date")),
             fiscal_period=data.get("fiscal_period", ""),
-            ingested_at=datetime.fromisoformat(data["ingested_at"]) if data.get("ingested_at") else datetime.now(timezone.utc),
+            ingested_at=_to_datetime(data.get("ingested_at")) or datetime.now(timezone.utc),
             char_count=int(data.get("char_count", 0)),
         )
 
@@ -333,10 +342,10 @@ class ExtractedQuote:
             company_name=data.get("company_name", ""),
             year=int(data.get("year", 0)),
             quarter=int(data.get("quarter", 0)),
-            call_date=datetime.fromisoformat(data["call_date"]) if data.get("call_date") else None,
+            call_date=_to_datetime(data.get("call_date")),
             section=CallSection(data.get("section", "unknown")),
             position_in_section=int(data.get("position_in_section", 0)),
-            extracted_at=datetime.fromisoformat(data["extracted_at"]) if data.get("extracted_at") else datetime.now(timezone.utc),
+            extracted_at=_to_datetime(data.get("extracted_at")) or datetime.now(timezone.utc),
             extraction_model=data.get("extraction_model", "claude-sonnet-4-6-20250514"),
             extraction_confidence=float(data.get("extraction_confidence", 0.8)),
         )

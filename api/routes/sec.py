@@ -33,8 +33,8 @@ async def get_all_nuggets(
     else:
         # Get nuggets for all tracked tickers
         try:
-            from config.earnings_tickers import EARNINGS_TICKERS
-            tickers = [t["ticker"] for t in EARNINGS_TICKERS]
+            from config.earnings_tickers import EARNINGS_COMPANIES
+            tickers = [t["ticker"] for t in EARNINGS_COMPANIES]
         except ImportError:
             tickers = []
 

@@ -143,6 +143,9 @@ class ClassificationResult:
     use_case_domains: List[str] = field(default_factory=list)
     sentiment: str = "neutral"
     confidence: float = 0.8
+    time_to_market_impact: str = ""
+    disrupted_industries: str = ""
+    investment_signal: str = ""
 
     # Metadata
     classified_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -178,6 +181,9 @@ class ClassificationResult:
             use_case_domains=response.get("use_case_domains", []),
             sentiment=response.get("sentiment", "neutral"),
             confidence=float(response.get("confidence", 0.8)),
+            time_to_market_impact=response.get("time_to_market_impact", ""),
+            disrupted_industries=response.get("disrupted_industries", ""),
+            investment_signal=response.get("investment_signal", ""),
             raw_response=response,
         )
 

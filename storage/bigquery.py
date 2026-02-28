@@ -210,7 +210,7 @@ class BigQueryStorage(StorageBackend):
                     "domain": article.domain,
                 })
 
-            count = await self._merge_rows("articles", rows, merge_key="url")
+            count = await self._insert_if_not_exists("articles", rows, ["url"])
             saved += count
 
         return saved
@@ -1457,3 +1457,90 @@ class BigQueryStorage(StorageBackend):
             except (json.JSONDecodeError, TypeError):
                 data["metadata"] = {}
         return data
+
+    # =========================================================================
+    # Funding Event Operations (Phase 3)
+    # =========================================================================
+
+    async def save_funding_events(self, events: List["FundingEvent"]) -> int:
+        """Save extracted funding events. Returns count saved."""
+        if not events:
+            return 0
+
+        rows = []
+        for event in events:
+            # Assuming the dataclass has a to_dict method, or doing it manually:
+            from dataclasses import asdict
+            data = asdict(event)
+            
+            rows.append({
+                "id": data["id"],
+                "article_id": data["article_id"],
+                "article_url": data["article_url"],
+                "domain": data["domain"],
+                "startup_name": data["startup_name"],
+                "funding_round": data["funding_round"],
+                "funding_amount": data["funding_amount"],
+                "valuation": data["valuation"],
+                "lead_investors": self._ensure_list(data.get("lead_investors")),
+                "other_investors": self._ensure_list(data.get("other_investors")),
+                "investment_thesis": data["investment_thesis"],
+                "known_technologies": self._ensure_list(data.get("known_technologies")),
+                "use_of_funds": data["use_of_funds"],
+                "extracted_at": self._dt_to_iso(data["extracted_at"]),
+                "confidence_score": data["confidence_score"],
+                "grounding_quote": data["grounding_quote"],
+            })
+
+        return await self._insert_if_not_exists("funding_events", rows, ["id", "article_id"])
+
+    async def get_funding_events(
+        self, domain: Optional[str] = None, limit: int = 50
+    ) -> List[Any]:
+        """Get funding events, optionally filtered by domain."""
+        from models.funding import FundingEvent
+        params = [bigquery.ScalarQueryParameter("lim", "INT64", limit)]
+        
+        if domain:
+            query = (
+                f"SELECT * FROM {self._table('funding_events')} "
+                f"WHERE domain = @domain ORDER BY extracted_at DESC LIMIT @lim"
+            )
+            params.append(bigquery.ScalarQueryParameter("domain", "STRING", domain))
+        else:
+            query = (
+                f"SELECT * FROM {self._table('funding_events')} "
+                f"ORDER BY extracted_at DESC LIMIT @lim"
+            )
+            
+        job_config = bigquery.QueryJobConfig(query_parameters=params)
+        rows = await self._run_sync(
+            lambda: list(self.client.query(query, job_config=job_config).result())
+        )
+        
+        results = []
+        for row in rows:
+            data = dict(row)
+            for list_field in ["lead_investors", "other_investors", "known_technologies"]:
+                data[list_field] = self._ensure_list(data.get(list_field))
+            for dt_field in ["extracted_at"]:
+                val = data.get(dt_field)
+                if val and isinstance(val, str):
+                    try:
+                        data[dt_field] = datetime.fromisoformat(val)
+                    except ValueError:
+                        data[dt_field] = None
+            results.append(FundingEvent(**data))
+            
+        return results
+
+    async def funding_events_exist_for_article(self, article_id: str) -> bool:
+        """Check if funding events were already extracted for this article."""
+        query = f"SELECT 1 FROM {self._table('funding_events')} WHERE article_id = @article_id LIMIT 1"
+        job_config = bigquery.QueryJobConfig(
+            query_parameters=[bigquery.ScalarQueryParameter("article_id", "STRING", article_id)]
+        )
+        rows = await self._run_sync(
+            lambda: list(self.client.query(query, job_config=job_config).result())
+        )
+        return len(rows) > 0

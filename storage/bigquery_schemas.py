@@ -48,6 +48,9 @@ CREATE TABLE IF NOT EXISTS `{table}` (
   use_case_domains ARRAY<STRING>,
   sentiment STRING,
   confidence FLOAT64,
+  time_to_market_impact STRING,
+  disrupted_industries STRING,
+  investment_signal STRING,
   classifier_model STRING,
   classified_at TIMESTAMP,
 
@@ -531,6 +534,34 @@ CREATE TABLE IF NOT EXISTS `{table}` (
 """
 
 # ============================================================================
+# Funding Events (Phase 3)
+# ============================================================================
+
+BQ_FUNDING_EVENTS_DDL = """
+CREATE TABLE IF NOT EXISTS `{table}` (
+  id STRING NOT NULL,
+  article_id STRING NOT NULL,
+  article_url STRING NOT NULL,
+  domain STRING,
+
+  startup_name STRING NOT NULL,
+  funding_round STRING,
+  funding_amount STRING,
+  valuation STRING,
+  lead_investors ARRAY<STRING>,
+  other_investors ARRAY<STRING>,
+
+  investment_thesis STRING,
+  known_technologies ARRAY<STRING>,
+  use_of_funds STRING,
+
+  extracted_at TIMESTAMP NOT NULL,
+  confidence_score FLOAT64,
+  grounding_quote STRING NOT NULL
+)
+"""
+
+# ============================================================================
 # Table registry — maps logical name to DDL template
 # ============================================================================
 
@@ -552,6 +583,7 @@ BQ_TABLE_REGISTRY = {
     "podcast_quote_embeddings": BQ_PODCAST_QUOTE_EMBEDDINGS_DDL,
     "case_studies": BQ_CASE_STUDIES_DDL,
     "case_study_embeddings": BQ_CASE_STUDY_EMBEDDINGS_DDL,
+    "funding_events": BQ_FUNDING_EVENTS_DDL,
 }
 
 
@@ -561,3 +593,39 @@ def get_all_create_ddl(dataset: str) -> list[str]:
         ddl.format(table=f"{dataset}.{name}")
         for name, ddl in BQ_TABLE_REGISTRY.items()
     ]
+
+
+# ============================================================================
+# Vector Indexes
+# ============================================================================
+
+# Tables with embedding columns that need vector indexes
+VECTOR_INDEX_TABLES = [
+    "article_embeddings",
+    "sec_nugget_embeddings",
+    "earnings_quote_embeddings",
+    "podcast_quote_embeddings",
+    "case_study_embeddings",
+]
+
+
+def get_vector_index_ddl(dataset: str) -> list[str]:
+    """
+    Return CREATE VECTOR INDEX IF NOT EXISTS statements for all embedding tables.
+
+    Uses IVF index type with COSINE distance metric — the standard for
+    BigQuery vector search with text-embedding-005 (768 dimensions).
+
+    These indexes improve VECTOR_SEARCH performance on large embedding tables.
+    """
+    ddl_statements = []
+    for table_name in VECTOR_INDEX_TABLES:
+        index_name = f"idx_{table_name}_vec"
+        ddl = (
+            f"CREATE VECTOR INDEX IF NOT EXISTS `{index_name}`\n"
+            f"ON `{dataset}.{table_name}`(embedding)\n"
+            f"OPTIONS(index_type='IVF', distance_type='COSINE', ivf_options='{{\"num_lists\": 100}}')"
+        )
+        ddl_statements.append(ddl)
+
+    return ddl_statements

@@ -61,6 +61,15 @@ class SQLiteStorage(StorageBackend):
             self._conn.commit()
             logger.info("[STORAGE] Migration: added domain column to articles")
 
+        # Migration: add strategic implication columns
+        for col in ["time_to_market_impact", "disrupted_industries", "investment_signal"]:
+            try:
+                self._conn.execute(f"SELECT {col} FROM articles LIMIT 1")
+            except sqlite3.OperationalError:
+                self._conn.execute(f"ALTER TABLE articles ADD COLUMN {col} TEXT DEFAULT ''")
+                self._conn.commit()
+                logger.info(f"[STORAGE] Migration: added {col} column to articles")
+
         # Migration: add domain column to earnings/SEC tables
         for table_name in ["earnings_transcripts", "earnings_quotes", "sec_filings", "sec_nuggets"]:
             try:
@@ -134,7 +143,9 @@ class SQLiteStorage(StorageBackend):
                         ai_summary, key_takeaway,
                         companies_mentioned, technologies_mentioned,
                         people_mentioned, use_case_domains,
-                        sentiment, confidence, classifier_model, classified_at,
+                        sentiment, confidence, time_to_market_impact,
+                        disrupted_industries, investment_signal,
+                        classifier_model, classified_at,
                         digest_priority, feed_eligible,
                         content_hash, coverage_count, duplicate_urls,
                         metadata, domain
@@ -146,7 +157,9 @@ class SQLiteStorage(StorageBackend):
                         ?, ?,
                         ?, ?,
                         ?, ?,
-                        ?, ?, ?, ?,
+                        ?, ?, ?,
+                        ?, ?,
+                        ?, ?,
                         ?, ?,
                         ?, ?, ?,
                         ?, ?
@@ -166,6 +179,9 @@ class SQLiteStorage(StorageBackend):
                         self._serialize_list(article.people_mentioned),
                         self._serialize_list(article.use_case_domains),
                         article.sentiment, article.confidence,
+                        article.time_to_market_impact,
+                        article.disrupted_industries,
+                        article.investment_signal,
                         article.classifier_model,
                         article.classified_at.isoformat() if article.classified_at else None,
                         article.digest_priority, int(article.feed_eligible),
@@ -1227,3 +1243,88 @@ class SQLiteStorage(StorageBackend):
             params,
         )
         return [CaseStudy.from_dict(dict(row)) for row in cursor.fetchall()]
+
+    # =========================================================================
+    # Funding Event Operations (Phase 3)
+    # =========================================================================
+
+    async def save_funding_events(self, events: List["FundingEvent"]) -> int:
+        """Save extracted funding events. Returns count saved."""
+        saved = 0
+        for event in events:
+            try:
+                # Assuming the dataclass has a to_dict method, or doing it manually:
+                from dataclasses import asdict
+                data = asdict(event)
+                
+                cursor = self._conn.execute(
+                    """INSERT OR IGNORE INTO funding_events (
+                        id, article_id, article_url, domain,
+                        startup_name, funding_round, funding_amount, valuation,
+                        lead_investors, other_investors,
+                        investment_thesis, known_technologies, use_of_funds,
+                        extracted_at, confidence_score, grounding_quote
+                    ) VALUES (
+                        ?, ?, ?, ?,
+                        ?, ?, ?, ?,
+                        ?, ?,
+                        ?, ?, ?,
+                        ?, ?, ?
+                    )""",
+                    (
+                        data["id"], data["article_id"], data["article_url"], data["domain"],
+                        data["startup_name"], data["funding_round"], data["funding_amount"], data["valuation"],
+                        self._serialize_list(data["lead_investors"]),
+                        self._serialize_list(data["other_investors"]),
+                        data["investment_thesis"],
+                        self._serialize_list(data["known_technologies"]),
+                        data["use_of_funds"],
+                        data["extracted_at"].isoformat() if isinstance(data["extracted_at"], datetime) else data["extracted_at"],
+                        data["confidence_score"], data["grounding_quote"],
+                    ),
+                )
+                if cursor.rowcount > 0:
+                    saved += 1
+            except Exception as e:
+                logger.warning(f"[FUNDING_EVENT] Save error: {e}")
+
+        self._conn.commit()
+        return saved
+
+    async def get_funding_events(
+        self, domain: Optional[str] = None, limit: int = 50
+    ) -> List[Any]:
+        """Get funding events, optionally filtered by domain."""
+        from models.funding import FundingEvent
+        if domain:
+            cursor = self._conn.execute(
+                "SELECT * FROM funding_events WHERE domain = ? ORDER BY extracted_at DESC LIMIT ?",
+                (domain, limit),
+            )
+        else:
+            cursor = self._conn.execute(
+                "SELECT * FROM funding_events ORDER BY extracted_at DESC LIMIT ?",
+                (limit,),
+            )
+        
+        results = []
+        for row in cursor.fetchall():
+            data = dict(row)
+            data["lead_investors"] = self._deserialize_list(data["lead_investors"])
+            data["other_investors"] = self._deserialize_list(data["other_investors"])
+            data["known_technologies"] = self._deserialize_list(data["known_technologies"])
+            if data["extracted_at"] and isinstance(data["extracted_at"], str):
+                try:
+                    data["extracted_at"] = datetime.fromisoformat(data["extracted_at"])
+                except ValueError:
+                    data["extracted_at"] = None
+            results.append(FundingEvent(**data))
+        return results
+
+    async def funding_events_exist_for_article(self, article_id: str) -> bool:
+        """Check if funding events were already extracted for this article."""
+        cursor = self._conn.execute(
+            "SELECT 1 FROM funding_events WHERE article_id = ? LIMIT 1",
+            (article_id,),
+        )
+        return cursor.fetchone() is not None
