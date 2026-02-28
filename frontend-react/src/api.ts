@@ -202,6 +202,56 @@ export interface RegulatoryNugget {
   fiscal_year: number
 }
 
+// ─── Case Study Types ─────────────────────────────────
+
+export interface CaseStudy {
+  case_study_id: string
+  use_case_title: string
+  use_case_summary: string
+  grounding_quote: string
+  company: string
+  industry: string
+  technology_stack: string[]
+  readiness_level: string
+  relevance_score: number
+  source_type: string
+  domain: string
+  // Outcome (optional — included when present)
+  outcome_metric?: string
+  outcome_type?: string
+  outcome_quantified?: boolean
+  // Implementation detail
+  implementation_detail?: string
+  department?: string
+  scale?: string
+  timeline?: string
+  // Speaker attribution (podcast/earnings)
+  speaker?: string
+  speaker_role?: string
+  speaker_company?: string
+  // Quantum-specific
+  qubit_type?: string
+  gate_fidelity?: string
+  commercial_viability?: string
+  scientific_significance?: string
+  // AI-specific
+  ai_model_used?: string
+  roi_metric?: string
+  deployment_type?: string
+}
+
+export interface CaseStudyStats {
+  total: number
+  quantified_outcomes: number
+  unique_companies: number
+  unique_industries: number
+  by_readiness: Record<string, number>
+  by_outcome_type: Record<string, number>
+  by_source_type: Record<string, number>
+  companies: string[]
+  industries: string[]
+}
+
 // ─── Weekly Briefing Types ────────────────────────────
 
 export interface WeeklyBriefingVoiceQuote {
@@ -395,6 +445,39 @@ export const api = {
     if (params?.new_only) sp.set('new_only', 'true')
     const qs = sp.toString()
     return fetchJson<{ nuggets: SecNuggetDisplay[]; count: number }>(`/sec${qs ? '?' + qs : ''}`)
+  },
+
+  // Case Studies
+  getCaseStudies: (params?: {
+    domain?: Domain
+    company?: string
+    industry?: string
+    source_type?: string
+    readiness_level?: string
+    outcome_type?: string
+    search?: string
+    limit?: number
+  }) => {
+    const sp = new URLSearchParams()
+    if (params?.domain) sp.set('domain', params.domain)
+    if (params?.company) sp.set('company', params.company)
+    if (params?.industry) sp.set('industry', params.industry)
+    if (params?.source_type) sp.set('source_type', params.source_type)
+    if (params?.readiness_level) sp.set('readiness_level', params.readiness_level)
+    if (params?.outcome_type) sp.set('outcome_type', params.outcome_type)
+    if (params?.search) sp.set('search', params.search)
+    if (params?.limit) sp.set('limit', String(params.limit))
+    const qs = sp.toString()
+    return fetchJson<{ case_studies: CaseStudy[]; count: number }>(
+      `/case-studies${qs ? '?' + qs : ''}`
+    )
+  },
+
+  getCaseStudyStats: (domain?: Domain) => {
+    const sp = new URLSearchParams()
+    if (domain) sp.set('domain', domain)
+    const qs = sp.toString()
+    return fetchJson<CaseStudyStats>(`/case-studies/stats${qs ? '?' + qs : ''}`)
   },
 
   // Stats

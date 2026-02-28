@@ -5,6 +5,7 @@ import {
   Compass,
   TrendingUp,
   FlaskConical,
+  Lightbulb,
   FileText,
   Settings,
   PanelRightClose,
@@ -16,6 +17,7 @@ import BriefingPage from './pages/BriefingPage'
 import ExplorePage from './pages/ExplorePage'
 import MarketsPage from './pages/MarketsPage'
 import ResearchPage from './pages/ResearchPage'
+import CaseStudiesPage from './pages/CaseStudiesPage'
 import FilingsPage from './pages/FilingsPage'
 import SettingsPage from './pages/SettingsPage'
 import ChatPanel from './components/ChatPanel'
@@ -28,6 +30,7 @@ const NAV_ITEMS = [
   { path: '/explore', label: 'Explore', icon: Compass },
   { path: '/markets', label: 'Markets', icon: TrendingUp },
   { path: '/research', label: 'Research', icon: FlaskConical },
+  { path: '/case-studies', label: 'Case Studies', icon: Lightbulb },
   { path: '/filings', label: 'Filings', icon: FileText },
 ]
 
@@ -91,6 +94,7 @@ export default function App() {
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/markets" element={<MarketsPage />} />
             <Route path="/research" element={<ResearchPage />} />
+            <Route path="/case-studies" element={<CaseStudiesPage />} />
             <Route path="/filings" element={<FilingsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
