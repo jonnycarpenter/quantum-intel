@@ -118,12 +118,12 @@ export default function FilingsPage() {
                           {n.display_source ?? `${n.filing_type} FY${n.fiscal_year}`}
                         </span>
                         {n.is_new_disclosure && (
-                          <span className="text-xs px-2 py-0.5 rounded bg-accent-red/10 text-accent-red font-medium">
+                          <span className="text-xs px-2 py-0.5 rounded bg-accent-red/15 text-accent-red font-medium">
                             NEW DISCLOSURE
                           </span>
                         )}
                         <span className={`text-xs px-2 py-0.5 rounded ${n.risk_level === 'high'
-                          ? 'bg-accent-red/10 text-accent-red'
+                          ? 'bg-accent-red/15 text-accent-red'
                           : 'bg-bg-tertiary text-text-muted'
                           }`}>
                           {n.risk_level} risk
@@ -133,7 +133,7 @@ export default function FilingsPage() {
                         "{n.nugget_text}"
                       </p>
                       <div className="flex flex-wrap gap-1.5 mt-2">
-                        <span className="text-xs px-2 py-0.5 rounded bg-accent-purple/10 text-accent-purple">
+                        <span className="text-xs px-2 py-0.5 rounded bg-accent-purple/15 text-accent-purple">
                           {n.nugget_type.replace(/_/g, ' ')}
                         </span>
                         <span className="text-xs px-2 py-0.5 rounded bg-bg-tertiary text-text-muted">
@@ -143,7 +143,7 @@ export default function FilingsPage() {
                           {n.signal_strength}
                         </span>
                         {n.competitors_named?.filter(Boolean).length > 0 && (
-                          <span className="text-xs px-2 py-0.5 rounded bg-accent-cyan/10 text-accent-cyan">
+                          <span className="text-xs px-2 py-0.5 rounded bg-accent-cyan/15 text-accent-cyan">
                             names: {n.competitors_named.filter(Boolean).join(', ')}
                           </span>
                         )}
@@ -211,21 +211,21 @@ export default function FilingsPage() {
                         <span>{q.section.replace(/_/g, ' ')}</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5 mt-1.5">
-                        <span className="text-xs px-2 py-0.5 rounded bg-accent-purple/10 text-accent-purple">
+                        <span className="text-xs px-2 py-0.5 rounded bg-accent-purple/15 text-accent-purple">
                           {q.quote_type.replace(/_/g, ' ')}
                         </span>
                         <span className={`text-xs px-2 py-0.5 rounded ${q.confidence_level === 'definitive'
-                          ? 'bg-accent-green/10 text-accent-green'
+                          ? 'bg-accent-green/15 text-accent-green'
                           : q.confidence_level === 'hedged'
-                            ? 'bg-accent-red/10 text-accent-red'
-                            : 'bg-accent-yellow/10 text-accent-yellow'
+                            ? 'bg-accent-red/15 text-accent-red'
+                            : 'bg-accent-yellow/15 text-accent-yellow'
                           }`}>
                           {q.confidence_level}
                         </span>
                         {q.sentiment && q.sentiment !== 'neutral' && (
                           <span className={`text-xs px-2 py-0.5 rounded ${q.sentiment === 'bullish'
-                            ? 'bg-accent-green/10 text-accent-green'
-                            : 'bg-accent-red/10 text-accent-red'
+                            ? 'bg-accent-green/15 text-accent-green'
+                            : 'bg-accent-red/15 text-accent-red'
                             }`}>
                             {q.sentiment}
                           </span>

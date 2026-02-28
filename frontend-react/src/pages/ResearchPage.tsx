@@ -76,7 +76,7 @@ export default function ResearchPage() {
               key={d}
               onClick={() => setDays(d)}
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${days === d
-                ? 'text-accent-blue bg-accent-blue/10'
+                ? 'text-accent-blue bg-accent-blue/15'
                 : 'text-text-muted hover:text-text-secondary'
                 }`}
             >
@@ -128,21 +128,21 @@ export default function ResearchPage() {
                   {/* Badges */}
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {p.relevance_score && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-accent-cyan/10 text-accent-cyan">
+                      <span className="text-xs px-2 py-0.5 rounded bg-accent-cyan/15 text-accent-cyan">
                         {p.relevance_score}/10
                       </span>
                     )}
                     {p.paper_type && (
                       <span className={`text-xs px-2 py-0.5 rounded ${p.paper_type === 'breakthrough'
-                        ? 'bg-accent-red/10 text-accent-red font-medium'
-                        : 'bg-accent-blue/10 text-accent-blue'
+                        ? 'bg-accent-red/15 text-accent-red font-medium'
+                        : 'bg-accent-blue/15 text-accent-blue'
                         }`}>
                         {p.paper_type}
                       </span>
                     )}
                     {p.commercial_readiness && (
                       <span className={`text-xs px-2 py-0.5 rounded ${p.commercial_readiness === 'near_term'
-                        ? 'bg-accent-green/10 text-accent-green'
+                        ? 'bg-accent-green/15 text-accent-green'
                         : 'bg-bg-tertiary text-text-muted'
                         }`}>
                         {p.commercial_readiness.replace(/_/g, ' ')}

@@ -1,17 +1,17 @@
 @import "tailwindcss";
 
-/* ─── Ket Zero Brand Theme ─── */
+/* ─── Ket Zero Brand Theme (Light) ─── */
 @theme {
-  /* Brand palette — KetZero_Brand_Style_Guide_Jan2026 */
-  --color-bg-primary: #0F1115;       /* Charcoal (Primary) */
-  --color-bg-secondary: #1A1F2B;     /* Slate (Secondary) */
-  --color-bg-tertiary: #232938;      /* Slate lightened */
-  --color-bg-hover: #2B3347;         /* Hover surface */
-  --color-border: #2B3347;
-  --color-border-light: #394560;
-  --color-text-primary: #E8EAEF;
-  --color-text-secondary: #9CA3B4;
-  --color-text-muted: #6B7280;
+  /* Brand palette — matching ketzerointelligence.ai */
+  --color-bg-primary: #F5F7FA;       /* Off-white page background */
+  --color-bg-secondary: #FFFFFF;     /* White cards / panels */
+  --color-bg-tertiary: #F0F2F5;      /* Light gray nested surfaces */
+  --color-bg-hover: #E8ECF1;         /* Hover surface */
+  --color-border: #E2E8F0;
+  --color-border-light: #CBD5E1;
+  --color-text-primary: #0F1115;
+  --color-text-secondary: #4A5568;
+  --color-text-muted: #718096;
   --color-accent-teal: #2BB0A6;      /* Signal Teal — brand accent */
   --color-accent-blue: #60a5fa;
   --color-accent-cyan: #2BB0A6;      /* Signal Teal (alias) */
@@ -39,7 +39,7 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-primary);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-border-light);

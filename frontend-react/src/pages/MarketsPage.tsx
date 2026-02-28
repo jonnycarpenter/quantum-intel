@@ -60,7 +60,7 @@ export default function MarketsPage() {
                     key={s.ticker}
                     onClick={() => setSelectedTicker(s.ticker)}
                     className={`border-t border-border cursor-pointer transition-colors ${selectedTicker === s.ticker
-                        ? 'bg-accent-blue/5 border-l-2 border-l-accent-blue'
+                        ? 'bg-accent-blue/15 border-l-2 border-l-accent-blue'
                         : 'hover:bg-bg-hover'
                       }`}
                   >
@@ -110,7 +110,7 @@ export default function MarketsPage() {
                   key={d}
                   onClick={() => setDays(d)}
                   className={`px-3 py-1.5 text-xs font-medium transition-colors ${days === d
-                      ? 'text-accent-blue bg-accent-blue/10'
+                      ? 'text-accent-blue bg-accent-blue/15'
                       : 'text-text-muted hover:text-text-secondary'
                     }`}
                 >
@@ -167,8 +167,8 @@ export default function MarketsPage() {
                         <div className="text-xs text-text-muted mt-1">
                           {q.speaker_name} • {q.speaker_role.toUpperCase()} • Q{q.quarter} {q.year}
                           <span className={`ml-2 px-1.5 py-0.5 rounded ${q.confidence_level === 'definitive'
-                              ? 'bg-accent-green/10 text-accent-green'
-                              : 'bg-accent-yellow/10 text-accent-yellow'
+                              ? 'bg-accent-green/15 text-accent-green'
+                              : 'bg-accent-yellow/15 text-accent-yellow'
                             }`}>
                             {q.confidence_level}
                           </span>
@@ -197,7 +197,7 @@ export default function MarketsPage() {
                             {n.display_source ?? `${n.filing_type} FY${n.fiscal_year}`}
                           </span>
                           {n.is_new_disclosure && (
-                            <span className="text-xs px-1.5 py-0.5 rounded bg-accent-red/10 text-accent-red">
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-accent-red/15 text-accent-red">
                               NEW
                             </span>
                           )}

@@ -23,11 +23,11 @@ import { Quote, ExternalLink, TrendingUp, TrendingDown, BookOpen } from 'lucide-
 // ─── Priority Tag Styles ──────────────────────────────
 
 const PRIORITY_TAG_COLORS: Record<string, string> = {
-  P1: 'bg-accent-cyan/15 text-accent-cyan border-accent-cyan/30',
-  P2: 'bg-accent-blue/15 text-accent-blue border-accent-blue/30',
-  P3: 'bg-accent-purple/15 text-accent-purple border-accent-purple/30',
-  P4: 'bg-accent-green/15 text-accent-green border-accent-green/30',
-  P5: 'bg-accent-orange/15 text-accent-orange border-accent-orange/30',
+  P1: 'bg-accent-cyan/20 text-accent-cyan border-accent-cyan/35',
+  P2: 'bg-accent-blue/20 text-accent-blue border-accent-blue/35',
+  P3: 'bg-accent-purple/20 text-accent-purple border-accent-purple/35',
+  P4: 'bg-accent-green/20 text-accent-green border-accent-green/35',
+  P5: 'bg-accent-orange/20 text-accent-orange border-accent-orange/35',
 }
 
 const VOICE_BORDER_COLORS: Record<string, string> = {
@@ -59,7 +59,7 @@ function renderNarrative(text: string, sectionId: string) {
           key={i}
           href={`#sources-${sectionId}`}
           className="inline-flex items-center justify-center w-5 h-5 mx-0.5 rounded text-[10px] font-bold
-                     bg-accent-blue/15 text-accent-blue hover:bg-accent-blue/25 transition-colors
+                     bg-accent-blue/20 text-accent-blue hover:bg-accent-blue/30 transition-colors
                      align-super leading-none no-underline"
         >
           {match[1]}
@@ -320,7 +320,7 @@ export default function BriefingPage() {
                 )}
                 <div className="flex gap-1.5 mt-2">
                   {rp.commercial_readiness && (
-                    <span className="text-xs px-2 py-0.5 rounded bg-accent-green/10 text-accent-green">
+                    <span className="text-xs px-2 py-0.5 rounded bg-accent-green/15 text-accent-green">
                       {rp.commercial_readiness.replace(/_/g, ' ')}
                     </span>
                   )}

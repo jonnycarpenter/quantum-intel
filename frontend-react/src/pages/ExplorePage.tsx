@@ -160,7 +160,7 @@ export default function ExplorePage() {
               key={tr.hours}
               onClick={() => setHours(tr.hours)}
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${hours === tr.hours
-                  ? 'text-accent-blue bg-accent-blue/10'
+                  ? 'text-accent-blue bg-accent-blue/15'
                   : 'text-text-muted hover:text-text-secondary'
                 }`}
             >

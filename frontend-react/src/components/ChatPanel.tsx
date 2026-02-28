@@ -63,7 +63,7 @@ export default function ChatPanel({ currentPage, domain }: Props) {
             <div
               className={`max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
                 msg.role === 'user'
-                  ? 'bg-accent-blue/20 text-accent-blue'
+                  ? 'bg-accent-teal/15 text-accent-teal'
                   : 'bg-bg-tertiary text-text-primary'
               }`}
             >

@@ -16,10 +16,10 @@ import DomainToggle from '../components/DomainToggle'
 // ─── Readiness Level Styles ─────────────────────────────
 
 const READINESS_STYLES: Record<string, string> = {
-  production: 'bg-accent-green/10 text-accent-green',
-  pilot: 'bg-accent-blue/10 text-accent-blue',
-  announced: 'bg-accent-purple/10 text-accent-purple',
-  research: 'bg-accent-yellow/10 text-accent-yellow',
+  production: 'bg-accent-green/15 text-accent-green',
+  pilot: 'bg-accent-blue/15 text-accent-blue',
+  announced: 'bg-accent-purple/15 text-accent-purple',
+  research: 'bg-accent-yellow/15 text-accent-yellow',
   theoretical: 'bg-bg-tertiary text-text-muted',
 }
 
@@ -46,7 +46,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
         <div
           className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium mb-3 ${
             cs.outcome_quantified
-              ? 'bg-accent-teal/10 text-accent-teal'
+              ? 'bg-accent-teal/15 text-accent-teal'
               : 'bg-bg-tertiary text-text-secondary'
           }`}
         >
@@ -62,7 +62,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
           {cs.readiness_level}
         </span>
         {cs.outcome_type && (
-          <span className="text-xs px-2 py-0.5 rounded bg-accent-purple/10 text-accent-purple">
+          <span className="text-xs px-2 py-0.5 rounded bg-accent-purple/15 text-accent-purple">
             {cs.outcome_type.replace(/_/g, ' ')}
           </span>
         )}
@@ -148,7 +148,7 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
                 {cs.ai_model_used && <TagChip label={`Model: ${cs.ai_model_used}`} variant="purple" />}
                 {cs.deployment_type && <TagChip label={cs.deployment_type} />}
                 {cs.roi_metric && (
-                  <span className="text-xs px-2 py-0.5 rounded bg-accent-green/10 text-accent-green">
+                  <span className="text-xs px-2 py-0.5 rounded bg-accent-green/15 text-accent-green">
                     ROI: {cs.roi_metric}
                   </span>
                 )}

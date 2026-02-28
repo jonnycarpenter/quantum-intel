@@ -9,10 +9,10 @@ import type { ReactNode } from 'react'
 // ─── Priority Badge ────────────────────────────────────
 
 const PRIORITY_STYLES: Record<string, string> = {
-  critical: 'bg-priority-critical/20 text-priority-critical border-priority-critical/30',
-  high: 'bg-priority-high/20 text-priority-high border-priority-high/30',
-  medium: 'bg-priority-medium/20 text-priority-medium border-priority-medium/30',
-  low: 'bg-priority-low/20 text-priority-low border-priority-low/30',
+  critical: 'bg-priority-critical/15 text-priority-critical border-priority-critical/25',
+  high: 'bg-priority-high/15 text-priority-high border-priority-high/25',
+  medium: 'bg-priority-medium/15 text-priority-medium border-priority-medium/25',
+  low: 'bg-priority-low/15 text-priority-low border-priority-low/25',
 }
 
 export function PriorityBadge({ priority }: { priority: string }) {
@@ -29,7 +29,7 @@ export function PriorityBadge({ priority }: { priority: string }) {
 export function CategoryBadge({ category }: { category: string }) {
   const label = category.replace(/_/g, ' ').replace(/\buse case\b/i, '').trim()
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-blue/10 text-accent-blue border border-accent-blue/20">
+    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent-blue/15 text-accent-blue border border-accent-blue/25">
       {label}
     </span>
   )
@@ -40,9 +40,9 @@ export function CategoryBadge({ category }: { category: string }) {
 export function TagChip({ label, variant = 'default' }: { label: string; variant?: 'default' | 'green' | 'purple' | 'cyan' }) {
   const colors = {
     default: 'bg-bg-tertiary text-text-secondary',
-    green: 'bg-accent-green/10 text-accent-green',
-    purple: 'bg-accent-purple/10 text-accent-purple',
-    cyan: 'bg-accent-cyan/10 text-accent-cyan',
+    green: 'bg-accent-green/15 text-accent-green',
+    purple: 'bg-accent-purple/15 text-accent-purple',
+    cyan: 'bg-accent-cyan/15 text-accent-cyan',
   }
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs ${colors[variant]}`}>
@@ -113,7 +113,7 @@ export function LensChip({ label, active, onClick }: { label: string; active: bo
       onClick={onClick}
       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
         active
-          ? 'bg-accent-blue/20 text-accent-blue border border-accent-blue/30'
+          ? 'bg-accent-blue/15 text-accent-blue border border-accent-blue/25'
           : 'bg-bg-tertiary text-text-muted hover:text-text-secondary hover:bg-bg-hover border border-transparent'
       }`}
     >
