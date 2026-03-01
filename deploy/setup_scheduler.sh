@@ -7,14 +7,19 @@
 # Schedule (all times UTC):
 #   06:00 daily     — Quantum RSS
 #   07:00 daily     — AI RSS
-#   08:00 Tue/Fri   — Exa web search
-#   09:00 Sunday    — ArXiv papers
+#   08:00 Tue/Fri   — Quantum Exa web search
+#   08:30 Tue/Fri   — AI Exa web search
+#   09:00 Sunday    — Quantum ArXiv papers
+#   09:30 Sunday    — AI ArXiv papers
 #   10:00 Sunday    — Podcasts
-#   11:00 1st/month — Earnings transcripts
-#   11:00 2nd/month — SEC filings
+#   11:00 1st/month — Quantum Earnings
+#   11:30 1st/month — AI Earnings
+#   11:00 2nd/month — Quantum SEC filings
+#   11:30 2nd/month — AI SEC filings
 #   12:00 Monday    — AI weekly briefing
 #   12:45 Monday    — Quantum weekly briefing
-#   13:00 daily     — Digest (after RSS completes)
+#   13:00 daily     — Quantum Digest
+#   13:30 daily     — AI Digest
 #   22:00 Mon-Fri   — Stocks (after US market close)
 #
 # Usage:
@@ -61,19 +66,24 @@ create_schedule "quantum-rss-daily"       "0 6 * * *"     "quantum-rss-ingestion
 create_schedule "ai-rss-daily"            "0 7 * * *"     "ai-rss-ingestion"
 create_schedule "quantum-stocks-daily"    "0 22 * * 1-5"  "quantum-stocks-ingestion"
 create_schedule "quantum-digest-daily"    "0 13 * * *"    "quantum-digest"
+create_schedule "ai-digest-daily"         "30 13 * * *"   "ai-digest"
 
 # Twice weekly (Tue & Fri)
-create_schedule "quantum-exa-biweekly" "0 8 * * 2,5" "quantum-exa-ingestion"
+create_schedule "quantum-exa-biweekly"    "0 8 * * 2,5"   "quantum-exa-ingestion"
+create_schedule "ai-exa-biweekly"         "30 8 * * 2,5"  "ai-exa-ingestion"
 
 # Weekly
-create_schedule "quantum-arxiv-weekly"    "0 9 * * 0"   "quantum-arxiv-ingestion"
-create_schedule "quantum-podcasts-weekly" "0 10 * * 0"  "quantum-podcasts"
-create_schedule "ai-briefing-weekly"      "0 12 * * 1"  "ai-weekly-briefing"
-create_schedule "quantum-briefing-weekly" "45 12 * * 1" "quantum-weekly-briefing"
+create_schedule "quantum-arxiv-weekly"    "0 9 * * 0"     "quantum-arxiv-ingestion"
+create_schedule "ai-arxiv-weekly"         "30 9 * * 0"    "ai-arxiv-ingestion"
+create_schedule "quantum-podcasts-weekly" "0 10 * * 0"    "quantum-podcasts"
+create_schedule "ai-briefing-weekly"      "0 12 * * 1"    "ai-weekly-briefing"
+create_schedule "quantum-briefing-weekly" "45 12 * * 1"   "quantum-weekly-briefing"
 
 # Monthly
-create_schedule "quantum-earnings-monthly" "0 11 1 * *"  "quantum-earnings"
-create_schedule "quantum-sec-monthly"      "0 11 2 * *"  "quantum-sec"
+create_schedule "quantum-earnings-monthly" "0 11 1 * *"   "quantum-earnings"
+create_schedule "ai-earnings-monthly"      "30 11 1 * *"  "ai-earnings"
+create_schedule "quantum-sec-monthly"      "0 11 2 * *"   "quantum-sec"
+create_schedule "ai-sec-monthly"           "30 11 2 * *"  "ai-sec"
 
 echo ""
 echo "=== All schedules created! ==="

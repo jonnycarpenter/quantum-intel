@@ -5,8 +5,8 @@ Multi-agent AI system monitoring the quantum computing and AI ecosystems.
 ## Project Conventions
 
 ### Architecture
-- **Local-first:** SQLite + ChromaDB for development; BigQuery + Vertex AI for production
-- **Storage factory pattern:** `storage.get_storage()` auto-selects backend based on environment
+- **BigQuery + Vertex AI only:** All development and production uses GCP backends. No local SQLite/ChromaDB.
+- **Storage factory pattern:** `storage.get_storage()` auto-selects backend based on environment (always BigQuery now)
 - **Orchestrator pattern:** fetch → filter → dedup → classify → persist → embed
 - **Domain-aware pipeline:** Single codebase serves both "quantum" and "ai" domains via `--domain` flag
 - **Async everywhere:** All I/O operations use async/await (fetchers, storage, LLM calls)
@@ -23,7 +23,7 @@ config/       - Configuration constants (feeds, queries, tickers, prompts)
 models/       - Dataclasses for articles, papers, stocks, earnings, SEC filings, case studies
 fetchers/     - Data source clients (RSS, Exa, ArXiv, yfinance, StockNews, SEC EDGAR, API Ninjas)
 processing/   - Classification, dedup, scoring, quote extraction, nugget extraction, case study extraction
-storage/      - SQLite/BigQuery backends + ChromaDB/Vertex embeddings
+storage/      - BigQuery storage + Vertex AI embeddings
 utils/        - Logger, LLM client, date utilities
 agents/       - Intelligence + router agents (Phase 3)
 tools/        - Agent tools: corpus search, web search, stock data (Phase 3)
@@ -43,13 +43,9 @@ Optional:
 - `SECIO_API_KEY` — SEC.io enhanced filing access (Phase 4A, optional)
 - `SEC_USER_AGENT` — Required for EDGAR API (Phase 4A)
 - `OPENAI_API_KEY` — Whisper transcription (Phase 4)
-- `GCP_PROJECT_ID` — Triggers BigQuery/Vertex backends (Phase 5)
+- `GCP_PROJECT_ID` — **Required.** BigQuery/Vertex AI project
 - `GCP_REGION` — GCP region (default: us-central1)
 - `BQ_DATASET_ID` — BigQuery dataset name (default: quantum_ai_hub)
-- `STORAGE_BACKEND` — Force "sqlite" or "bigquery" (default: auto)
-- `EMBEDDINGS_BACKEND` — Force "chromadb" or "vertex" (default: auto)
-- `SQLITE_DB_PATH` — Override SQLite path (default: data/quantum_intel.db)
-- `EMBEDDINGS_PATH` — Override ChromaDB path (default: data/embeddings)
 
 ### Testing
 - Framework: pytest
@@ -113,8 +109,8 @@ Key patterns to follow:
 - **GitHub repo:** `jonnycarpenter/quantum-intel` (public)
 
 ### Dependencies
-- **`requirements.txt`** — Production-only (slim, no PyTorch/CUDA/ChromaDB/Streamlit)
-- **`requirements-local.txt`** — All deps including local dev (ChromaDB, Streamlit, pytest)
+- **`requirements.txt`** — Production deps (slim, no PyTorch/CUDA/ChromaDB/Streamlit)
+- **`requirements-local.txt`** — Additional local dev deps (pytest, etc.)
 
 ### Documentation Convention
 Every core pipeline must have its own README. These live at the project root:

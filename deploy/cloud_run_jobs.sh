@@ -83,9 +83,21 @@ create_job "quantum-exa-ingestion" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest,EXA_API_KEY=EXA_API_KEY:latest" \
   "" "2Gi" "1" "3600"
 
+# --- AI Exa (twice weekly) ---
+create_job "ai-exa-ingestion" \
+  "scripts/run_ingestion.py,--sources,exa,--domain,ai" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest,EXA_API_KEY=EXA_API_KEY:latest" \
+  "" "2Gi" "1" "7200"
+
 # --- Quantum ArXiv (weekly) ---
 create_job "quantum-arxiv-ingestion" \
   "scripts/run_ingestion.py,--sources,arxiv,--domain,quantum" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest" \
+  "" "2Gi" "1" "3600"
+
+# --- AI ArXiv (weekly) ---
+create_job "ai-arxiv-ingestion" \
+  "scripts/run_ingestion.py,--sources,arxiv,--domain,ai" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest" \
   "" "2Gi" "1" "3600"
 
@@ -95,9 +107,21 @@ create_job "quantum-earnings" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest,API_NINJA_API_KEY=api-ninja-key:latest" \
   "" "4Gi" "2" "3600"
 
+# --- AI Earnings (monthly) ---
+create_job "ai-earnings" \
+  "scripts/run_earnings.py,--domain,ai" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest,API_NINJA_API_KEY=api-ninja-key:latest" \
+  "" "4Gi" "2" "3600"
+
 # --- Quantum SEC (monthly) ---
 create_job "quantum-sec" \
   "scripts/run_sec.py,--domain,quantum" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest" \
+  "SEC_USER_AGENT=QuantumIntelHub admin@example.com" "4Gi" "2" "3600"
+
+# --- AI SEC (monthly) ---
+create_job "ai-sec" \
+  "scripts/run_sec.py,--domain,ai" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest" \
   "SEC_USER_AGENT=QuantumIntelHub admin@example.com" "4Gi" "2" "3600"
 
@@ -124,9 +148,14 @@ create_job "quantum-stocks-ingestion" \
   "scripts/run_ingestion.py,--sources,stocks" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest"
 
-# --- Digest (daily) ---
+# --- Quantum Digest (daily) ---
 create_job "quantum-digest" \
   "scripts/run_digest.py,--domain,quantum,--use-llm,--save" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest"
+
+# --- AI Digest (daily) ---
+create_job "ai-digest" \
+  "scripts/run_digest.py,--domain,ai,--use-llm,--save" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest"
 
 echo ""

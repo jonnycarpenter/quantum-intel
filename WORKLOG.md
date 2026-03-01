@@ -93,6 +93,17 @@
 - Swapped dependency: `tavily-python` → `exa-py` in `requirements.txt`
 - **237 tests passing** (2 pre-existing failures in corpus_search.py unrelated to swap)
 
+### Session 11 (Feb 2026) — Filings Tab Fix + BigQuery Migration + Funding Pipeline
+- Fixed Filings tab data loading — SEC nuggets and earnings quotes now serving from BigQuery
+  - Fixed `EARNINGS_TICKERS` → `ALL_EARNINGS_TICKERS` import in `api/routes/earnings.py` `/tickers` endpoint
+  - Added `_to_datetime()` helper in `models/sec_filing.py` and `models/earnings.py` to handle BigQuery native datetime objects in `from_dict()`
+  - Fixed `_merge_rows` → `_insert_if_not_exists` in `storage/bigquery.py` `save_articles()`
+- Ran SQLite → BigQuery migration (`scripts/migrate_sqlite_to_bigquery.py`): articles (47), earnings_transcripts (37), sec_filings (70), papers (370), stocks (900), earnings_quotes (802), sec_nuggets (560), podcast_quotes (356), weekly_briefings (2)
+  - Known issues: podcast_transcripts migration fails (missing `from_dict`), sec_filings has INT64 vs STRING type mismatch on dedup query (rows still insert)
+- Added dedicated funding/VC extraction pipeline (`models/funding.py`, `processing/funding_extractor.py`, `scripts/run_funding_extraction.py`)
+- Added BigQuery test suites: `tests/test_bigquery_storage.py` (37 tests), `tests/test_vertex_embeddings.py` (22 tests)
+- Added `scripts/create_vector_indexes.py` for BigQuery vector index creation
+
 ---
 
 ## Next Up
@@ -100,3 +111,8 @@
 ### Remaining Work
 - Monitor costs and tune Cloud Run Job resource limits
 - Add `EXA_API_KEY` to GCP Secret Manager and `.env`
+- Markets tab — add "Last Updated [timestamp]"
+- Markets tab — AI tickers overview (similar to quantum)
+- Fix podcast_transcripts BigQuery migration (`PodcastTranscript.from_dict()` missing)
+- Fix sec_filings BigQuery dedup type mismatch (INT64 vs STRING on `fiscal_quarter`)
+- AI assistant design — personality, tools, app navigation, memory/compaction

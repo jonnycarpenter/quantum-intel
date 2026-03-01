@@ -24,14 +24,19 @@ steps:
           quantum-rss-ingestion \
           ai-rss-ingestion \
           quantum-exa-ingestion \
+          ai-exa-ingestion \
           quantum-arxiv-ingestion \
+          ai-arxiv-ingestion \
           quantum-earnings \
+          ai-earnings \
           quantum-sec \
+          ai-sec \
           quantum-podcasts \
           quantum-stocks-ingestion \
           quantum-weekly-briefing \
           ai-weekly-briefing \
-          quantum-digest; do
+          quantum-digest \
+          ai-digest; do
           echo "Updating $${JOB} -> $${IMAGE}"
           gcloud run jobs update "$${JOB}" \
             --image "$${IMAGE}" \
