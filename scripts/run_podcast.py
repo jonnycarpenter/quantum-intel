@@ -6,7 +6,9 @@ Standalone script to run the podcast ingestion pipeline.
 Discovers episodes → transcribes → extracts quotes → stores results.
 
 Usage:
-    python scripts/run_podcast.py
+    python scripts/run_podcast.py                             # All enabled podcasts
+    python scripts/run_podcast.py --domain quantum            # Quantum podcasts only
+    python scripts/run_podcast.py --domain ai                 # AI podcasts only
     python scripts/run_podcast.py --podcasts new_quantum_era --max-episodes 3
     python scripts/run_podcast.py --skip-extraction
     python scripts/run_podcast.py --list-podcasts
@@ -41,6 +43,7 @@ logger = get_logger(__name__)
 
 async def run_podcast_pipeline(
     podcast_ids: list[str] | None = None,
+    domain: str | None = None,
     max_episodes: int = 5,
     skip_extraction: bool = False,
     skip_transcription: bool = False,
@@ -80,6 +83,11 @@ async def run_podcast_pipeline(
             return
     else:
         sources = ENABLED_PODCAST_SOURCES
+
+    # Filter by domain if specified
+    if domain:
+        sources = [s for s in sources if s.domain == domain]
+        logger.info(f"[PODCAST_PIPELINE] Filtered to {len(sources)} {domain}-domain podcast(s)")
 
     if not sources:
         logger.warning("[PODCAST_PIPELINE] No enabled podcast sources. Check config/podcast_sources.py")
@@ -235,6 +243,13 @@ def main():
         description="Run podcast ingestion pipeline"
     )
     parser.add_argument(
+        "--domain",
+        type=str,
+        choices=["quantum", "ai"],
+        default=None,
+        help="Filter podcasts by domain (default: all domains)",
+    )
+    parser.add_argument(
         "--podcasts",
         type=str,
         help="Comma-separated podcast IDs (default: all enabled)",
@@ -280,6 +295,7 @@ def main():
     asyncio.run(
         run_podcast_pipeline(
             podcast_ids=podcast_ids,
+            domain=args.domain,
             max_episodes=args.max_episodes,
             skip_extraction=args.skip_extraction,
             skip_transcription=args.skip_transcription,

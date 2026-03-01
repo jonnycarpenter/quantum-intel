@@ -2,7 +2,7 @@
 
 This document serves as a living backlog for future enhancements, product ideas, and strategic features aimed at making the Quantum + AI Intelligence Hub a premier destination for business leaders and investors. Unlike the `WORKLOG.md` which tracks immediate to-dos, this file captures the broader vision.
 
-## 1. The "So What?" Layer (Strategic Implications Engine)
+## 1. The "So What?" Layer (Strategic Implications Engine) [COMPLETED]
 - **Concept:** Introduce a "Strategic Implications" extraction step.
 - **Execution:** When a milestone is ingested, an agent synthesizes 3 bullet points: *Time to Market Impact*, *Disrupted Industries*, and *Investment Signal*.
 - **UI Payoff:** Toggleable "Executive Summary" on news cards that skips technical jargon and focuses purely on business impact, ROI, and risk.
@@ -37,7 +37,7 @@ This document serves as a living backlog for future enhancements, product ideas,
 - **Sources:** LinkedIn API, Greenhouse/Lever scraping, specialized job aggregators.
 - **Why it matters:** Seeing a spike in roles like "Quantum Algorithm Researcher" or "GenAI Integration Engineer" at major banks or aerospace firms is a massive, tangible signal of adoption.
 
-## 8. Venture Capital & Startup Funding Flow
+## 8. Venture Capital & Startup Funding Flow [COMPLETED]
 - **Concept:** Track "Micro-Trends" by following the smart money before companies IPO.
 - **Sources:** Crunchbase API, Dealroom API, or parsing funding announcement PRs via Exa.
 - **Why it matters:** Reveals whether VCs are prioritizing Quantum Error Correction over Photonic startups, or Foundation Models over Application-Layer startups this quarter.

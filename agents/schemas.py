@@ -185,6 +185,183 @@ PODCAST_SEARCH_TOOL = {
     },
 }
 
+SUBMIT_FEEDBACK_TOOL = {
+    "name": "submit_user_feedback",
+    "description": (
+        "Submit user feedback, feature requests, or bug reports directly to the engineering team. "
+        "Use this when a user complains about the platform, asks for a new feature, or explicitly wants to send feedback."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "feedback_type": {
+                "type": "string",
+                "description": "Category of the feedback",
+                "enum": ["bug", "feature_request", "general_feedback"],
+            },
+            "message": {
+                "type": "string",
+                "description": "The actual message summarizing the user's feedback",
+            },
+            "user_context": {
+                "type": "string",
+                "description": "Optional context about what the user was doing when they submitted the feedback",
+            },
+        },
+        "required": ["feedback_type", "message"],
+    },
+}
+
+WRITE_SCRATCHPAD_TOOL = {
+    "name": "write_to_scratchpad",
+    "description": (
+        "Write raw text to your internal scratchpad memory. This memory will be injected into your system prompt on the very next turn. "
+        "Use this to hold onto intermediate thoughts, lists of company tickers, or facts while you use other tools to gather more information. "
+        "Note: Overwrites the existing scratchpad."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "content": {
+                "type": "string",
+                "description": "The information you want to save into your working memory.",
+            }
+        },
+        "required": ["content"],
+    },
+}
+
+ADHOC_SEC_TOOL = {
+    "name": "fetch_adhoc_sec_filing",
+    "description": (
+        "Trigger the ingestion pipeline to fetch an SEC filing (10-K, 10-Q, 8-K) for a given ticker, "
+        "extract its quotes with an LLM, and save it to the database for all users. Use this when the user asks on-demand "
+        "for a filing we don't have. Warning: This takes ~30-60 seconds to complete."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "ticker": {
+                "type": "string",
+                "description": "The stock ticker symbol (e.g. IONQ, GOOGL).",
+            },
+            "filing_type": {
+                "type": "string",
+                "description": "The SEC form type requested.",
+                "enum": ["10-K", "10-Q", "8-K"],
+            }
+        },
+        "required": ["ticker", "filing_type"],
+    },
+}
+
+ADHOC_EARNINGS_TOOL = {
+    "name": "fetch_adhoc_earnings_call",
+    "description": (
+        "Trigger the ingestion pipeline to fetch an earnings call transcript for a given ticker and quarter, "
+        "extract its strategic quotes with an LLM, and save it to the database for all users. "
+        "Warning: This takes ~30-60 seconds to complete."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "ticker": {
+                "type": "string",
+                "description": "The stock ticker symbol (e.g. IONQ, GOOGL).",
+            },
+            "year": {
+                "type": "integer",
+                "description": "The four-digit fiscal year.",
+            },
+            "quarter": {
+                "type": "integer",
+                "description": "The fiscal quarter (1-4).",
+            }
+        },
+        "required": ["ticker", "year", "quarter"],
+    },
+}
+
+FRONTEND_COMMAND_TOOL = {
+    "name": "dispatch_frontend_command",
+    "description": (
+        "Control the user's React frontend by emitting a WebSocket/SSE event. "
+        "Use this exclusively when the user says things like 'Take me to the pipeline', 'Show me AI companies', "
+        "or 'Open the ad-hoc analysis window'."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "action": {
+                "type": "string",
+                "description": "Command type (e.g. 'navigate', 'apply_filters', 'open_modal').",
+            },
+            "target": {
+                "type": "string",
+                "description": "The route (e.g. '/pipeline', '/brief') or modal ID representing the destination.",
+            },
+            "filters": {
+                "type": "object",
+                "description": "JSON object mapping filter names to values if the user wants specific data shown (e.g. {'domain': 'quantum'}).",
+                "additionalProperties": {"type": "string"}
+            }
+        },
+        "required": ["action"],
+    },
+}
+
+PLATFORM_KNOWLEDGE_TOOL = {
+    "name": "query_platform_features",
+    "description": (
+        "Search the internal Ket Zero Knowledge Base for help documentation and platform guides. "
+        "Use this when the user asks questions like 'How do I use X?', 'What does the brevity score mean?', or 'How does the feed work?'"
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "The user's question about the platform.",
+            },
+            "limit": {
+                "type": "integer",
+                "description": "Max number of guide chunks to return (default: 3).",
+                "default": 3,
+            }
+        },
+        "required": ["query"],
+    },
+}
+
+NANO_BANANA_TOOL = {
+    "name": "generate_infographic",
+    "description": (
+        "Generate a professional infographic, diagram, or data visualization using the Nano Banana 2 (Gemini Imagen 3) engine. "
+        "Use this tool when creating Ad-Hoc Analysis reports, or when the user explicitly asks for a visual representation. "
+        "Returns a markdown image string you must embed in your response."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "prompt": {
+                "type": "string",
+                "description": "A highly detailed, comprehensive description of the image to generate. Be specific about colors, layout, and textual elements.",
+            },
+            "aspect_ratio": {
+                "type": "string",
+                "description": "Aspect ratio of the generated image (e.g. '16:9', '1:1', '4:3').",
+                "default": "16:9",
+            },
+            "style": {
+                "type": "string",
+                "description": "The style of the image (e.g. 'clean vector art', 'minimalist dashboard screenshot', '3d isometric tech diagram').",
+                "default": "clean vector art",
+            }
+        },
+        "required": ["prompt"],
+    },
+}
+
 # All tools available to the Intelligence Agent
 ALL_INTELLIGENCE_TOOLS = [
     CORPUS_SEARCH_TOOL,
@@ -192,6 +369,13 @@ ALL_INTELLIGENCE_TOOLS = [
     STOCK_DATA_TOOL,
     ARXIV_SEARCH_TOOL,
     PODCAST_SEARCH_TOOL,
+    SUBMIT_FEEDBACK_TOOL,
+    WRITE_SCRATCHPAD_TOOL,
+    ADHOC_SEC_TOOL,
+    ADHOC_EARNINGS_TOOL,
+    FRONTEND_COMMAND_TOOL,
+    PLATFORM_KNOWLEDGE_TOOL,
+    NANO_BANANA_TOOL,
 ]
 
 # Valid routes for the Router Agent
@@ -201,6 +385,7 @@ VALID_ROUTES = frozenset({
     "stock_query",
     "paper_search",
     "deep_research",
+    "full_report",
 })
 
 

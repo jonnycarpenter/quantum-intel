@@ -62,6 +62,8 @@ async def run_chat(args: argparse.Namespace) -> None:
     print("Type 'quit' or 'exit' to leave.\n")
 
     conversation_history = []
+    compacted_summary = ""
+    session_id = "cli_session_1"
 
     while True:
         try:
@@ -102,12 +104,20 @@ async def run_chat(args: argparse.Namespace) -> None:
             print("\nDeep research is coming soon. "
                   "Routing to quick query instead...")
             route_result.route = "quick_query"
+            
+        if route_result.route == "full_report":
+            print("\n[ROUTER] Ad-Hoc Report requested. Expanding agent compute allowance...")
+            # We'll override the max_tool_calls for this specific run to allow deeper analysis
+            # and infographic generation
+            agent.max_tool_calls = max(agent.max_tool_calls, 10)
 
         # Run the Intelligence Agent
         response = await agent.answer(
             user_message=user_input,
             conversation_history=conversation_history if conversation_history else None,
             route_hint=route_result.route,
+            session_id=session_id,
+            compacted_summary=compacted_summary,
         )
 
         # Display the answer
@@ -125,9 +135,18 @@ async def run_chat(args: argparse.Namespace) -> None:
         conversation_history.append({"role": "user", "content": user_input})
         conversation_history.append({"role": "assistant", "content": response.answer})
 
-        # Keep history manageable
-        if len(conversation_history) > 20:
-            conversation_history = conversation_history[-10:]
+        # Compaction Engine Logic: keeping context small
+        # In a real app, this would be token-based. Here we trigger every 6 turns (12 messages)
+        if len(conversation_history) > 12:
+            print("\n[MEMORY] Compacting conversation history...")
+            # Summarize the oldest messages, keep the newest 4
+            messages_to_compact = conversation_history[:-4]
+            compacted_summary = await agent.compaction_engine.compact(
+                current_summary=compacted_summary, 
+                new_messages=messages_to_compact
+            )
+            # Retain only the newest 4 for explicit short-term LLM context
+            conversation_history = conversation_history[-4:]
 
 
 def main():

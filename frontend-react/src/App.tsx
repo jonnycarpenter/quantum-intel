@@ -22,8 +22,7 @@ import FilingsPage from './pages/FilingsPage'
 import SettingsPage from './pages/SettingsPage'
 import ChatPanel from './components/ChatPanel'
 import StatusBar from './components/StatusBar'
-
-
+import AdHocModal from './components/AdHocModal'
 
 const NAV_ITEMS = [
   { path: '/', label: 'Briefing', icon: Newspaper },
@@ -36,13 +35,22 @@ const NAV_ITEMS = [
 
 export default function App() {
   const [chatOpen, setChatOpen] = useState(true)
+  const [adHocReport, setAdHocReport] = useState<{ isOpen: boolean, content: string, title?: string }>({ isOpen: false, content: '' })
   const location = useLocation()
 
   // Derive current page name for chat context
   const currentPage = NAV_ITEMS.find(n => n.path === location.pathname)?.label ?? 'Briefing'
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden bg-bg-primary">
+      {/* Ad-Hoc Modal */}
+      <AdHocModal
+        isOpen={adHocReport.isOpen}
+        content={adHocReport.content}
+        title={adHocReport.title}
+        onClose={() => setAdHocReport({ ...adHocReport, isOpen: false })}
+      />
+
       {/* ─── Header ─── */}
       <header className="flex items-center justify-between px-6 py-3 bg-bg-secondary border-b border-border">
         <div className="flex items-center gap-3">
@@ -120,7 +128,11 @@ export default function App() {
                 </button>
               </div>
             </div>
-            <ChatPanel currentPage={currentPage} domain="quantum" />
+            <ChatPanel
+              currentPage={currentPage}
+              domain="quantum"
+              onShowAdHocReport={(content: string, title?: string) => setAdHocReport({ isOpen: true, content, title: title || "Ad-Hoc Analysis" })}
+            />
           </aside>
         ) : (
           <button

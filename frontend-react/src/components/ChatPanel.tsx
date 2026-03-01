@@ -4,6 +4,7 @@ import { Send } from 'lucide-react'
 interface Props {
   currentPage: string
   domain: string
+  onShowAdHocReport: (content: string, title?: string) => void
 }
 
 interface Message {
@@ -11,7 +12,7 @@ interface Message {
   content: string
 }
 
-export default function ChatPanel({ currentPage, domain }: Props) {
+export default function ChatPanel({ currentPage, domain, onShowAdHocReport }: Props) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -35,13 +36,43 @@ export default function ChatPanel({ currentPage, domain }: Props) {
 
     // TODO: Wire to /api/chat SSE endpoint when agent integration is built
     setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: `I'm currently in preview mode. The full agent integration (with corpus search, stock data, and web search tools) will be connected in the next phase. You asked about: "${userMsg.content}" on the ${currentPage} page.`,
-        },
-      ])
+      // Temporary simulated routing/response for Ad-Hoc Report or Navigation depending on user msg
+      const msgLower = userMsg.content.toLowerCase()
+
+      if (msgLower.includes("generate") || msgLower.includes("report") || msgLower.includes("infographic")) {
+        // Trigger Ad-Hoc Modal Mock
+        const mockMarkdown = `# Executive Analysis: ${currentPage} Insights\n\nHere is the dynamically requested report containing advanced metrics, visualizations, and generated Nano Banana 2 assets.\n\n## Key Findings\n- **Strategic Value:** High\n- **Timeline:** Accelerated\n\n### Visualization\n\n![Generated Graphic Placeholder](/api/assets/mock-infographic.jpeg "Ket Zero Nano Banana 2")\n`
+
+        onShowAdHocReport(mockMarkdown, "Ad-Hoc Analysis: " + currentPage)
+
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: `I've generated a full ad-hoc intelligence report based on your request. Opening it now.`,
+          },
+        ])
+      } else if (msgLower.includes("take me to") || msgLower.includes("navigate") || msgLower.includes("show me")) {
+        // Mocking Navigation Command `__FRONTEND_COMMAND__`
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: `[Navigating to your requested view...]`,
+          },
+        ])
+
+        // Simulating the dispatch payload:
+        // window.location.href = "/markets" (or similar logic handled by App context)
+      } else {
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: `I'm currently in preview mode. The full agent integration (with corpus search, stock data, and web search tools) will be connected in the next phase. You asked about: "${userMsg.content}" on the ${currentPage} page.`,
+          },
+        ])
+      }
       setIsLoading(false)
     }, 800)
   }
@@ -61,11 +92,10 @@ export default function ChatPanel({ currentPage, domain }: Props) {
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
-              className={`max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed ${
-                msg.role === 'user'
+              className={`max-w-[85%] rounded-lg px-3 py-2 text-sm leading-relaxed ${msg.role === 'user'
                   ? 'bg-accent-teal/15 text-accent-teal'
                   : 'bg-bg-tertiary text-text-primary'
-              }`}
+                }`}
             >
               {msg.content}
             </div>

@@ -272,6 +272,9 @@ ROUTES:
 - deep_research: Complex questions requiring multi-source deep analysis (not yet available)
   Examples: "Write a report on the quantum computing landscape", "Compare all quantum modalities"
 
+- full_report: User explicitly requests a full, generated ad-hoc briefing, infographic, visual report, or deep-dive analysis.
+  Examples: "Generate an infographic about quantum startups", "Write me a full ad-hoc report on IonQ's latest earnings", "I need a visual breakdown of error correction"
+
 Default to "quick_query" if uncertain. Return ONLY the JSON object."""
 
 
@@ -305,6 +308,9 @@ ROUTES:
 
 - deep_research: Complex questions requiring multi-source deep analysis (not yet available)
   Examples: "Write a report on the AI landscape", "Compare all frontier model providers"
+
+- full_report: User explicitly requests a full, generated ad-hoc briefing, infographic, visual report, or deep-dive analysis.
+  Examples: "Generate an infographic explaining the transformer architecture", "I need a full report on NVDA's moat", "Create a visual breakdown of open source vs proprietary models"
 
 Default to "quick_query" if uncertain. Return ONLY the JSON object."""
 

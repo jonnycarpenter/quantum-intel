@@ -20,6 +20,13 @@ from tools.web_search import WebSearchTool
 from tools.stock_data import StockDataTool
 from tools.arxiv_search import ArXivSearchTool
 from tools.podcast_search import PodcastSearchTool
+from tools.submit_user_feedback import SubmitUserFeedbackTool
+from tools.adhoc_sec import AdHocSecTool
+from tools.adhoc_earnings import AdHocEarningsTool
+from tools.app_navigation import AppNavigationTool
+from tools.platform_knowledge import PlatformKnowledgeTool
+from tools.nano_banana import GenerateInfographicTool
+from agents.memory import CompactionEngine, ScratchpadTool
 from utils.llm_client import ResilientAsyncClient
 
 logger = logging.getLogger(__name__)
@@ -59,7 +66,8 @@ class IntelligenceAgent:
         )
         self.max_tool_calls = max_tool_calls
         self.temperature = float(os.getenv("INTELLIGENCE_AGENT_TEMP", "0.3"))
-        self.domain = domain
+        self.compaction_engine = CompactionEngine(llm_client)
+        self.scratchpad = ScratchpadTool()
 
         # Initialize tools
         self._tools: Dict[str, Any] = {
@@ -68,6 +76,13 @@ class IntelligenceAgent:
             "stock_data": StockDataTool(),
             "arxiv_search": ArXivSearchTool(),
             "podcast_search": PodcastSearchTool(),
+            "submit_user_feedback": SubmitUserFeedbackTool(),
+            "write_to_scratchpad": self.scratchpad,
+            "fetch_adhoc_sec_filing": AdHocSecTool(),
+            "fetch_adhoc_earnings_call": AdHocEarningsTool(),
+            "dispatch_frontend_command": AppNavigationTool(),
+            "query_platform_features": PlatformKnowledgeTool(),
+            "generate_infographic": GenerateInfographicTool(),
         }
 
     async def answer(
@@ -76,6 +91,7 @@ class IntelligenceAgent:
         conversation_history: Optional[List[Dict[str, Any]]] = None,
         route_hint: Optional[str] = None,
         domain: Optional[str] = None,
+        **kwargs,
     ) -> AgentResponse:
         """
         Answer a user question using tool-calling.
@@ -85,6 +101,7 @@ class IntelligenceAgent:
             conversation_history: Optional prior messages for multi-turn
             route_hint: Optional route from the router for tool prioritization
             domain: Override domain for this call (defaults to instance domain)
+            **kwargs: Extra arguments like `session_id` or `compacted_summary`
 
         Returns:
             AgentResponse with answer, sources, and metadata
@@ -95,8 +112,20 @@ class IntelligenceAgent:
             f"(domain={active_domain})"
         )
 
-        # Build system prompt with domain awareness and optional route hint
+        # Build system prompt with domain awareness, memory, and optional route hint
         system = INTELLIGENCE_PROMPTS.get(active_domain, INTELLIGENCE_AGENT_SYSTEM_PROMPT)
+        
+        # Inject short-term memory (scratchpad)
+        session_id = kwargs.get("session_id", "default")
+        scratchpad_context = self.scratchpad.get_context(session_id)
+        if scratchpad_context:
+            system += f"\n\n<scratchpad_memory>\n{scratchpad_context}\n</scratchpad_memory>\n\n(Note: The scratchpad holds short-term information you saved. You can overwrite it using the write_to_scratchpad tool.)"
+
+        # Inject long-term memory (compaction)
+        compacted_summary = kwargs.get("compacted_summary")
+        if compacted_summary:
+            system += f"\n\n<strategic_recap>\n{compacted_summary}\n</strategic_recap>\n\n(Note: The strategic recap summarizes the earlier parts of this conversation.)"
+
         hint = ROUTE_HINTS.get(route_hint, "")
         if hint:
             system += f"\n\nROUTE HINT: {hint}"
