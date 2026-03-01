@@ -99,6 +99,15 @@ WEB_SEARCH_TOOL = {
                 "description": "Limit results to the last N days (default: 7)",
                 "default": 7,
             },
+            "include_text": {
+                "type": "string",
+                "description": "If provided, only returns pages containing this specific text string (useful for forcing exact mention of a term).",
+            },
+            "exclude_domains": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "List of domains to explicitly exclude from the search results (e.g. ['wikipedia.org', 'youtube.com']).",
+            }
         },
         "required": ["query"],
     },
@@ -362,6 +371,36 @@ NANO_BANANA_TOOL = {
     },
 }
 
+FIND_SIMILAR_TOOL = {
+    "name": "find_similar_articles",
+    "description": (
+        "Use Exa's neural network to find web pages that are highly similar in context and quality to a specific target URL. "
+        "Use this tool when a user provides a URL they like and asks to find 'more stuff like this', or when you find a great "
+        "source via web_search and want to discover related high-value intelligence sources (e.g. competitors, related funding rounds). "
+        "Do NOT use this tool for keyword searches; this tool ONLY accepts a valid URL."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "url": {
+                "type": "string",
+                "description": "The exact URL of the web page you want to find similar content for.",
+            },
+            "num_results": {
+                "type": "integer",
+                "description": "Maximum number of lookalike URLs to return (default: 5).",
+                "default": 5,
+            },
+            "exclude_source_domain": {
+                "type": "boolean",
+                "description": "If true, exclude other pages from the same website to force discovery of new sources.",
+                "default": True,
+            }
+        },
+        "required": ["url"],
+    }
+}
+
 # All tools available to the Intelligence Agent
 ALL_INTELLIGENCE_TOOLS = [
     CORPUS_SEARCH_TOOL,
@@ -376,6 +415,7 @@ ALL_INTELLIGENCE_TOOLS = [
     FRONTEND_COMMAND_TOOL,
     PLATFORM_KNOWLEDGE_TOOL,
     NANO_BANANA_TOOL,
+    FIND_SIMILAR_TOOL,
 ]
 
 # Valid routes for the Router Agent

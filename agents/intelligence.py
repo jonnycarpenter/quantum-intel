@@ -26,6 +26,7 @@ from tools.adhoc_earnings import AdHocEarningsTool
 from tools.app_navigation import AppNavigationTool
 from tools.platform_knowledge import PlatformKnowledgeTool
 from tools.nano_banana import GenerateInfographicTool
+from tools.find_similar import FindSimilarTool
 from agents.memory import CompactionEngine, ScratchpadTool
 from utils.llm_client import ResilientAsyncClient
 
@@ -83,6 +84,7 @@ class IntelligenceAgent:
             "dispatch_frontend_command": AppNavigationTool(),
             "query_platform_features": PlatformKnowledgeTool(),
             "generate_infographic": GenerateInfographicTool(),
+            "find_similar_articles": FindSimilarTool(),
         }
 
     async def answer(

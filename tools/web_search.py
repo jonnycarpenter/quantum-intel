@@ -50,6 +50,8 @@ class WebSearchTool:
         query: str,
         max_results: int = 5,
         days: Optional[int] = 7,
+        include_text: Optional[str] = None,
+        exclude_domains: Optional[List[str]] = None,
     ) -> str:
         """
         Search the web and return results as JSON string.
@@ -58,6 +60,8 @@ class WebSearchTool:
             query: Search query
             max_results: Maximum number of results
             days: Limit to last N days
+            include_text: Only return pages containing this text
+            exclude_domains: List of domains to explicitly exclude
 
         Returns:
             JSON string with search results
@@ -79,6 +83,8 @@ class WebSearchTool:
                 query=query,
                 max_results=max_results,
                 days=days,
+                include_text=include_text,
+                exclude_domains=exclude_domains,
             )
 
             if not results:
@@ -110,6 +116,8 @@ class WebSearchTool:
         query: str,
         max_results: int,
         days: Optional[int],
+        include_text: Optional[str] = None,
+        exclude_domains: Optional[List[str]] = None,
     ) -> List[dict]:
         """Execute search with domain filtering and fallback."""
         import asyncio
@@ -120,6 +128,10 @@ class WebSearchTool:
             "type": "auto",
             "text": {"max_characters": 500},
         }
+        if include_text:
+            search_kwargs["include_text"] = [include_text]
+        if exclude_domains:
+            search_kwargs["exclude_domains"] = exclude_domains
         if days:
             end_date = datetime.now(timezone.utc)
             start_date = end_date - timedelta(days=days)
