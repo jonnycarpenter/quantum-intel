@@ -17,6 +17,14 @@ export default function ArticleCard({ article, compact = false }: Props) {
             <PriorityBadge priority={article.priority} />
             <CategoryBadge category={article.category} />
             <span className="text-xs text-text-muted">●{article.relevance_score.toFixed(2)}</span>
+            {article.metadata?.reality_check_score && (
+              <span
+                className="ml-auto text-[10px] sm:text-xs px-2 py-0.5 rounded bg-accent-purple/10 text-accent-purple cursor-help border border-accent-purple/20 transition-all hover:bg-accent-purple/20"
+                title={article.metadata.reality_check_reasoning || "Reality Check Score"}
+              >
+                Signal: {article.metadata.reality_check_score}/100
+              </span>
+            )}
           </div>
 
           {/* Title */}

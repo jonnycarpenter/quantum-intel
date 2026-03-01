@@ -61,8 +61,8 @@ Optional:
 - 29 content categories: 11 quantum-specific + 8 shared business + 10 AI-specific
 - 4 priority levels: critical, high, medium, low
 - 7 entity types: company, technology, product, person, institution, standard, use_case_domain
-- **Quantum:** 18 RSS feeds, 52 Exa queries (9 themes), 6 ArXiv queries
-- **AI:** 19 RSS feeds, 198 Exa queries (34 themes), 8 ArXiv queries
+- **Quantum:** 18 RSS feeds, 57 Exa queries (10 themes), 6 ArXiv queries, 6 podcasts
+- **AI:** 19 RSS feeds, 203 Exa queries (35 themes), 8 ArXiv queries, 7 podcasts
 - 20 stock tickers (pure-play quantum + major tech + ETF)
 - 14 earnings tickers with CIK mappings (core + secondary)
 - SEC filing types: 10-K, 10-Q, 8-K
@@ -83,7 +83,8 @@ Key patterns to follow:
 - SEC: `fetchers/sec.py` → `processing/nugget_extractor.py` → storage backend
 - Podcasts: `fetchers/podcast.py` → `processing/podcast_quote_extractor.py` → storage backend
 - StockNews: `fetchers/stocknews.py` → existing article classify pipeline
-- Run standalone: `python scripts/run_earnings.py`, `python scripts/run_sec.py`, `python scripts/run_podcast.py`
+- Run standalone: `python scripts/run_earnings.py`, `python scripts/run_sec.py`
+- Podcasts support `--domain` flag: `python scripts/run_podcast.py --domain quantum`, `python scripts/run_podcast.py --domain ai`
 
 ### Phase 6: Case Study Extraction
 - **Model:** `models/case_study.py` — CaseStudy dataclass with ~40 fields, enums (SourceType, OutcomeType, ReadinessLevel)
@@ -102,10 +103,10 @@ Key patterns to follow:
 - **Vertex AI embeddings:** `storage/vertex_embeddings.py` — text-embedding-005 + VECTOR_SEARCH
 - **Factory routing:** `storage/__init__.py` — auto-selects backend based on `GCP_PROJECT_ID`
 - **Docker:** Single `Dockerfile`, different entrypoints per Cloud Run Job
-- **CI/CD:** Push to `master` on GitHub triggers Cloud Build → builds image → updates all jobs
-- **Cloud Build config:** `cloudbuild.yaml` — build, push, update 10 Cloud Run Jobs
+- **CI/CD:** Push to `master` on GitHub triggers Cloud Build → builds image → updates all 17 jobs
+- **Cloud Build config:** `cloudbuild.yaml` — build, push, update 17 Cloud Run Jobs
 - **Deploy scripts:** `deploy/setup_infra.sh`, `deploy/cloud_run_jobs.sh`, `deploy/setup_scheduler.sh`
-- **10 Cloud Run Jobs** with Cloud Scheduler (see `README_GCP_DEPLOYMENT.md`)
+- **17 Cloud Run Jobs** with 17 Cloud Scheduler entries — full quantum + AI parity (see `README_GCP_DEPLOYMENT.md`)
 - **GitHub repo:** `jonnycarpenter/quantum-intel` (public)
 
 ### Dependencies

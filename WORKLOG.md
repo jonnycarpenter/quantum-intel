@@ -104,13 +104,37 @@
 - Added BigQuery test suites: `tests/test_bigquery_storage.py` (37 tests), `tests/test_vertex_embeddings.py` (22 tests)
 - Added `scripts/create_vector_indexes.py` for BigQuery vector index creation
 
+### Session 12 (Mar 2026) — Complete Ingestion Infrastructure Audit + Fix
+- Audited all Cloud Run Jobs and Cloud Scheduler entries against desired state
+- **Created 4 missing Cloud Run Jobs:**
+  - `quantum-exa-ingestion` (was missing — only stale `quantum-tavily-ingestion` existed)
+  - `quantum-stocks-ingestion` (defined in scripts but never created)
+  - `ai-weekly-briefing` (scheduler pointed to it but job didn't exist)
+  - `ai-podcasts` (new — split from quantum-podcasts for per-domain processing)
+- **Updated `quantum-podcasts`** to pass `--domain quantum` (was processing both domains)
+- **Added `--domain` flag to `scripts/run_podcast.py`** — filters podcast sources by domain
+- **Fixed scheduler:**
+  - Deleted stale `quantum-tavily-biweekly` → created `quantum-exa-biweekly` (pointing to `quantum-exa-ingestion`)
+  - Created `ai-podcasts-weekly` (Sunday 10:30 UTC)
+  - Created `quantum-stocks-daily` (Mon-Fri 22:00 UTC)
+- **Deleted stale `quantum-tavily-ingestion`** Cloud Run Job
+- Updated all deploy scripts (`cloudbuild.yaml`, `cloud_run_jobs.sh`, `setup_scheduler.sh`) to match final state
+- **17 Cloud Run Jobs, 17 Cloud Scheduler entries — all ENABLED and Ready**
+- Full parity: every pipeline has both quantum and AI domain jobs
+
+### Session 13 (Mar 2026) — Signal Filters & Govt Grants
+- Added `reality_check_score` (1-100) and `reality_check_reasoning` to classifier prompts to filter hype.
+- Injected `reality_check_score` into article `metadata` JSON blob in BigQuery to prevent schema breaking changes.
+- Surfaced "Reality Check" UI badge in frontend React `ArticleCard`.
+- Added new `government_grants_contracts` theme directly into `exa_queries.py` and `exa_ai_queries.py`.
+- Updated `experience_enhancement.md` to mark Item 6 and Item 10 as COMPLETED.
+
 ---
 
 ## Next Up
 
 ### Remaining Work
 - Monitor costs and tune Cloud Run Job resource limits
-- Add `EXA_API_KEY` to GCP Secret Manager and `.env`
 - Markets tab — add "Last Updated [timestamp]"
 - Markets tab — AI tickers overview (similar to quantum)
 - Fix podcast_transcripts BigQuery migration (`PodcastTranscript.from_dict()` missing)

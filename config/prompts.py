@@ -27,7 +27,9 @@ You will be given an article with its title, source, and content. Analyze it and
     "people_mentioned": ["<key researchers, CEOs, policy makers>"],
     "use_case_domains": ["<pharma, finance, logistics, defense, etc.>"],
     "sentiment": "<bullish|bearish|neutral>",
-    "confidence": <0.0-1.0 float>
+    "confidence": <0.0-1.0 float>,
+    "reality_check_score": <1-100 integer (100 = verified deployment/metric, 50 = unverified interesting claim, 1-10 = pure hype/buzzwords)>,
+    "reality_check_reasoning": "<1 sentence reasoning for the reality check score>"
 }
 
 CATEGORIES (choose exactly one):
@@ -101,7 +103,9 @@ You will be given an article with its title, source, and content. Analyze it and
     "industries": ["<applicable industries from: retail, manufacturing, supply_chain, construction, healthcare, pharma, financial_services, insurance, energy, telecom, transportation, agriculture, real_estate, hospitality, media, professional_services, cpg, aerospace, automotive, food_beverage>"],
     "departments": ["<applicable departments from: marketing, finance, sales, operations, hr, legal, procurement, rd_product, strategy, risk, quality, training, pricing, demand_planning>"],
     "ai_technology": "<LLM|computer_vision|predictive_analytics|NLP|robotics|recommendation_system|generative_ai|other|null>",
-    "implementation_scale": "<pilot|department|enterprise|unknown>"
+    "implementation_scale": "<pilot|department|enterprise|unknown>",
+    "reality_check_score": <1-100 integer (100 = verified deployment/metric, 50 = unverified interesting claim, 1-10 = pure hype/buzzwords)>,
+    "reality_check_reasoning": "<1 sentence reasoning for the reality check score>"
 }
 
 CATEGORIES (choose exactly one):

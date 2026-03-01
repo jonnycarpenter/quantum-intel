@@ -5,20 +5,20 @@ Fetches, deduplicates, classifies, and stores quantum computing intelligence fro
 ## Architecture
 
 ```
-RSS / Exa / ArXiv / StockNews  →  Dedup  →  Classify (Claude)  →  SQLite + Embeddings
+RSS / Exa / ArXiv / StockNews  →  Dedup  →  Classify (Claude)  →  BigQuery + Vertex AI Embeddings
 ```
 
 | Stage | Module | Description |
 |-------|--------|-------------|
 | Fetch | `fetchers/rss.py` | 20+ tiered RSS feeds |
-| Fetch | `fetchers/exa.py` | 52 Exa queries across 9 themes |
+| Fetch | `fetchers/exa.py` | 57 quantum queries (10 themes) + 203 AI queries (35 themes) |
 | Fetch | `fetchers/arxiv.py` | Quantum computing paper search |
 | Fetch | `fetchers/stocknews.py` | Stock market news for quantum tickers |
 | Fetch | `fetchers/stocks.py` | Price data via yfinance (20 tickers) |
 | Filter | `processing/deduplication.py` | SimHash + URL dedup with article aggregation |
 | Classify | `processing/classifier.py` | Claude-powered category, priority, relevance scoring |
-| Persist | `storage/sqlite.py` | SQLite (local) or BigQuery (prod) |
-| Embed | `storage/` | ChromaDB (local) or Vertex AI (prod) |
+| Persist | `storage/bigquery.py` | BigQuery storage |
+| Embed | `storage/vertex_embeddings.py` | Vertex AI text-embedding-005 |
 
 ## Configuration
 
@@ -62,17 +62,20 @@ The pipeline is coordinated by `orchestrator.py`:
 
 ## Storage
 
-- **Local:** SQLite (`data/quantum_intel.db`) + ChromaDB (`data/embeddings/`)
-- **Production:** BigQuery + Vertex AI Vector Search
-- **Auto-select:** `storage.get_storage()` picks backend based on `GCP_PROJECT_ID` env var
+- **BigQuery** (`quantum_ai_hub` dataset) for all structured data
+- **Vertex AI** text-embedding-005 for vector embeddings + VECTOR_SEARCH
 
 ## Scheduling
 
 Core ingestion runs on a recurring Cloud Run Job schedule. See `CLAUDE.md` for environment variable configuration.
 
-## AI News Pipeline (In Progress)
+## Dual-Domain Pipeline
 
-The same pipeline architecture is being extended for AI-domain intelligence:
-- `config/ai_rss_sources.py` — 22 AI RSS feeds across 4 tiers (dedicated → vendor → academic → general tech)
-- `config/ai_exa_queries.py` — AI-focused search queries
-- Uses the same orchestrator pattern with `domain="ai"` parameter
+Both quantum and AI domains use identical pipeline architecture with different config:
+
+| Domain | RSS Feeds | Exa Queries | ArXiv Queries | Cloud Run Jobs |
+|--------|-----------|-------------|---------------|----------------|
+| Quantum | 18 feeds (4 tiers) | 57 queries (10 themes) | 6 queries | `quantum-rss-ingestion`, `quantum-exa-ingestion`, `quantum-arxiv-ingestion` |
+| AI | 19 feeds (4 tiers) | 203 queries (35 themes) | 8 queries | `ai-rss-ingestion`, `ai-exa-ingestion`, `ai-arxiv-ingestion` |
+
+Switch domain with `--domain ai` or `--domain quantum` on any script.

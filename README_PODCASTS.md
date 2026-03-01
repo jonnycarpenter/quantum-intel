@@ -5,7 +5,7 @@ Discovers, transcribes, and extracts expert quotes from quantum computing and AI
 ## Architecture
 
 ```
-RSS Discovery  →  Dedup  →  Transcribe (AssemblyAI)  →  Extract Quotes (Claude)  →  SQLite
+RSS Discovery  →  Dedup  →  Transcribe (AssemblyAI)  →  Extract Quotes (Claude)  →  BigQuery
 ```
 
 | Stage | Module | Description |
@@ -15,7 +15,7 @@ RSS Discovery  →  Dedup  →  Transcribe (AssemblyAI)  →  Extract Quotes (Cl
 | Discover | `fetchers/podcast.py` | RSS feed parsing, episode filtering |
 | Transcribe | `fetchers/podcast.py` | AssemblyAI with speaker diarization |
 | Extract | `processing/podcast_quote_extractor.py` | Domain-aware Claude-powered quote extraction |
-| Store | `storage/sqlite.py` | `podcast_transcripts` + `podcast_quotes` tables |
+| Store | `storage/bigquery.py` | `podcast_transcripts` + `podcast_quotes` tables |
 
 ## Enabled Podcasts
 
@@ -45,14 +45,20 @@ RSS Discovery  →  Dedup  →  Transcribe (AssemblyAI)  →  Extract Quotes (Cl
 ## Running
 
 ```bash
-# Discovery only (no transcription costs)
-python scripts/run_podcast.py --skip-transcription --max-episodes 5
+# All enabled podcasts (both domains)
+python scripts/run_podcast.py --max-episodes 5
 
-# Full pipeline — single podcast
+# Quantum podcasts only
+python scripts/run_podcast.py --domain quantum --max-episodes 5
+
+# AI podcasts only
+python scripts/run_podcast.py --domain ai --max-episodes 5
+
+# Single podcast
 python scripts/run_podcast.py --podcasts new-quantum-era --max-episodes 2
 
-# Full pipeline — all enabled podcasts
-python scripts/run_podcast.py --max-episodes 5
+# Discovery only (no transcription costs)
+python scripts/run_podcast.py --skip-transcription --max-episodes 5
 
 # List configured podcasts
 python scripts/run_podcast.py --list-podcasts
@@ -79,12 +85,14 @@ Key settings in `PodcastConfig` (`config/settings.py`):
 
 ## Scheduling
 
-**Weekly on Sundays** with 14-day lookback. The overlap ensures no episodes are missed.
+Two Cloud Run Jobs run **weekly on Sundays** with 14-day lookback:
 
-```bash
-# Production command (Sunday scheduled job)
-python scripts/run_podcast.py --max-episodes 10
-```
+| Job | Domain | UTC Time | Podcasts |
+|-----|--------|----------|----------|
+| `quantum-podcasts` | quantum | Sunday 10:00 | 6 podcasts |
+| `ai-podcasts` | ai | Sunday 10:30 | 7 podcasts |
+
+The overlap ensures no episodes are missed.
 
 ## Costs
 

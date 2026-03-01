@@ -100,6 +100,7 @@ class ClassifiedArticle:
                 "roi_confirmed", "roi_type", "roi_metrics",
                 "industries", "departments", "ai_technology",
                 "implementation_scale",
+                "reality_check_score", "reality_check_reasoning",
             ]
             for key in roi_keys:
                 val = classification.raw_response.get(key)

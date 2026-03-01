@@ -106,6 +106,14 @@ EXA_QUERIES: List[Dict[str, Any]] = [
     {"query": "quantum computing new company launch stealth mode funding", "theme": "venture_capital_funding", "id": 55},
     {"query": "quantum technology IPO SPAC public market valuation", "theme": "venture_capital_funding", "id": 56},
     {"query": "quantum computing incubator accelerator startup ecosystem", "theme": "venture_capital_funding", "id": 57},
+
+    # =========================================================================
+    # Theme 11: Government Grants & Defense Contracts (4 queries)
+    # =========================================================================
+    {"query": "quantum computing DARPA contract award DoD", "theme": "government_grants_contracts", "id": 58},
+    {"query": "quantum computing SBIR STTR Phase II grant award", "theme": "government_grants_contracts", "id": 59},
+    {"query": "quantum technology federal funding intelligence community contract", "theme": "government_grants_contracts", "id": 60},
+    {"query": "quantum computing Department of Energy grant national lab deployment", "theme": "government_grants_contracts", "id": 61},
 ]
 
 
@@ -130,4 +138,5 @@ THEMES = [
     "government_defense",
     "industry_adoption",
     "venture_capital_funding",
+    "government_grants_contracts",
 ]

@@ -11,14 +11,14 @@ Cloud Build (cloudbuild.yaml)
     ↓ builds Docker image → updates Cloud Run Jobs
 Cloud Scheduler (cron)
     ↓ triggers
-Cloud Run Jobs (10 jobs)
+Cloud Run Jobs (17 jobs)
     ↓ reads/writes
-BigQuery (quantum_ai_hub dataset, 15 tables)
+BigQuery (quantum_ai_hub dataset, 17 tables)
     ↓ embeddings
 Vertex AI text-embedding-005 → BigQuery VECTOR_SEARCH
 ```
 
-**Local path preserved:** Set `STORAGE_BACKEND=sqlite` (or omit `GCP_PROJECT_ID`) to keep using SQLite + ChromaDB locally.
+**BigQuery-only:** All development and production uses BigQuery + Vertex AI. `GCP_PROJECT_ID` is required.
 
 ## CI/CD Pipeline
 
@@ -26,7 +26,7 @@ Every push to `master` triggers Cloud Build via a Developer Connect GitHub trigg
 
 1. Builds slim Docker image (production deps only — no PyTorch/CUDA/ChromaDB/Streamlit)
 2. Pushes to Artifact Registry with `$SHORT_SHA` and `latest` tags
-3. Updates all 10 Cloud Run Jobs to use the new image
+3. Updates all 17 Cloud Run Jobs to use the new image
 
 Config: `cloudbuild.yaml` at project root.
 
@@ -55,8 +55,8 @@ chmod +x deploy/setup_infra.sh
 
 # 2. Populate secrets
 echo -n "sk-ant-..." | gcloud secrets versions add anthropic-api-key --data-file=- --project=gen-lang-client-0436975498
-echo -n "tvly-..."   | gcloud secrets versions add tavily-api-key    --data-file=- --project=gen-lang-client-0436975498
-# Repeat for: api-ninja-key, secio-api-key, assemblyai-api-key, stocknews-api-key
+echo -n "exa-..."    | gcloud secrets versions add EXA_API_KEY       --data-file=- --project=gen-lang-client-0436975498
+# Repeat for: api-ninja-key, assemblyai-api-key
 
 # 3. Build image and create Cloud Run Jobs
 chmod +x deploy/cloud_run_jobs.sh
@@ -74,13 +74,13 @@ gcloud run jobs execute quantum-rss-ingestion --region us-central1
 
 | Resource | Name | Purpose |
 |----------|------|---------|
-| BigQuery Dataset | `quantum_ai_hub` | 15 tables for all pipeline data |
+| BigQuery Dataset | `quantum_ai_hub` | 17 tables for all pipeline data |
 | Artifact Registry | `quantum-intel` | Docker images |
 | Cloud Build Trigger | `quantum-intel-deploy` | GitHub push → build → deploy |
 | GCS Bucket | `quantum-ai-hub-data` | Future file storage |
-| Secret Manager | 6 secrets | API keys |
-| Cloud Run Jobs | 10 jobs | Pipeline execution |
-| Cloud Scheduler | 10 schedules | Cron triggers |
+| Secret Manager | 4 secrets | API keys (anthropic, exa, api-ninja, assemblyai) |
+| Cloud Run Jobs | 17 jobs | Pipeline execution (quantum + AI) |
+| Cloud Scheduler | 17 schedules | Cron triggers |
 
 ## Environment Variables
 
@@ -91,26 +91,40 @@ gcloud run jobs execute quantum-rss-ingestion --region us-central1
 | `GCP_REGION` | `us-central1` |
 | `BQ_DATASET_ID` | `quantum_ai_hub` |
 
-### Optional overrides
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `STORAGE_BACKEND` | `auto` | Force `sqlite` or `bigquery` |
-| `EMBEDDINGS_BACKEND` | `auto` | Force `chromadb` or `vertex` |
+## Pipeline Schedules (17 jobs, all times UTC)
 
-## Pipeline Schedules
+### Daily
+| Pipeline | UTC Time | Cloud Run Job |
+|----------|----------|---------------|
+| Quantum RSS | 06:00 | `quantum-rss-ingestion` |
+| AI RSS | 07:00 | `ai-rss-ingestion` |
+| Quantum Digest | 13:00 | `quantum-digest` |
+| AI Digest | 13:30 | `ai-digest` |
+| Stocks | 22:00 Mon-Fri | `quantum-stocks-ingestion` |
 
-| Pipeline | Cadence | UTC Time | Cloud Run Job |
-|----------|---------|----------|---------------|
-| Quantum RSS | Daily | 06:00 | `quantum-rss-ingestion` |
-| AI RSS | Daily | 07:00 | `ai-rss-ingestion` |
-| Tavily Search | Tue & Fri | 08:00 | `quantum-tavily-ingestion` |
-| ArXiv Papers | Sunday | 09:00 | `quantum-arxiv-ingestion` |
-| Podcasts | Sunday | 10:00 | `quantum-podcasts` |
-| Earnings | 1st of month | 11:00 | `quantum-earnings` |
-| SEC Filings | 2nd of month | 11:00 | `quantum-sec` |
-| Weekly Briefing | Monday | 12:00 | `quantum-weekly-briefing` |
-| Digest | Daily | 13:00 | `quantum-digest` |
-| Stocks | Mon-Fri | 22:00 | `quantum-stocks-ingestion` |
+### Twice Weekly (Tue & Fri)
+| Pipeline | UTC Time | Cloud Run Job |
+|----------|----------|---------------|
+| Quantum Exa Search | 08:00 | `quantum-exa-ingestion` |
+| AI Exa Search | 08:30 | `ai-exa-ingestion` |
+
+### Weekly
+| Pipeline | UTC Time | Cloud Run Job |
+|----------|----------|---------------|
+| Quantum ArXiv | Sunday 09:00 | `quantum-arxiv-ingestion` |
+| AI ArXiv | Sunday 09:30 | `ai-arxiv-ingestion` |
+| Quantum Podcasts | Sunday 10:00 | `quantum-podcasts` |
+| AI Podcasts | Sunday 10:30 | `ai-podcasts` |
+| AI Weekly Briefing | Monday 12:00 | `ai-weekly-briefing` |
+| Quantum Weekly Briefing | Monday 12:45 | `quantum-weekly-briefing` |
+
+### Monthly
+| Pipeline | UTC Time | Cloud Run Job |
+|----------|----------|---------------|
+| Quantum Earnings | 1st 11:00 | `quantum-earnings` |
+| AI Earnings | 1st 11:30 | `ai-earnings` |
+| Quantum SEC Filings | 2nd 11:00 | `quantum-sec` |
+| AI SEC Filings | 2nd 11:30 | `ai-sec` |
 
 ## Monitoring
 
@@ -143,20 +157,17 @@ bq query --project_id=gen-lang-client-0436975498 \
 
 ## Local Development
 
-The local SQLite path is unchanged. If `GCP_PROJECT_ID` is not set, everything runs locally:
+All development uses BigQuery. Requires `gcloud auth application-default login`:
 
 ```bash
-# Install all deps including local-only (ChromaDB, Streamlit, pytest)
 pip install -r requirements-local.txt
 
-# Local mode (default)
+# Run locally against BigQuery
 python scripts/run_ingestion.py --sources rss --max-classify 5
 
-# Force BigQuery locally (requires gcloud auth)
-GCP_PROJECT_ID=gen-lang-client-0436975498 python scripts/run_ingestion.py --sources rss --max-classify 3
+# Test a specific domain
+python scripts/run_ingestion.py --domain ai --sources exa --max-classify 3
 ```
-
-**Note:** `requirements.txt` contains production-only deps (slim, no PyTorch). For local dev, use `requirements-local.txt` which includes ChromaDB, Streamlit, and pytest.
 
 ## Troubleshooting
 

@@ -146,6 +146,8 @@ class ClassificationResult:
     time_to_market_impact: str = ""
     disrupted_industries: str = ""
     investment_signal: str = ""
+    reality_check_score: Optional[int] = None
+    reality_check_reasoning: str = ""
 
     # Metadata
     classified_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
@@ -184,6 +186,8 @@ class ClassificationResult:
             time_to_market_impact=response.get("time_to_market_impact", ""),
             disrupted_industries=response.get("disrupted_industries", ""),
             investment_signal=response.get("investment_signal", ""),
+            reality_check_score=response.get("reality_check_score"),
+            reality_check_reasoning=response.get("reality_check_reasoning", ""),
             raw_response=response,
         )
 
