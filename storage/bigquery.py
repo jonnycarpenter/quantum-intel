@@ -884,6 +884,50 @@ class BigQueryStorage(StorageBackend):
         )
         return [ExtractedQuote.from_dict(dict(r)) for r in rows]
 
+    async def search_earnings_quotes(
+        self, query: str, ticker: Optional[str] = None, limit: int = 30
+    ) -> List[ExtractedQuote]:
+        """Search earnings quotes by text."""
+        pattern = f"%{query}%"
+        if ticker:
+            bq_query = (
+                f"SELECT * FROM {self._table('earnings_quotes')} "
+                f"WHERE ticker = @ticker AND ("
+                f"  LOWER(quote_text) LIKE LOWER(@pattern) OR "
+                f"  LOWER(speaker_name) LIKE LOWER(@pattern) OR "
+                f"  LOWER(themes) LIKE LOWER(@pattern) OR "
+                f"  LOWER(companies_mentioned) LIKE LOWER(@pattern) OR "
+                f"  LOWER(technologies_mentioned) LIKE LOWER(@pattern)"
+                f") "
+                f"ORDER BY relevance_score DESC LIMIT @lim"
+            )
+            query_params = [
+                bigquery.ScalarQueryParameter("ticker", "STRING", ticker),
+                bigquery.ScalarQueryParameter("pattern", "STRING", pattern),
+                bigquery.ScalarQueryParameter("lim", "INT64", limit),
+            ]
+        else:
+            bq_query = (
+                f"SELECT * FROM {self._table('earnings_quotes')} "
+                f"WHERE "
+                f"  LOWER(quote_text) LIKE LOWER(@pattern) OR "
+                f"  LOWER(speaker_name) LIKE LOWER(@pattern) OR "
+                f"  LOWER(themes) LIKE LOWER(@pattern) OR "
+                f"  LOWER(companies_mentioned) LIKE LOWER(@pattern) OR "
+                f"  LOWER(technologies_mentioned) LIKE LOWER(@pattern) "
+                f"ORDER BY relevance_score DESC LIMIT @lim"
+            )
+            query_params = [
+                bigquery.ScalarQueryParameter("pattern", "STRING", pattern),
+                bigquery.ScalarQueryParameter("lim", "INT64", limit),
+            ]
+
+        job_config = bigquery.QueryJobConfig(query_parameters=query_params)
+        rows = await self._run_sync(
+            lambda: list(self.client.query(bq_query, job_config=job_config).result())
+        )
+        return [ExtractedQuote.from_dict(dict(r)) for r in rows]
+
     async def get_transcripts_without_quotes(
         self, tickers: Optional[List[str]] = None,
     ) -> List[EarningsTranscript]:
@@ -1023,6 +1067,48 @@ class BigQueryStorage(StorageBackend):
         )
         rows = await self._run_sync(
             lambda: list(self.client.query(query, job_config=job_config).result())
+        )
+        return [SecNugget.from_dict(dict(r)) for r in rows]
+
+    async def search_sec_nuggets(
+        self, query: str, ticker: Optional[str] = None, limit: int = 30
+    ) -> List[SecNugget]:
+        """Search SEC nuggets by text."""
+        pattern = f"%{query}%"
+        if ticker:
+            bq_query = (
+                f"SELECT * FROM {self._table('sec_nuggets')} "
+                f"WHERE ticker = @ticker AND ("
+                f"  LOWER(nugget_text) LIKE LOWER(@pattern) OR "
+                f"  LOWER(themes) LIKE LOWER(@pattern) OR "
+                f"  LOWER(companies_mentioned) LIKE LOWER(@pattern) OR "
+                f"  LOWER(technologies_mentioned) LIKE LOWER(@pattern)"
+                f") "
+                f"ORDER BY relevance_score DESC LIMIT @lim"
+            )
+            query_params = [
+                bigquery.ScalarQueryParameter("ticker", "STRING", ticker),
+                bigquery.ScalarQueryParameter("pattern", "STRING", pattern),
+                bigquery.ScalarQueryParameter("lim", "INT64", limit),
+            ]
+        else:
+            bq_query = (
+                f"SELECT * FROM {self._table('sec_nuggets')} "
+                f"WHERE "
+                f"  LOWER(nugget_text) LIKE LOWER(@pattern) OR "
+                f"  LOWER(themes) LIKE LOWER(@pattern) OR "
+                f"  LOWER(companies_mentioned) LIKE LOWER(@pattern) OR "
+                f"  LOWER(technologies_mentioned) LIKE LOWER(@pattern) "
+                f"ORDER BY relevance_score DESC LIMIT @lim"
+            )
+            query_params = [
+                bigquery.ScalarQueryParameter("pattern", "STRING", pattern),
+                bigquery.ScalarQueryParameter("lim", "INT64", limit),
+            ]
+
+        job_config = bigquery.QueryJobConfig(query_parameters=query_params)
+        rows = await self._run_sync(
+            lambda: list(self.client.query(bq_query, job_config=job_config).result())
         )
         return [SecNugget.from_dict(dict(r)) for r in rows]
 

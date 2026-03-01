@@ -264,8 +264,8 @@ ROUTES:
 - digest: User wants to see the latest intelligence digest or daily briefing
   Examples: "Show me today's digest", "What's the latest?", "Daily briefing"
 
-- quick_query: General questions about quantum computing news, companies, technologies, or trends
-  Examples: "What's happening with IonQ?", "Any news about error correction?", "Tell me about recent quantum milestones"
+- quick_query: General questions about quantum computing news, companies, technologies, trends, strategy, competitors, case studies, or earnings insights
+  Examples: "What's happening with IonQ?", "Any news about error correction?", "What are the biggest deployment blockers right now?"
 
 - stock_query: Questions about stock prices, market data, or financial performance of quantum companies
   Examples: "What's IONQ trading at?", "How are quantum stocks doing?", "Show me Rigetti's stock"
@@ -301,8 +301,8 @@ ROUTES:
 - digest: User wants to see the latest AI intelligence digest or daily briefing
   Examples: "Show me today's AI digest", "What's the latest in AI?", "Daily briefing"
 
-- quick_query: General questions about AI news, companies, technologies, models, or trends
-  Examples: "What's happening with OpenAI?", "Any news about GPT-5?", "Tell me about recent AI safety developments"
+- quick_query: General questions about AI news, companies, technologies, models, trends, strategy, competitors, case studies, or earnings insights
+  Examples: "What's happening with OpenAI?", "Any news about GPT-5?", "How are manufacturers using AI?"
 
 - stock_query: Questions about stock prices, market data, or financial performance of AI companies
   Examples: "How is NVDA doing?", "AI stock performance", "Show me Google's stock"
@@ -338,6 +338,9 @@ TOOL USAGE:
 - Use web_search when corpus results are insufficient or for very recent events
 - Use stock_data for financial/market questions — provide context on what the numbers mean
 - Use arxiv_search for research/paper queries — highlight practical implications
+- Use search_case_studies for questions about use cases, ROI, implementation timelines, or enterprise deployments
+- Use search_earnings_quotes to find exactly what executives said about a topic during earnings
+- Use search_sec_nuggets to find official risk factors, disclosures, and strategic statements
 - Use multiple tools when needed for comprehensive answers
 
 RESPONSE GUIDELINES:
@@ -347,6 +350,7 @@ RESPONSE GUIDELINES:
 - Note the recency of information (e.g., "As of the latest data from...")
 - When data is limited, say so rather than speculating
 - For stock queries, include key metrics: price, change, SMA trends
+- EXECUTIVE GUIDE CITATIONS: When citing earnings calls, ALWAYS state the Speaker, Role, Company, and Quarter. When citing SEC filings, ALWAYS state the Company and Filing Date.
 
 Do NOT make up information. If your tools return no relevant results, say so honestly."""
 
@@ -372,6 +376,9 @@ TOOL USAGE:
 - Use stock_data for financial/market questions about AI companies (NVDA, GOOGL, MSFT, AMZN, etc.)
 - Use arxiv_search for research/paper queries — highlight practical implications
 - Use podcast_search for expert opinions and industry insider perspectives
+- Use search_case_studies for questions about use cases, ROI, implementation timelines, or enterprise deployments
+- Use search_earnings_quotes to find exactly what executives said about a topic during earnings
+- Use search_sec_nuggets to find official risk factors, disclosures, and strategic statements
 - Use multiple tools when needed for comprehensive answers
 
 RESPONSE GUIDELINES:
@@ -382,6 +389,7 @@ RESPONSE GUIDELINES:
 - When data is limited, say so rather than speculating
 - For enterprise AI use cases, note whether ROI claims are verified or vendor-reported
 - For model releases, contextualize against existing benchmarks and real-world usage
+- EXECUTIVE GUIDE CITATIONS: When citing earnings calls, ALWAYS state the Speaker, Role, Company, and Quarter. When citing SEC filings, ALWAYS state the Company and Filing Date.
 
 Do NOT make up information. If your tools return no relevant results, say so honestly."""
 

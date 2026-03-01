@@ -17,9 +17,9 @@ This document serves as a living backlog for future enhancements, product ideas,
 - **Execution:** When 10-K, earnings call, or news mentions an AI vendor or quantum partnership, map it into a graph or relational table.
 - **UI Payoff:** Interactive "Partnership Ecosystem" map showing client-vendor and investment relationships (e.g., mapping OpenAI's or IBM Quantum's enterprise clients).
 
-## 4. Direct Q&A "Executive Guide" Panel
+## 4. Direct Q&A "Executive Guide" Panel [COMPLETED]
 - **Concept:** Specialized chat interface for strategic querying.
-- **Execution:** Supercharge the Guide Agent to query the `case_studies` BigQuery table. Structured responses include: 1. Proven use cases, 2. Leading companies, 3. Blockers/Risks.
+- **Execution:** Integrated seamlessly into the existing `IntelligenceAgent` (March 2026). Added `search_case_studies`, `search_earnings_quotes`, and `search_sec_nuggets` tools, allowing the agent to query structured database tables and output highly formatted, explicitly cited answers in the regular chat.
 - **UI Payoff:** Perplexity-style interface with direct citations linking to exact timestamps in earnings calls or paragraphs in SEC filings.
 
 ## 5. Playbook & Case Study Explorer (The "How-To" Hub) [COMPLETED]

@@ -27,6 +27,9 @@ from tools.app_navigation import AppNavigationTool
 from tools.platform_knowledge import PlatformKnowledgeTool
 from tools.nano_banana import GenerateInfographicTool
 from tools.find_similar import FindSimilarTool
+from tools.search_case_studies import SearchCaseStudiesTool
+from tools.search_earnings_quotes import SearchEarningsQuotesTool
+from tools.search_sec_nuggets import SearchSecNuggetsTool
 from agents.memory import CompactionEngine, ScratchpadTool
 from utils.llm_client import ResilientAsyncClient
 
@@ -85,6 +88,9 @@ class IntelligenceAgent:
             "query_platform_features": PlatformKnowledgeTool(),
             "generate_infographic": GenerateInfographicTool(),
             "find_similar_articles": FindSimilarTool(),
+            "search_case_studies": SearchCaseStudiesTool(),
+            "search_earnings_quotes": SearchEarningsQuotesTool(),
+            "search_sec_nuggets": SearchSecNuggetsTool(),
         }
 
     async def answer(

@@ -401,6 +401,89 @@ FIND_SIMILAR_TOOL = {
     }
 }
 
+SEARCH_CASE_STUDIES_TOOL = {
+    "name": "search_case_studies",
+    "description": (
+        "Search explicitly through parsed case studies. "
+        "Useful for understanding how companies or industries are deploying technology, "
+        "their specific use cases, blockers, metrics, and outcomes."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Keywords or topics to search for within case cases.",
+            },
+            "domain": {
+                "type": "string",
+                "description": "Domain to filter by, typically 'quantum' or 'ai'.",
+            },
+            "limit": {
+                "type": "integer",
+                "description": "Maximum number of results to return. Default 5.",
+                "default": 5,
+            },
+        },
+        "required": ["query"],
+    },
+}
+
+SEARCH_EARNINGS_QUOTES_TOOL = {
+    "name": "search_earnings_quotes",
+    "description": (
+        "Search the database of historical earnings quotes. "
+        "Useful for finding out exactly what a company (or overall industry) has said "
+        "about a specific topic (e.g. 'GPU CapEx', 'deployment blockers') during earnings."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Topic or keyword to search for in quotes, themes, tech mentioned, etc.",
+            },
+            "ticker": {
+                "type": "string",
+                "description": "Optional stock ticker symbol to narrow search down to a specific company.",
+            },
+            "limit": {
+                "type": "integer",
+                "description": "Maximum number of results to return. Default 5.",
+                "default": 5,
+            },
+        },
+        "required": ["query"],
+    },
+}
+
+SEARCH_SEC_NUGGETS_TOOL = {
+    "name": "search_sec_nuggets",
+    "description": (
+        "Search the database of historical SEC filing risk factors, MD&A insights, and nuggets. "
+        "Useful for understanding official company disclosures, risk factors, or strategic statements."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Topic or keyword to search for in nuggets.",
+            },
+            "ticker": {
+                "type": "string",
+                "description": "Optional stock ticker symbol to narrow search down to a specific company.",
+            },
+            "limit": {
+                "type": "integer",
+                "description": "Maximum number of results to return. Default 5.",
+                "default": 5,
+            },
+        },
+        "required": ["query"],
+    },
+}
+
 # All tools available to the Intelligence Agent
 ALL_INTELLIGENCE_TOOLS = [
     CORPUS_SEARCH_TOOL,
@@ -416,6 +499,9 @@ ALL_INTELLIGENCE_TOOLS = [
     PLATFORM_KNOWLEDGE_TOOL,
     NANO_BANANA_TOOL,
     FIND_SIMILAR_TOOL,
+    SEARCH_CASE_STUDIES_TOOL,
+    SEARCH_EARNINGS_QUOTES_TOOL,
+    SEARCH_SEC_NUGGETS_TOOL,
 ]
 
 # Valid routes for the Router Agent

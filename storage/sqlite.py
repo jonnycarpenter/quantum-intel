@@ -695,6 +695,33 @@ class SQLiteStorage(StorageBackend):
         )
         return [ExtractedQuote.from_dict(dict(row)) for row in cursor.fetchall()]
 
+    async def search_earnings_quotes(
+        self, query: str, ticker: Optional[str] = None, limit: int = 30
+    ) -> List[ExtractedQuote]:
+        """Search earnings quotes by text."""
+        pattern = f"%{query}%"
+        if ticker:
+            cursor = self._conn.execute(
+                """SELECT * FROM earnings_quotes
+                WHERE ticker = ? AND (
+                  quote_text LIKE ? OR speaker_name LIKE ? OR
+                  themes LIKE ? OR companies_mentioned LIKE ? OR
+                  technologies_mentioned LIKE ?
+                )
+                ORDER BY relevance_score DESC LIMIT ?""",
+                (ticker, pattern, pattern, pattern, pattern, pattern, limit),
+            )
+        else:
+            cursor = self._conn.execute(
+                """SELECT * FROM earnings_quotes
+                WHERE quote_text LIKE ? OR speaker_name LIKE ? OR
+                  themes LIKE ? OR companies_mentioned LIKE ? OR
+                  technologies_mentioned LIKE ?
+                ORDER BY relevance_score DESC LIMIT ?""",
+                (pattern, pattern, pattern, pattern, pattern, limit),
+            )
+        return [ExtractedQuote.from_dict(dict(row)) for row in cursor.fetchall()]
+
     async def get_transcripts_without_quotes(
         self, tickers: Optional[List[str]] = None
     ) -> List[EarningsTranscript]:
@@ -864,6 +891,31 @@ class SQLiteStorage(StorageBackend):
             "SELECT * FROM sec_nuggets WHERE ticker = ? ORDER BY relevance_score DESC LIMIT ?",
             (ticker, limit),
         )
+        return [SecNugget.from_dict(dict(row)) for row in cursor.fetchall()]
+
+    async def search_sec_nuggets(
+        self, query: str, ticker: Optional[str] = None, limit: int = 30
+    ) -> List[SecNugget]:
+        """Search SEC nuggets by text."""
+        pattern = f"%{query}%"
+        if ticker:
+            cursor = self._conn.execute(
+                """SELECT * FROM sec_nuggets
+                WHERE ticker = ? AND (
+                  nugget_text LIKE ? OR themes LIKE ? OR
+                  companies_mentioned LIKE ? OR technologies_mentioned LIKE ?
+                )
+                ORDER BY relevance_score DESC LIMIT ?""",
+                (ticker, pattern, pattern, pattern, pattern, limit),
+            )
+        else:
+            cursor = self._conn.execute(
+                """SELECT * FROM sec_nuggets
+                WHERE nugget_text LIKE ? OR themes LIKE ? OR
+                  companies_mentioned LIKE ? OR technologies_mentioned LIKE ?
+                ORDER BY relevance_score DESC LIMIT ?""",
+                (pattern, pattern, pattern, pattern, limit),
+            )
         return [SecNugget.from_dict(dict(row)) for row in cursor.fetchall()]
 
     # =========================================================================
