@@ -4,23 +4,32 @@
 # ============================================================================
 # Creates Cloud Scheduler jobs to trigger Cloud Run Jobs on cadence.
 #
-# Schedule (all times UTC):
+# 17 Cloud Run Jobs, 17 Scheduler entries (all times UTC):
+#
+#   DAILY
 #   06:00 daily     — Quantum RSS
 #   07:00 daily     — AI RSS
+#   13:00 daily     — Quantum Digest
+#   13:30 daily     — AI Digest
+#   22:00 Mon-Fri   — Stocks (after US market close)
+#
+#   TWICE WEEKLY (Tue & Fri)
 #   08:00 Tue/Fri   — Quantum Exa web search
 #   08:30 Tue/Fri   — AI Exa web search
+#
+#   WEEKLY
 #   09:00 Sunday    — Quantum ArXiv papers
 #   09:30 Sunday    — AI ArXiv papers
-#   10:00 Sunday    — Podcasts
+#   10:00 Sunday    — Quantum Podcasts
+#   10:30 Sunday    — AI Podcasts
+#   12:00 Monday    — AI weekly briefing
+#   12:45 Monday    — Quantum weekly briefing
+#
+#   MONTHLY
 #   11:00 1st/month — Quantum Earnings
 #   11:30 1st/month — AI Earnings
 #   11:00 2nd/month — Quantum SEC filings
 #   11:30 2nd/month — AI SEC filings
-#   12:00 Monday    — AI weekly briefing
-#   12:45 Monday    — Quantum weekly briefing
-#   13:00 daily     — Quantum Digest
-#   13:30 daily     — AI Digest
-#   22:00 Mon-Fri   — Stocks (after US market close)
 #
 # Usage:
 #   chmod +x deploy/setup_scheduler.sh
@@ -76,6 +85,7 @@ create_schedule "ai-exa-biweekly"         "30 8 * * 2,5"  "ai-exa-ingestion"
 create_schedule "quantum-arxiv-weekly"    "0 9 * * 0"     "quantum-arxiv-ingestion"
 create_schedule "ai-arxiv-weekly"         "30 9 * * 0"    "ai-arxiv-ingestion"
 create_schedule "quantum-podcasts-weekly" "0 10 * * 0"    "quantum-podcasts"
+create_schedule "ai-podcasts-weekly"      "30 10 * * 0"   "ai-podcasts"
 create_schedule "ai-briefing-weekly"      "0 12 * * 1"    "ai-weekly-briefing"
 create_schedule "quantum-briefing-weekly" "45 12 * * 1"   "quantum-weekly-briefing"
 

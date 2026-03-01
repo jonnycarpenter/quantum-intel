@@ -32,6 +32,7 @@ steps:
           quantum-sec \
           ai-sec \
           quantum-podcasts \
+          ai-podcasts \
           quantum-stocks-ingestion \
           quantum-weekly-briefing \
           ai-weekly-briefing \

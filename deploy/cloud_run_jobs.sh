@@ -125,9 +125,15 @@ create_job "ai-sec" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest" \
   "SEC_USER_AGENT=QuantumIntelHub admin@example.com" "4Gi" "2" "3600"
 
-# --- Podcasts (weekly) ---
+# --- Quantum Podcasts (weekly) ---
 create_job "quantum-podcasts" \
-  "scripts/run_podcast.py" \
+  "scripts/run_podcast.py,--domain,quantum" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest,ASSEMBLYAI_API_KEY=assemblyai-api-key:latest" \
+  "" "4Gi" "2" "7200"
+
+# --- AI Podcasts (weekly) ---
+create_job "ai-podcasts" \
+  "scripts/run_podcast.py,--domain,ai" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest,ASSEMBLYAI_API_KEY=assemblyai-api-key:latest" \
   "" "4Gi" "2" "7200"
 
