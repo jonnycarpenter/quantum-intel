@@ -18,6 +18,8 @@ import type {
 } from '../api'
 import { Card, EmptyState } from '../components/ui'
 import DomainToggle from '../components/DomainToggle'
+import CompanyLogo from '../components/CompanyLogo'
+import { companyNameToDomain } from '../utils/logoUtils'
 import { Quote, ExternalLink, TrendingUp, TrendingDown, BookOpen } from 'lucide-react'
 
 // ─── Priority Tag Styles ──────────────────────────────
@@ -87,7 +89,15 @@ function VoiceQuoteCard({ quote }: { quote: WeeklyBriefingVoiceQuote }) {
           <div className="flex flex-wrap items-center gap-1.5 mt-2 text-xs text-text-muted">
             <span className="font-medium text-text-secondary">{quote.speaker}</span>
             {quote.role && <><span>-</span><span>{quote.role}</span></>}
-            {quote.company && <><span>-</span><span>{quote.company}</span></>}
+            {quote.company && (
+              <>
+                <span>-</span>
+                <span className="inline-flex items-center gap-1">
+                  <CompanyLogo companyName={quote.company} domain={companyNameToDomain(quote.company)} size={14} />
+                  {quote.company}
+                </span>
+              </>
+            )}
             <span className="px-1.5 py-0.5 rounded bg-bg-tertiary text-text-muted">
               {label}
             </span>
@@ -264,7 +274,12 @@ export default function BriefingPage() {
               <tbody>
                 {briefing.market_movers.map(mm => (
                   <tr key={mm.ticker} className="border-t border-border hover:bg-bg-hover transition-colors">
-                    <td className="px-4 py-2 font-medium">{mm.ticker}</td>
+                    <td className="px-4 py-2 font-medium">
+                      <span className="inline-flex items-center gap-2">
+                        <CompanyLogo companyName={mm.company_name} domain={companyNameToDomain(mm.company_name)} size={20} />
+                        {mm.ticker}
+                      </span>
+                    </td>
                     <td className="px-4 py-2 text-right">
                       {mm.close != null ? `$${mm.close.toFixed(2)}` : '-'}
                     </td>

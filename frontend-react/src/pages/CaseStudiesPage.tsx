@@ -12,6 +12,8 @@ import { api } from '../api'
 import type { Domain, CaseStudy } from '../api'
 import { Card, SectionHeader, StatCard, EmptyState, TagChip } from '../components/ui'
 import DomainToggle from '../components/DomainToggle'
+import CompanyLogo from '../components/CompanyLogo'
+import { companyNameToDomain } from '../utils/logoUtils'
 
 // ─── Readiness Level Styles ─────────────────────────────
 
@@ -56,7 +58,10 @@ function CaseStudyCard({ cs }: { cs: CaseStudy }) {
 
       {/* Badge row */}
       <div className="flex flex-wrap items-center gap-2 mb-1.5">
-        <span className="text-xs font-medium text-accent-blue">{cs.company}</span>
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-accent-blue">
+          <CompanyLogo companyName={cs.company} domain={companyNameToDomain(cs.company)} size={16} />
+          {cs.company}
+        </span>
         {cs.industry && <span className="text-xs text-text-muted">{cs.industry}</span>}
         <span className={`text-xs px-2 py-0.5 rounded ${readinessStyle}`}>
           {cs.readiness_level}

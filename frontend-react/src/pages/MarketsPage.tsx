@@ -9,6 +9,8 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
 import { Card, SectionHeader, EmptyState } from '../components/ui'
 import DomainToggle from '../components/DomainToggle'
+import CompanyLogo from '../components/CompanyLogo'
+import { companyNameToDomain } from '../utils/logoUtils'
 import { TrendingUp, TrendingDown, Quote, ShieldAlert, ExternalLink } from 'lucide-react'
 import type { Domain } from '../api'
 
@@ -64,7 +66,12 @@ export default function MarketsPage() {
                         : 'hover:bg-bg-hover'
                       }`}
                   >
-                    <td className="px-4 py-2.5 font-medium text-accent-blue">{s.ticker}</td>
+                    <td className="px-4 py-2.5 font-medium text-accent-blue">
+                      <span className="inline-flex items-center gap-2">
+                        <CompanyLogo companyName={s.company} domain={companyNameToDomain(s.company ?? s.ticker)} size={22} />
+                        {s.ticker}
+                      </span>
+                    </td>
                     <td className="px-4 py-2.5 text-text-secondary">{s.company}</td>
                     <td className="px-4 py-2.5 text-right">${s.close?.toFixed(2) ?? '–'}</td>
                     <td className={`px-4 py-2.5 text-right font-medium ${(s.change_percent ?? 0) >= 0 ? 'text-accent-green' : 'text-accent-red'
@@ -101,8 +108,13 @@ export default function MarketsPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-text-primary">{detail.ticker}</h2>
-              <p className="text-sm text-text-muted">{detail.company} — {detail.focus}</p>
+              <div className="flex items-center gap-3">
+                <CompanyLogo companyName={detail.company} domain={companyNameToDomain(detail.company)} size={32} />
+                <div>
+                  <h2 className="text-lg font-bold text-text-primary">{detail.ticker}</h2>
+                  <p className="text-sm text-text-muted">{detail.company} — {detail.focus}</p>
+                </div>
+              </div>
             </div>
             <div className="flex items-center bg-bg-tertiary rounded-lg border border-border">
               {[7, 30, 90].map(d => (

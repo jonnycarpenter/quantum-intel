@@ -9,6 +9,8 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '../api'
 import { Card, SectionHeader, EmptyState, LensChip } from '../components/ui'
 import DomainToggle from '../components/DomainToggle'
+import CompanyLogo from '../components/CompanyLogo'
+import { companyNameToDomain } from '../utils/logoUtils'
 import { Quote, ShieldAlert } from 'lucide-react'
 import type { Domain } from '../api'
 
@@ -113,7 +115,10 @@ export default function FilingsPage() {
                       }`} />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-xs font-medium text-accent-blue">{n.ticker}</span>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-accent-blue">
+                          <CompanyLogo companyName={n.company_name} domain={companyNameToDomain(n.company_name || n.ticker)} size={16} />
+                          {n.ticker}
+                        </span>
                         <span className="text-xs text-text-muted">
                           {n.display_source ?? `${n.filing_type} FY${n.fiscal_year}`}
                         </span>
@@ -195,7 +200,10 @@ export default function FilingsPage() {
                     <Quote className="w-5 h-5 text-accent-purple flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-xs font-medium text-accent-blue">{q.ticker}</span>
+                        <span className="inline-flex items-center gap-1 text-xs font-medium text-accent-blue">
+                          <CompanyLogo companyName={q.company_name} domain={companyNameToDomain(q.company_name)} size={16} />
+                          {q.ticker}
+                        </span>
                         <span className="text-xs text-text-muted">
                           {q.company_name} • Q{q.quarter} {q.year}
                         </span>

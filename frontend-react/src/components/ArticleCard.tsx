@@ -1,5 +1,7 @@
 import { ExternalLink } from 'lucide-react'
 import { PriorityBadge, CategoryBadge, TagChip, Card, timeAgo } from './ui'
+import CompanyLogo from './CompanyLogo'
+import { companyNameToDomain } from '../utils/logoUtils'
 import type { Article } from '../api'
 
 interface Props {
@@ -17,14 +19,6 @@ export default function ArticleCard({ article, compact = false }: Props) {
             <PriorityBadge priority={article.priority} />
             <CategoryBadge category={article.category} />
             <span className="text-xs text-text-muted">●{article.relevance_score.toFixed(2)}</span>
-            {article.metadata?.reality_check_score && (
-              <span
-                className="ml-auto text-[10px] sm:text-xs px-2 py-0.5 rounded bg-accent-purple/10 text-accent-purple cursor-help border border-accent-purple/20 transition-all hover:bg-accent-purple/20"
-                title={article.metadata.reality_check_reasoning || "Reality Check Score"}
-              >
-                Signal: {article.metadata.reality_check_score}/100
-              </span>
-            )}
           </div>
 
           {/* Title */}
@@ -64,7 +58,10 @@ export default function ArticleCard({ article, compact = false }: Props) {
           {!compact && (
             <div className="flex flex-wrap gap-1.5 mt-2">
               {article.companies_mentioned?.slice(0, 4).map(c => (
-                <TagChip key={c} label={c} variant="cyan" />
+                <span key={c} className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-accent-cyan/15 text-accent-cyan">
+                  <CompanyLogo companyName={c} domain={companyNameToDomain(c)} size={14} />
+                  {c}
+                </span>
               ))}
               {article.technologies_mentioned?.slice(0, 3).map(t => (
                 <TagChip key={t} label={t} variant="purple" />
