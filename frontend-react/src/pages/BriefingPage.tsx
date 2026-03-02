@@ -6,8 +6,10 @@
  * and research frontier. Powered by the 2-agent pipeline.
  */
 
-import { useState } from 'react'
+import { useState, useMemo, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { api } from '../api'
 import type {
   Domain,
@@ -47,11 +49,10 @@ const VOICE_LABELS: Record<string, string> = {
 // ─── Helpers ──────────────────────────────────────────
 
 /**
- * Render narrative markdown with [N] citation highlights.
- * Replaces [1], [2] etc. with styled clickable spans that scroll to the
- * sources section.
+ * Inject styled citation badges into plain text.
+ * Replaces [1], [2] etc. with styled clickable spans.
  */
-function renderNarrative(text: string, sectionId: string) {
+function injectCitations(text: string, sectionId: string): ReactNode[] {
   const parts = text.split(/(\[\d+\])/)
   return parts.map((part, i) => {
     const match = part.match(/^\[(\d+)\]$/)
@@ -68,8 +69,70 @@ function renderNarrative(text: string, sectionId: string) {
         </a>
       )
     }
-    return <span key={i}>{part}</span>
+    return part ? <span key={i}>{part}</span> : null
   })
+}
+
+/**
+ * Render narrative markdown with:
+ * - ### sub-headlines styled as story dividers
+ * - **bold** for lead sentences
+ * - [N] citation badges as interactive links
+ * - Proper paragraph spacing for scannability
+ */
+function NarrativeRenderer({ text, sectionId }: { text: string; sectionId: string }) {
+  // Memoize the custom components to avoid re-creating on every render
+  const components = useMemo(() => ({
+    // Sub-headlines within a section — render as styled story dividers
+    h3: ({ children }: { children?: ReactNode }) => (
+      <h4 className="text-sm font-semibold text-text-primary mt-5 mb-2 pt-3 border-t border-border/40 first:mt-0 first:pt-0 first:border-t-0">
+        {children}
+      </h4>
+    ),
+    // Paragraphs — inject citation badges into text content
+    p: ({ children }: { children?: ReactNode }) => {
+      const processed = processChildren(children, sectionId)
+      return <p className="mb-3 last:mb-0">{processed}</p>
+    },
+    // Bold — used for lead sentences
+    strong: ({ children }: { children?: ReactNode }) => (
+      <strong className="font-semibold text-text-primary">{children}</strong>
+    ),
+    // Prevent any h1/h2 from disrupting the layout (shouldn't appear, but safety)
+    h1: ({ children }: { children?: ReactNode }) => (
+      <h4 className="text-sm font-semibold text-text-primary mt-4 mb-2">{children}</h4>
+    ),
+    h2: ({ children }: { children?: ReactNode }) => (
+      <h4 className="text-sm font-semibold text-text-primary mt-4 mb-2">{children}</h4>
+    ),
+  }), [sectionId])
+
+  return (
+    <div className="text-sm text-text-secondary leading-relaxed briefing-narrative">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+        {text}
+      </ReactMarkdown>
+    </div>
+  )
+}
+
+/**
+ * Recursively process React children to inject citation badges into text nodes.
+ */
+function processChildren(children: ReactNode, sectionId: string): ReactNode {
+  if (typeof children === 'string') {
+    // Check if this text has [N] citations
+    if (/\[\d+\]/.test(children)) {
+      return <>{injectCitations(children, sectionId)}</>
+    }
+    return children
+  }
+  if (Array.isArray(children)) {
+    return children.map((child, i) => (
+      <span key={i}>{processChildren(child, sectionId)}</span>
+    ))
+  }
+  return children
 }
 
 // ─── Sub-Components ───────────────────────────────────
@@ -162,8 +225,8 @@ function BriefingSectionCard({ section }: { section: WeeklyBriefingSection }) {
       </div>
 
       {/* Narrative */}
-      <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-line mb-4">
-        {renderNarrative(section.narrative, section.section_id)}
+      <div className="mb-4">
+        <NarrativeRenderer text={section.narrative} sectionId={section.section_id} />
       </div>
 
       {/* Voice quotes */}

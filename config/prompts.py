@@ -512,11 +512,31 @@ STRATEGIC PRIORITIES:
 INSTRUCTIONS:
 
 For each priority section that has observations:
-- Write 1-3 paragraphs of narrative synthesis — NOT bullet lists
+- Write narrative synthesis — NOT bullet lists
 - Use inline citations [1], [2] referencing source articles by their number
 - Weave in relevant voice quotes with attribution: 'As [Speaker], [Role] at [Company] noted in [Source]...'
 - Only include voice quotes that genuinely reinforce the narrative — do NOT force-fit
 - Be specific: name companies, cite numbers, reference technologies
+
+NARRATIVE FORMATTING (critical for readability):
+The narrative field supports markdown. Use structured formatting to make each section scannable:
+
+1. **Sub-headlines**: When a section covers multiple stories or themes, break them up with ### sub-headlines. Each sub-headline should be a punchy, newsworthy title (e.g., "### OpenAI–Amazon Partnership Reshapes Cloud AI" or "### Goldman Sachs Deploys Claude in Production").
+
+2. **Bold lead sentences**: Start each story/theme's paragraph with a **bolded lead sentence** that captures the core takeaway. An executive scanning should get the gist from the bold text alone.
+
+3. **Paragraph breaks**: Separate distinct stories/themes with blank lines. Do NOT write one giant paragraph covering 5+ topics. Each distinct development or cluster of related developments should be its own paragraph under its own sub-headline.
+
+4. **Flow**: Within each sub-section, write flowing prose (not bullets). The sub-headline + bold lead + paragraph structure provides the scannability; the prose provides the depth.
+
+Example structure for a section narrative:
+```
+### IonQ Signs $50M Enterprise Deal with JPMorgan
+**IonQ secured its largest enterprise contract to date**, a $50M multi-year agreement with JPMorgan Chase for quantum optimization of derivatives pricing [1]. The deal includes...
+
+### Google Quantum AI Achieves 99.7% Gate Fidelity
+**Google's Willow processor reached a new gate fidelity milestone**, surpassing the 99.5% threshold widely considered necessary for fault-tolerant operation [3][4]. The breakthrough...
+```
 
 For sections with NO observations, set has_content to false.
 
@@ -586,12 +606,32 @@ STRATEGIC PRIORITIES:
 INSTRUCTIONS:
 
 For each priority section that has observations:
-- Write 1-3 paragraphs of narrative synthesis — NOT bullet lists
+- Write narrative synthesis — NOT bullet lists
 - Use inline citations [1], [2] referencing source articles by their number
 - Weave in relevant voice quotes with attribution: 'As [Speaker], [Role] at [Company] noted on [Source]...'
 - Podcast quotes from practitioners are especially valuable for Enterprise AI (P1) — these are real people deploying AI
 - Only include voice quotes that genuinely reinforce the narrative — do NOT force-fit
 - Be specific: name companies, cite ROI numbers, reference model names and benchmarks
+
+NARRATIVE FORMATTING (critical for readability):
+The narrative field supports markdown. Use structured formatting to make each section scannable:
+
+1. **Sub-headlines**: When a section covers multiple stories or themes, break them up with ### sub-headlines. Each sub-headline should be a punchy, newsworthy title (e.g., "### OpenAI–Amazon Partnership Reshapes Cloud AI" or "### Goldman Sachs Deploys Claude in Production").
+
+2. **Bold lead sentences**: Start each story/theme's paragraph with a **bolded lead sentence** that captures the core takeaway. An executive scanning should get the gist from the bold text alone.
+
+3. **Paragraph breaks**: Separate distinct stories/themes with blank lines. Do NOT write one giant paragraph covering 5+ topics. Each distinct development or cluster of related developments should be its own paragraph under its own sub-headline.
+
+4. **Flow**: Within each sub-section, write flowing prose (not bullets). The sub-headline + bold lead + paragraph structure provides the scannability; the prose provides the depth.
+
+Example structure for a section narrative:
+```
+### OpenAI–Amazon Partnership Reshapes Cloud AI
+**OpenAI's Frontier platform is now integrated with AWS**, giving enterprise customers access to advanced AI models and custom agents through Amazon's cloud [1]. The deal...
+
+### Goldman Sachs Deploys Claude in Production
+**Goldman Sachs is using Anthropic's Claude for trade accounting and client onboarding** [6], marking one of the most significant production deployments of frontier AI in financial services...
+```
 
 For sections with NO observations, set has_content to false.
 
