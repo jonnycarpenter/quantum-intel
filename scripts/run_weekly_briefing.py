@@ -33,7 +33,7 @@ def _safe_print(text: str) -> None:
     try:
         print(text)
     except UnicodeEncodeError:
-        print(text.encode("utf-8", errors="replace").decode("utf-8"))
+        print(text.encode("ascii", errors="replace").decode("ascii"))
 
 
 def print_briefing(briefing) -> None:
@@ -182,15 +182,15 @@ async def main():
 
         briefing = await pipeline.generate(domain=args.domain, days=args.days)
 
+        # Save before printing so encoding errors don't prevent persistence
+        if args.save:
+            briefing_id = await storage.save_weekly_briefing(briefing)
+            print(f"\nBriefing saved: {briefing_id}")
+
         if args.json:
             print(json.dumps(briefing.to_dict(), indent=2, default=str))
         else:
             print_briefing(briefing)
-
-        # Save if requested
-        if args.save:
-            briefing_id = await storage.save_weekly_briefing(briefing)
-            print(f"\nBriefing saved: {briefing_id}")
 
     finally:
         await storage.close()

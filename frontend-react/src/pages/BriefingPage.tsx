@@ -20,8 +20,9 @@ import type {
 } from '../api'
 import { Card, EmptyState } from '../components/ui'
 import DomainToggle from '../components/DomainToggle'
+import { RadarWidget } from '../components/RadarWidget'
 import CompanyLogo from '../components/CompanyLogo'
-import { companyNameToDomain } from '../utils/logoUtils'
+import { companyNameToDomain, findInlineLogos } from '../utils/logoUtils'
 import { Quote, ExternalLink, TrendingUp, TrendingDown, BookOpen } from 'lucide-react'
 
 // ─── Priority Tag Styles ──────────────────────────────
@@ -117,15 +118,54 @@ function NarrativeRenderer({ text, sectionId }: { text: string; sectionId: strin
 }
 
 /**
- * Recursively process React children to inject citation badges into text nodes.
+ * Split a text string at known company names and inject inline logo chips.
+ * Returns an array of ReactNode (strings + logo elements).
+ */
+function injectInlineLogos(text: string): ReactNode[] {
+  const matches = findInlineLogos(text)
+  if (matches.length === 0) return [text]
+
+  const parts: ReactNode[] = []
+  let cursor = 0
+  matches.forEach((m, i) => {
+    // Text before this match
+    if (m.index > cursor) {
+      parts.push(text.slice(cursor, m.index))
+    }
+    // The company name with inline logo
+    parts.push(
+      <span key={`logo-${i}`} className="inline-flex items-center gap-0.5">
+        <CompanyLogo domain={m.domain} companyName={m.name} size={14} className="inline-block -mt-px" />
+        {m.name}
+      </span>
+    )
+    cursor = m.index + m.name.length
+  })
+  // Remaining text
+  if (cursor < text.length) {
+    parts.push(text.slice(cursor))
+  }
+  return parts
+}
+
+/**
+ * Recursively process React children to inject citation badges and inline logos into text nodes.
  */
 function processChildren(children: ReactNode, sectionId: string): ReactNode {
   if (typeof children === 'string') {
-    // Check if this text has [N] citations
-    if (/\[\d+\]/.test(children)) {
-      return <>{injectCitations(children, sectionId)}</>
-    }
-    return children
+    // First inject inline logos, then inject citations into the resulting text segments
+    const logoParts = injectInlineLogos(children)
+    // Now process each part for citations
+    return (
+      <>
+        {logoParts.map((part, i) => {
+          if (typeof part === 'string' && /\[\d+\]/.test(part)) {
+            return <span key={`c-${i}`}>{injectCitations(part, sectionId)}</span>
+          }
+          return typeof part === 'string' ? <span key={`t-${i}`}>{part}</span> : part
+        })}
+      </>
+    )
   }
   if (Array.isArray(children)) {
     return children.map((child, i) => (
@@ -301,6 +341,11 @@ export default function BriefingPage() {
           </div>
         </div>
         <DomainToggle domain={domain} onChange={setDomain} />
+      </div>
+
+      {/* Maturity Radar */}
+      <div className="mb-6">
+        <RadarWidget domain={domain} />
       </div>
 
       {/* Priority Sections */}
