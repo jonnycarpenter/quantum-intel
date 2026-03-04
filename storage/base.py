@@ -100,7 +100,6 @@ class ClassifiedArticle:
                 "roi_confirmed", "roi_type", "roi_metrics",
                 "industries", "departments", "ai_technology",
                 "implementation_scale",
-                "reality_check_score", "reality_check_reasoning",
             ]
             for key in roi_keys:
                 val = classification.raw_response.get(key)
@@ -305,13 +304,6 @@ class StorageBackend(ABC):
         """Get quotes for a specific ticker."""
         ...
 
-    @abstractmethod
-    async def search_earnings_quotes(
-        self, query: str, ticker: Optional[str] = None, limit: int = 30
-    ) -> List[ExtractedQuote]:
-        """Search earnings quotes by text."""
-        ...
-
     # =========================================================================
     # SEC Operations (Phase 4A)
     # =========================================================================
@@ -338,13 +330,6 @@ class StorageBackend(ABC):
         self, ticker: str, limit: int = 50
     ) -> List[SecNugget]:
         """Get nuggets for a specific ticker."""
-        ...
-
-    @abstractmethod
-    async def search_sec_nuggets(
-        self, query: str, ticker: Optional[str] = None, limit: int = 30
-    ) -> List[SecNugget]:
-        """Search SEC nuggets by text."""
         ...
 
     # =========================================================================

@@ -1,0 +1,101 @@
+{
+  "id": "patent/US11494681B1/en",
+  "rank": 0,
+  "patent": {
+    "title": " Quantum instruction compiler for optimizing hybrid algorithms",
+    "snippet": " A compiler for a gate-based superconducting quantum computer compiles hybrid classical/quantum algorithms for quantum processing cells with different configurations. The compiler inputs the algorithm and outputs code in a target language executable by a quantum processing cell of a quantum &hellip;",
+    "priority_date": "2017-12-14",
+    "filing_date": "2018-12-13",
+    "grant_date": "2022-11-08",
+    "publication_date": "2022-11-08",
+    "inventor": "Eric Christopher Peterson",
+    "assignee": "Rigetti & Co, Llc",
+    "publication_number": "US11494681B1",
+    "language": "en",
+    "thumbnail": "84/e0/89/19e74a95805dc7/US11494681-20221108-D00000.png",
+    "pdf": "23/d0/ad/8fad71328e03d1/US11494681.pdf",
+    "figures": [
+      {
+        "thumbnail": "ea/22/ff/f1522bf37f1122/US11494681-20221108-D00000.png",
+        "full": "bb/6e/5c/961b882801f91c/US11494681-20221108-D00000.png"
+      },
+      {
+        "thumbnail": "ce/df/53/e0d3a709fff3ca/US11494681-20221108-D00001.png",
+        "full": "99/10/af/c58e962ce2310b/US11494681-20221108-D00001.png"
+      },
+      {
+        "thumbnail": "85/67/69/60e140e4f3df60/US11494681-20221108-D00002.png",
+        "full": "3b/07/d5/4e9e1ab4555dea/US11494681-20221108-D00002.png"
+      },
+      {
+        "thumbnail": "6b/f8/4e/cade8b09733b6a/US11494681-20221108-D00003.png",
+        "full": "f6/5f/00/fa2e84907e914f/US11494681-20221108-D00003.png"
+      },
+      {
+        "thumbnail": "91/a5/e4/0dd195f247fb3a/US11494681-20221108-D00004.png",
+        "full": "c5/5a/4f/76479e0fad4e46/US11494681-20221108-D00004.png"
+      },
+      {
+        "thumbnail": "d2/d0/7c/84d440888ea7d1/US11494681-20221108-D00005.png",
+        "full": "46/27/05/a4c6e092fba458/US11494681-20221108-D00005.png"
+      },
+      {
+        "thumbnail": "3f/a6/08/ec3f3922643e9f/US11494681-20221108-D00006.png",
+        "full": "93/6d/ea/d55f9fb2687aef/US11494681-20221108-D00006.png"
+      },
+      {
+        "thumbnail": "bc/a2/09/e2e9f3b1fb10db/US11494681-20221108-D00007.png",
+        "full": "08/0f/61/a844f4b1baf29c/US11494681-20221108-D00007.png"
+      },
+      {
+        "thumbnail": "19/ee/cc/b644bf347ac16a/US11494681-20221108-D00008.png",
+        "full": "ef/6f/f3/9dced58df6057e/US11494681-20221108-D00008.png"
+      },
+      {
+        "thumbnail": "8d/b5/3c/a998157ae000bd/US11494681-20221108-D00009.png",
+        "full": "61/1a/b2/fd123e2d1187e9/US11494681-20221108-D00009.png"
+      },
+      {
+        "thumbnail": "a2/32/9b/0140de40ea042e/US11494681-20221108-D00010.png",
+        "full": "6f/9a/8a/4ac6948aa8d3e7/US11494681-20221108-D00010.png"
+      },
+      {
+        "thumbnail": "15/7f/9a/2cb75dd2dc2602/US11494681-20221108-D00011.png",
+        "full": "85/8c/fe/7b3432c0507604/US11494681-20221108-D00011.png"
+      },
+      {
+        "thumbnail": "06/5c/3b/0aeede58c3d941/US11494681-20221108-D00012.png",
+        "full": "ec/31/65/75252ffd053585/US11494681-20221108-D00012.png"
+      },
+      {
+        "thumbnail": "b1/62/b3/fd6ddf17205ee4/US11494681-20221108-D00013.png",
+        "full": "9b/3f/d5/ec1640f42b6b3f/US11494681-20221108-D00013.png"
+      },
+      {
+        "thumbnail": "1d/e9/8a/32a02802972ddd/US11494681-20221108-D00014.png",
+        "full": "5a/20/52/6529f8a9ded13a/US11494681-20221108-D00014.png"
+      },
+      {
+        "thumbnail": "55/96/55/0ee798d3e2f175/US11494681-20221108-D00015.png",
+        "full": "87/22/d6/81149f3f633219/US11494681-20221108-D00015.png"
+      }
+    ],
+    "family_metadata": {
+      "aggregated": {
+        "country_status": [
+          {
+            "country_code": "US",
+            "best_patent_stage": {
+              "state": "ACTIVE"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "is_similar_document": false,
+  "entity_matches": {
+    "additional": 0
+  },
+  "measure_matches": {}
+}

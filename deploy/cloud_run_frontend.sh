@@ -15,7 +15,7 @@ REGION="us-central1"
 SERVICE_NAME="quantum-intel-frontend"
 IMAGE="us-central1-docker.pkg.dev/${PROJECT_ID}/quantum-intel/quantum-intel-frontend:latest"
 
-COMMON_ENV="GCP_PROJECT_ID=${PROJECT_ID},BQ_DATASET_ID=quantum_ai_hub,GCP_REGION=${REGION}"
+COMMON_ENV="GCP_PROJECT_ID=${PROJECT_ID},BQ_DATASET_ID=quantum_ai_hub,GCP_REGION=${REGION},STORAGE_BACKEND=bigquery"
 
 echo "=== Building and pushing UI Docker image ==="
 gcloud builds submit . \

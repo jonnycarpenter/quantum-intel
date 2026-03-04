@@ -37,7 +37,9 @@ steps:
           quantum-weekly-briefing \
           ai-weekly-briefing \
           quantum-digest \
-          ai-digest; do
+          ai-digest \
+          quantum-case-studies \
+          ai-case-studies; do
           echo "Updating $${JOB} -> $${IMAGE}"
           gcloud run jobs update "$${JOB}" \
             --image "$${IMAGE}" \

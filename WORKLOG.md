@@ -122,13 +122,6 @@
 - **17 Cloud Run Jobs, 17 Cloud Scheduler entries — all ENABLED and Ready**
 - Full parity: every pipeline has both quantum and AI domain jobs
 
-### Session 13 (Mar 2026) — Signal Filters & Govt Grants
-- Added `reality_check_score` (1-100) and `reality_check_reasoning` to classifier prompts to filter hype.
-- Injected `reality_check_score` into article `metadata` JSON blob in BigQuery to prevent schema breaking changes.
-- Surfaced "Reality Check" UI badge in frontend React `ArticleCard`.
-- Added new `government_grants_contracts` theme directly into `exa_queries.py` and `exa_ai_queries.py`.
-- Updated `experience_enhancement.md` to mark Item 6 and Item 10 as COMPLETED.
-
 ---
 
 ## Next Up

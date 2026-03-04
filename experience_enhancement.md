@@ -7,7 +7,7 @@ This document serves as a living backlog for future enhancements, product ideas,
 - **Execution:** When a milestone is ingested, an agent synthesizes 3 bullet points: *Time to Market Impact*, *Disrupted Industries*, and *Investment Signal*.
 - **UI Payoff:** Toggleable "Executive Summary" on news cards that skips technical jargon and focuses purely on business impact, ROI, and risk.
 
-## 2. Quantum Advantage / AI Maturity Radar
+## 2. Quantum Advantage / AI Maturity Radar [COMPLETED]
 - **Concept:** Visual readiness indicators for both domains.
 - **Execution (Quantum):** Track the march toward Fault-Tolerant Quantum Computing (FTQC) across modalities (Superconducting, Trapped Ion, Neutral Atom) based on ArXiv/Exa frequency and sentiment.
 - **Execution (AI):** An "Enterprise Adoption Landscape" matrix (Hype vs. Tangible ROI) using Phase 6 case studies to show what is actually working in production.
@@ -42,7 +42,7 @@ This document serves as a living backlog for future enhancements, product ideas,
 - **Sources:** Crunchbase API, Dealroom API, or parsing funding announcement PRs via Exa.
 - **Why it matters:** Reveals whether VCs are prioritizing Quantum Error Correction over Photonic startups, or Foundation Models over Application-Layer startups this quarter.
 
-## 9. Patent Filings (Core IP Tracking)
+## 9. Patent Filings (Core IP Tracking) [COMPLETED]
 - **Concept:** Track what hardware modality or algorithm major players are actually betting their R&D budget on.
 - **Sources:** Google Patents API or USPTO Data.
 - **Why it matters:** Cuts through marketing language. Patents are the ultimate moat in hard tech.

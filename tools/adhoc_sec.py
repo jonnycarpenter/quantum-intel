@@ -13,7 +13,7 @@ from typing import Optional
 from fetchers.sec import SecFetcher
 from storage import get_storage
 from processing.quote_extractor import QuoteExtractor
-from config.settings import AppConfig
+from config.settings import SecConfig
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class AdHocSecTool:
         
         # We need the quote extractor to fully process the pipeline 
         # so it saves to the BigQuery analytics tables
-        config = AppConfig()
+        config = SecConfig()
         self.extractor = QuoteExtractor(config=config)
 
     async def execute(

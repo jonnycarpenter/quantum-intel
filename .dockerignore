@@ -17,7 +17,8 @@ tests/
 deploy/
 ingestion_REFERENCE_template/
 frontend/
-frontend-react/
+frontend-react/node_modules/
+frontend-react/dist/
 
 # Build / cache
 __pycache__/

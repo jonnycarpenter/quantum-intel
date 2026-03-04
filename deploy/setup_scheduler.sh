@@ -4,7 +4,7 @@
 # ============================================================================
 # Creates Cloud Scheduler jobs to trigger Cloud Run Jobs on cadence.
 #
-# 17 Cloud Run Jobs, 17 Scheduler entries (all times UTC):
+# 19 Cloud Run Jobs, 19 Scheduler entries (all times UTC):
 #
 #   DAILY
 #   06:00 daily     — Quantum RSS
@@ -30,6 +30,10 @@
 #   11:30 1st/month — AI Earnings
 #   11:00 2nd/month — Quantum SEC filings
 #   11:30 2nd/month — AI SEC filings
+#
+#   WEEKLY (case studies — after source data ingested)
+#   14:00 Sunday    — Quantum Case Studies
+#   14:30 Sunday    — AI Case Studies
 #
 # Usage:
 #   chmod +x deploy/setup_scheduler.sh
@@ -88,6 +92,10 @@ create_schedule "quantum-podcasts-weekly" "0 10 * * 0"    "quantum-podcasts"
 create_schedule "ai-podcasts-weekly"      "30 10 * * 0"   "ai-podcasts"
 create_schedule "ai-briefing-weekly"      "0 12 * * 1"    "ai-weekly-briefing"
 create_schedule "quantum-briefing-weekly" "45 12 * * 1"   "quantum-weekly-briefing"
+
+# Weekly (case studies — after other pipelines ingest source data)
+create_schedule "quantum-case-studies-weekly" "0 14 * * 0"   "quantum-case-studies"
+create_schedule "ai-case-studies-weekly"      "30 14 * * 0"  "ai-case-studies"
 
 # Monthly
 create_schedule "quantum-earnings-monthly" "0 11 1 * *"   "quantum-earnings"

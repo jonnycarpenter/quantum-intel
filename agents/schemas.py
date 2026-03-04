@@ -535,3 +535,4 @@ class AgentResponse:
     sources: List[Dict[str, Any]] = field(default_factory=list)
     tool_calls_made: int = 0
     model: str = ""
+    frontend_command: Optional[Dict[str, Any]] = None

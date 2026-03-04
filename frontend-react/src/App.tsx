@@ -11,6 +11,7 @@ import {
   PanelRightClose,
   PanelRightOpen,
   Bot,
+  FileBadge,
 } from 'lucide-react'
 
 import BriefingPage from './pages/BriefingPage'
@@ -19,6 +20,7 @@ import MarketsPage from './pages/MarketsPage'
 import ResearchPage from './pages/ResearchPage'
 import CaseStudiesPage from './pages/CaseStudiesPage'
 import FilingsPage from './pages/FilingsPage'
+import PatentsPage from './pages/PatentsPage'
 import SettingsPage from './pages/SettingsPage'
 import ChatPanel from './components/ChatPanel'
 import StatusBar from './components/StatusBar'
@@ -31,6 +33,7 @@ const NAV_ITEMS = [
   { path: '/research', label: 'Research', icon: FlaskConical },
   { path: '/case-studies', label: 'Case Studies', icon: Lightbulb },
   { path: '/filings', label: 'Filings', icon: FileText },
+  { path: '/patents', label: 'Patents', icon: FileBadge },
 ]
 
 export default function App() {
@@ -104,6 +107,7 @@ export default function App() {
             <Route path="/research" element={<ResearchPage />} />
             <Route path="/case-studies" element={<CaseStudiesPage />} />
             <Route path="/filings" element={<FilingsPage />} />
+            <Route path="/patents" element={<PatentsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>

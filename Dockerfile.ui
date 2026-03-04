@@ -1,0 +1,38 @@
+# Stage 1: Build the React frontend
+FROM node:20 AS frontend-builder
+WORKDIR /app/frontend-react
+
+# Copy package files and install dependencies
+COPY frontend-react/package.json frontend-react/package-lock.json* ./
+RUN npm install
+
+# Copy the rest of the frontend code and build
+COPY frontend-react/ ./
+RUN npm run build
+
+# Stage 2: Build the Python backend and serve
+FROM python:3.11-slim
+WORKDIR /app
+
+# System dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir fastapi uvicorn
+
+# Copy backend code
+COPY . .
+
+# Copy the built React UI from Stage 1 into the place FastAPI expects it
+COPY --from=frontend-builder /app/frontend-react/dist /app/frontend-react/dist
+
+ENV PYTHONPATH=/app
+ENV PORT=8080
+EXPOSE 8080
+
+# Start FastAPI server
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]

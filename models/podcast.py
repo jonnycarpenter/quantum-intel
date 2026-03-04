@@ -173,6 +173,64 @@ class PodcastTranscript:
     def unique_key(self) -> str:
         return f"{self.podcast_id}:{self.episode_title[:50]}"
 
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "PodcastTranscript":
+        """Create from dictionary (e.g. BigQuery row)."""
+        # Handle datetime fields
+        def _parse_dt(val):
+            if val is None:
+                return None
+            if isinstance(val, datetime):
+                return val
+            if isinstance(val, str) and val:
+                try:
+                    return datetime.fromisoformat(val)
+                except ValueError:
+                    return None
+            return None
+
+        # Handle speakers list (may be JSON string or native list)
+        speakers = data.get("speakers", [])
+        if isinstance(speakers, str):
+            import json
+            try:
+                speakers = json.loads(speakers)
+            except (json.JSONDecodeError, TypeError):
+                speakers = []
+
+        # Handle hosts list
+        hosts = data.get("hosts", [])
+        if isinstance(hosts, str):
+            hosts = [h.strip() for h in hosts.split(",") if h.strip()]
+
+        return cls(
+            transcript_id=data.get("transcript_id", str(uuid.uuid4())),
+            episode_id=data.get("episode_id", ""),
+            podcast_id=data.get("podcast_id", ""),
+            podcast_name=data.get("podcast_name", ""),
+            episode_title=data.get("episode_title", ""),
+            episode_url=data.get("episode_url"),
+            audio_url=data.get("audio_url"),
+            published_at=_parse_dt(data.get("published_at")),
+            full_text=data.get("full_text", ""),
+            formatted_text=data.get("formatted_text"),
+            word_count=int(data.get("word_count", 0)),
+            char_count=int(data.get("char_count", 0)),
+            duration_seconds=data.get("duration_seconds"),
+            has_speaker_labels=bool(data.get("has_speaker_labels", False)),
+            speaker_count=int(data.get("speaker_count", 0)),
+            speakers=speakers,
+            transcript_source=data.get("transcript_source", TranscriptSource.ASSEMBLYAI.value),
+            status=EpisodeStatus(data["status"]) if data.get("status") else EpisodeStatus.PENDING,
+            transcription_cost_usd=float(data.get("transcription_cost_usd", 0.0)),
+            guest_name=data.get("guest_name"),
+            guest_title=data.get("guest_title"),
+            guest_company=data.get("guest_company"),
+            hosts=hosts,
+            ingested_at=_parse_dt(data.get("ingested_at")) or datetime.now(timezone.utc),
+            transcribed_at=_parse_dt(data.get("transcribed_at")),
+        )
+
 
 @dataclass
 class PodcastQuote:

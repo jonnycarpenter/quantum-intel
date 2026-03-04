@@ -164,6 +164,18 @@ create_job "ai-digest" \
   "scripts/run_digest.py,--domain,ai,--use-llm,--save" \
   "ANTHROPIC_API_KEY=anthropic-api-key:latest"
 
+# --- Quantum Case Studies (weekly) ---
+create_job "quantum-case-studies" \
+  "scripts/run_case_studies.py,--domain,quantum,--sources,all,--max-items,20" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest" \
+  "" "4Gi" "2" "3600"
+
+# --- AI Case Studies (weekly) ---
+create_job "ai-case-studies" \
+  "scripts/run_case_studies.py,--domain,ai,--sources,all,--max-items,20" \
+  "ANTHROPIC_API_KEY=anthropic-api-key:latest" \
+  "" "4Gi" "2" "3600"
+
 echo ""
 echo "=== All Cloud Run Jobs created! ==="
 echo ""

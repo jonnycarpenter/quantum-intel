@@ -1222,7 +1222,7 @@ class BigQueryStorage(StorageBackend):
                 "podcast_id": data["podcast_id"],
                 "podcast_name": data["podcast_name"],
                 "episode_title": data["episode_title"],
-                "published_at": data["published_at"],
+                "published_at": data["published_at"] or None,
                 "extracted_at": data["extracted_at"],
                 "extraction_model": data["extraction_model"],
                 "extraction_confidence": data["extraction_confidence"],
@@ -1630,3 +1630,63 @@ class BigQueryStorage(StorageBackend):
             lambda: list(self.client.query(query, job_config=job_config).result())
         )
         return len(rows) > 0
+
+    # =========================================================================
+    # Patents (Phase 9)
+    # =========================================================================
+
+    async def save_patents(self, patents: List[Any]) -> int:
+        """Save extracted patents to BigQuery."""
+        if not patents:
+            return 0
+        
+        rows = []
+        for p in patents:
+            rows.append({
+                "id": p.id,
+                "title": p.title,
+                "abstract": p.abstract,
+                "assignee": p.assignee,
+                "inventors": p.inventors,
+                "filing_date": p.filing_date,
+                "publication_date": p.publication_date,
+                "patent_url": p.patent_url,
+                "domain": p.domain,
+                "relevance_score": p.relevance_score,
+                "innovation_category": p.innovation_category,
+                "created_at": p.created_at
+            })
+            
+        return await self._insert_if_not_exists("patents", rows, ["id"])
+
+    async def get_recent_patents(
+        self, domain: Optional[str] = None, limit: int = 50
+    ) -> List[Any]:
+        """Fetch recent patents from BigQuery."""
+        from models.patent import Patent
+        params = [bigquery.ScalarQueryParameter("lim", "INT64", limit)]
+        
+        if domain:
+            query = (
+                f"SELECT * FROM {self._table('patents')} "
+                f"WHERE domain = @domain ORDER BY publication_date DESC, filing_date DESC LIMIT @lim"
+            )
+            params.append(bigquery.ScalarQueryParameter("domain", "STRING", domain))
+        else:
+            query = (
+                f"SELECT * FROM {self._table('patents')} "
+                f"ORDER BY publication_date DESC, filing_date DESC LIMIT @lim"
+            )
+            
+        job_config = bigquery.QueryJobConfig(query_parameters=params)
+        rows = await self._run_sync(
+            lambda: list(self.client.query(query, job_config=job_config).result())
+        )
+        
+        results = []
+        for row in rows:
+            data = dict(row)
+            data["inventors"] = self._ensure_list(data.get("inventors"))
+            results.append(Patent(**data))
+            
+        return results

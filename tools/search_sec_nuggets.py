@@ -2,13 +2,12 @@ import json
 import logging
 from typing import Optional
 
-from tools.base import BaseTool
 from storage import get_storage
 
 logger = logging.getLogger(__name__)
 
 
-class SearchSecNuggetsTool(BaseTool):
+class SearchSecNuggetsTool:
     """
     Tool for searching historically extracted SEC nuggets.
     """

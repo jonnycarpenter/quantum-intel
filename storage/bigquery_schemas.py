@@ -562,6 +562,62 @@ CREATE TABLE IF NOT EXISTS `{table}` (
 """
 
 # ============================================================================
+# API Keys (Proxy Storage)
+# ============================================================================
+
+BQ_API_KEYS_DDL = """
+CREATE TABLE IF NOT EXISTS `{table}` (
+  api_key STRING NOT NULL,
+  client_name STRING NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  last_used_at TIMESTAMP,
+  is_active BOOL NOT NULL,
+  tier STRING,
+  permissions ARRAY<STRING>,
+  allowed_domains ARRAY<STRING>
+)
+"""
+
+# ============================================================================
+# Maturity Radar Metrics
+# ============================================================================
+
+BQ_MATURITY_RADAR_METRICS_DDL = """
+CREATE TABLE IF NOT EXISTS `{table}` (
+  calculated_date DATE NOT NULL,
+  domain STRING NOT NULL,
+  category_name STRING NOT NULL,
+  signal_score FLOAT64 NOT NULL,
+  article_count INT64 NOT NULL,
+  paper_count INT64 NOT NULL,
+  avg_relevance FLOAT64 NOT NULL,
+  velocity_trend FLOAT64
+)
+"""
+
+# ============================================================================
+# Patents (Phase 9)
+# ============================================================================
+
+BQ_PATENTS_DDL = """
+CREATE TABLE IF NOT EXISTS `{table}` (
+  id STRING NOT NULL,
+  title STRING NOT NULL,
+  abstract STRING,
+  assignee STRING,
+  inventors ARRAY<STRING>,
+  filing_date STRING,
+  publication_date STRING,
+  patent_url STRING,
+  domain STRING,
+  relevance_score FLOAT64,
+  innovation_category STRING,
+  created_at TIMESTAMP NOT NULL
+)
+"""
+
+
+# ============================================================================
 # Table registry — maps logical name to DDL template
 # ============================================================================
 
@@ -584,6 +640,9 @@ BQ_TABLE_REGISTRY = {
     "case_studies": BQ_CASE_STUDIES_DDL,
     "case_study_embeddings": BQ_CASE_STUDY_EMBEDDINGS_DDL,
     "funding_events": BQ_FUNDING_EVENTS_DDL,
+    "api_keys": BQ_API_KEYS_DDL,
+    "maturity_radar_metrics": BQ_MATURITY_RADAR_METRICS_DDL,
+    "patents": BQ_PATENTS_DDL,
 }
 
 

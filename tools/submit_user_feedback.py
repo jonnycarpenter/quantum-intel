@@ -13,7 +13,6 @@ from typing import Optional
 from datetime import datetime, timezone
 
 from google.cloud import bigquery
-from config.settings import GCP_PROJECT_ID, BIGQUERY_DATASET
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +25,14 @@ class SubmitUserFeedbackTool:
     def _ensure_bq_client(self) -> None:
         """Lazy-initialize BigQuery client."""
         if self.bq_client is None:
-            self.bq_client = bigquery.Client(project=GCP_PROJECT_ID)
+            project_id = os.getenv("GCP_PROJECT_ID", "gen-lang-client-0436975498")
+            self.bq_client = bigquery.Client(project=project_id)
 
     def _table(self) -> str:
         """Get fully qualified table name for feedback."""
-        return f"{GCP_PROJECT_ID}.{BIGQUERY_DATASET}.user_feedback"
+        project_id = os.getenv("GCP_PROJECT_ID", "gen-lang-client-0436975498")
+        dataset = os.getenv("BIGQUERY_DATASET", "quantum_ai_hub")
+        return f"{project_id}.{dataset}.user_feedback"
 
     async def execute(
         self,

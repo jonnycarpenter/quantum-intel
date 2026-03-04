@@ -28,8 +28,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from api.routes import articles, digest, stocks, papers, earnings, sec, stats, case_studies, logo
-
+from api.routes import articles, digest, stocks, papers, earnings, sec, stats, case_studies, logo, radar, patents, chat
 app = FastAPI(
     title="Quantum Intelligence Hub API",
     description="REST API for the Quantum Intelligence Hub — multi-domain intelligence platform",
@@ -59,6 +58,9 @@ app.include_router(sec.router, prefix="/api/sec", tags=["SEC Filings"])
 app.include_router(stats.router, prefix="/api/stats", tags=["Stats"])
 app.include_router(case_studies.router, prefix="/api/case-studies", tags=["Case Studies"])
 app.include_router(logo.router, prefix="/api/logo", tags=["Logo"])
+app.include_router(radar.router, prefix="/api/radar", tags=["Radar"])
+app.include_router(patents.router, prefix="/api/patents", tags=["Patents"])
+app.include_router(chat.router, prefix="/api/chat", tags=["Chat"])
 
 
 @app.get("/api/health")

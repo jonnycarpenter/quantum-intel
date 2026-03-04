@@ -33,11 +33,6 @@ export interface Article {
   use_case_domains: string[]
   confidence: number
   domain?: string
-  metadata?: {
-    reality_check_score?: number
-    reality_check_reasoning?: string
-    [key: string]: any
-  }
 }
 
 export interface DigestData {

@@ -318,6 +318,61 @@ class ResilientAsyncClient:
         logger.error(f"[LLM] All {self.max_retries} retries failed | model: {model}")
         raise last_error or Exception("All retries failed")
 
+    async def messages_stream(
+        self,
+        model: str,
+        max_tokens: int,
+        messages: Optional[List[Dict[str, Any]]] = None,
+        system: Optional[str] = None,
+        temperature: float = 0.0,
+        **kwargs,
+    ) -> Any:
+        """
+        Create a streaming message response.
+        Uses httpx directly to stream SSE events.
+        """
+        payload: Dict[str, Any] = {
+            "model": model,
+            "max_tokens": max_tokens,
+            "stream": True,
+        }
+        if not self._is_local_proxy:
+            payload["temperature"] = temperature
+        if messages:
+            payload["messages"] = messages
+        if system:
+            payload["system"] = system
+        
+        for k, v in kwargs.items():
+            if k not in ("stream",):
+                payload[k] = v
+
+        client = httpx.AsyncClient(timeout=self.timeout, http2=False)
+        try:
+            async with client.stream(
+                "POST", 
+                self._messages_url, 
+                headers=self._headers, 
+                json=payload
+            ) as response:
+                if response.status_code >= 400:
+                    text = await response.aread()
+                    logger.error(f"[LLM] Stream error {response.status_code}: {text}")
+                    raise Exception(f"API stream error {response.status_code}: {text}")
+
+                async for line in response.aiter_lines():
+                    if line.startswith("data: "):
+                        data_str = line[6:].strip()
+                        if data_str == "[DONE]":
+                            break
+                        try:
+                            yield json.loads(data_str)
+                        except json.JSONDecodeError:
+                            pass
+        finally:
+            await client.aclose()
+
+
     def extract_text(self, response: Any) -> str:
         """Extract text content from API response."""
         if hasattr(response, "content") and response.content:

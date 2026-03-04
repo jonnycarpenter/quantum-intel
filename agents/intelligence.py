@@ -174,6 +174,8 @@ class IntelligenceAgent:
             has_tool_use = False
             text_parts: List[str] = []
             tool_results: List[Dict[str, Any]] = []
+            frontend_command: Optional[Dict[str, Any]] = None
+
 
             for block in response.content:
                 if block.type == "text":
@@ -201,11 +203,20 @@ class IntelligenceAgent:
                     # Track sources from tool results
                     self._extract_sources(tool_name, result, sources)
 
+                    # Extract frontend command
+                    try:
+                        data = json.loads(result)
+                        if "__FRONTEND_COMMAND__" in data:
+                            frontend_command = data["__FRONTEND_COMMAND__"]
+                    except Exception:
+                        pass
+
                     tool_results.append({
                         "type": "tool_result",
                         "tool_use_id": tool_id,
                         "content": result,
                     })
+
 
             if has_tool_use:
                 # Append assistant response and tool results to messages
@@ -223,6 +234,7 @@ class IntelligenceAgent:
                     sources=sources,
                     tool_calls_made=tool_calls_made,
                     model=self.model,
+                    frontend_command=frontend_command,
                 )
 
         # Max tool calls reached — return whatever text we have
@@ -239,6 +251,165 @@ class IntelligenceAgent:
             tool_calls_made=tool_calls_made,
             model=self.model,
         )
+
+    async def answer_stream(
+        self,
+        user_message: str,
+        conversation_history: Optional[List[Dict[str, Any]]] = None,
+        route_hint: Optional[str] = None,
+        domain: Optional[str] = None,
+        **kwargs,
+    ):
+        """
+        Streaming version of answer(). Yields Server-Sent Events (SSE) data chunks.
+        """
+        active_domain = domain or self.domain
+        logger.info(f"[AGENT] Streaming query: '{user_message[:80]}...' (domain={active_domain})")
+
+        system = INTELLIGENCE_PROMPTS.get(active_domain, INTELLIGENCE_AGENT_SYSTEM_PROMPT)
+        session_id = kwargs.get("session_id", "default")
+        
+        scratchpad_context = self.scratchpad.get_context(session_id)
+        if scratchpad_context:
+            system += f"\n\n<scratchpad_memory>\n{scratchpad_context}\n</scratchpad_memory>"
+
+        compacted_summary = kwargs.get("compacted_summary")
+        if compacted_summary:
+            system += f"\n\n<strategic_recap>\n{compacted_summary}\n</strategic_recap>"
+
+        hint = ROUTE_HINTS.get(route_hint, "")
+        if hint:
+            system += f"\n\nROUTE HINT: {hint}"
+
+        messages: List[Dict[str, Any]] = []
+        if conversation_history:
+            messages.extend(conversation_history)
+        messages.append({"role": "user", "content": user_message})
+
+        tool_calls_made = 0
+        sources = []
+        frontend_command = None
+
+        while tool_calls_made < self.max_tool_calls:
+            yield {"event": "thinking", "data": {"iteration": tool_calls_made + 1}}
+            
+            try:
+                stream = self.llm.messages_stream(
+                    model=self.model,
+                    max_tokens=2048,
+                    system=system,
+                    messages=messages,
+                    tools=ALL_INTELLIGENCE_TOOLS,
+                    temperature=self.temperature,
+                )
+                
+                has_tool_use = False
+                current_tool = None
+                tool_results = []
+                assistant_content = []
+                
+                async for chunk in stream:
+                    event_type = chunk.get("type")
+                    
+                    if event_type == "content_block_start":
+                        block = chunk.get("content_block", {})
+                        if block.get("type") == "tool_use":
+                            has_tool_use = True
+                            current_tool = {
+                                "id": block.get("id"),
+                                "name": block.get("name"),
+                                "input": ""
+                            }
+                            yield {"event": "tool_call", "data": {"tool": current_tool["name"]}}
+                        elif block.get("type") == "text":
+                            assistant_content.append({"type": "text", "text": ""})
+                            
+                    elif event_type == "content_block_delta":
+                        delta = chunk.get("delta", {})
+                        if delta.get("type") == "text_delta":
+                            text = delta.get("text", "")
+                            if not assistant_content or assistant_content[-1]["type"] != "text":
+                                assistant_content.append({"type": "text", "text": text})
+                            else:
+                                assistant_content[-1]["text"] += text
+                            yield {"event": "text_delta", "data": {"text": text}}
+                        elif delta.get("type") == "input_json_delta":
+                            if current_tool:
+                                current_tool["input"] += delta.get("partial_json", "")
+                                
+                    elif event_type == "content_block_stop":
+                        if current_tool:
+                            # Finished streaming tool input
+                            tool_calls_made += 1
+                            try:
+                                tool_input_dict = json.loads(current_tool["input"])
+                            except json.JSONDecodeError:
+                                tool_input_dict = {}
+                                
+                            # Convert string input back to dict for the assistant message
+                            assistant_tool_use = {
+                                "type": "tool_use",
+                                "id": current_tool["id"],
+                                "name": current_tool["name"],
+                                "input": tool_input_dict
+                            }
+                            assistant_content.append(assistant_tool_use)
+                            
+                            tool_name = current_tool["name"]
+                            if tool_name == "corpus_search":
+                                tool_input_dict["domain"] = active_domain
+                                
+                            logger.info(f"[AGENT] Executing {tool_name}")
+                            result = await self._execute_tool(tool_name, tool_input_dict)
+                            self._extract_sources(tool_name, result, sources)
+                            
+                            try:
+                                data = json.loads(result)
+                                if "__FRONTEND_COMMAND__" in data:
+                                    frontend_command = data["__FRONTEND_COMMAND__"]
+                            except Exception:
+                                pass
+                                
+                            tool_results.append({
+                                "type": "tool_result",
+                                "tool_use_id": current_tool["id"],
+                                "content": result,
+                            })
+                            current_tool = None
+                            
+                if has_tool_use:
+                    # Append history for next iteration
+                    if assistant_content:
+                        messages.append({"role": "assistant", "content": assistant_content})
+                    messages.append({"role": "user", "content": tool_results})
+                else:
+                    # Done
+                    yield {
+                        "event": "complete", 
+                        "data": {
+                            "session_id": session_id,
+                            "tools_called": tool_calls_made,
+                            "frontend_command": frontend_command,
+                            "sources": sources
+                        }
+                    }
+                    return
+                    
+            except Exception as e:
+                logger.error(f"[AGENT] Stream error: {e}")
+                yield {"event": "error", "data": {"error": str(e)}}
+                return
+                
+        yield {
+            "event": "complete", 
+            "data": {
+                "session_id": session_id,
+                "tools_called": tool_calls_made,
+                "frontend_command": frontend_command,
+                "sources": sources,
+                "warning": "Max tool calls reached"
+            }
+        }
 
     async def _execute_tool(self, tool_name: str, tool_input: Dict[str, Any]) -> str:
         """Execute a tool and return its result string."""

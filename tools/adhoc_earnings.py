@@ -13,7 +13,7 @@ from typing import Optional
 from fetchers.earnings import EarningsFetcher
 from storage import get_storage
 from processing.podcast_quote_extractor import PodcastQuoteExtractor
-from config.settings import AppConfig
+from config.settings import EarningsConfig
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +27,7 @@ class AdHocEarningsTool:
         
         # We need the quote extractor to fully process the pipeline 
         # so it saves to the BigQuery analytics tables
-        config = AppConfig()
-        self.extractor = PodcastQuoteExtractor(config=config)
+        self.extractor = PodcastQuoteExtractor()
 
     async def execute(
         self,
