@@ -44,7 +44,6 @@ steps:
       - '8080'
 
 images:
-  - 'us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel-frontend:$SHORT_SHA'
   - 'us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel-frontend:latest'
 
 options:
