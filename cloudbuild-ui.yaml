@@ -4,8 +4,6 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel-frontend:$SHORT_SHA'
-      - '-t'
       - 'us-central1-docker.pkg.dev/$PROJECT_ID/quantum-intel/quantum-intel-frontend:latest'
       - '-f'
       - 'Dockerfile.ui'
