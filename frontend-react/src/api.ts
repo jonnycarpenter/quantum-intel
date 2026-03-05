@@ -202,6 +202,23 @@ export interface RegulatoryNugget {
   fiscal_year: number
 }
 
+// ─── Patent Types ─────────────────────────────────────
+
+export interface Patent {
+  id: string
+  title: string
+  abstract: string
+  assignee: string
+  inventors: string[]
+  filing_date: string
+  publication_date: string
+  patent_url: string
+  domain: string
+  relevance_score: number | null
+  innovation_category: string | null
+  created_at: string
+}
+
 // ─── Case Study Types ─────────────────────────────────
 
 export interface CaseStudy {
@@ -250,6 +267,82 @@ export interface CaseStudyStats {
   by_source_type: Record<string, number>
   companies: string[]
   industries: string[]
+}
+
+// ─── Podcast Quote Types ──────────────────────────────
+
+export interface PodcastQuote {
+  quote_id: string
+  transcript_id: string
+  episode_id: string
+  quote_text: string
+  context_before: string
+  context_after: string
+  speaker_name: string
+  speaker_role: string
+  speaker_title: string | null
+  speaker_company: string | null
+  quote_type: string
+  themes: string
+  sentiment: string
+  companies_mentioned: string
+  technologies_mentioned: string
+  people_mentioned: string
+  relevance_score: number
+  is_quotable: boolean
+  quotability_reason: string
+  podcast_id: string
+  podcast_name: string
+  episode_title: string
+  published_at: string | null
+  extracted_at: string
+  extraction_confidence: number
+}
+
+// ─── Analytics Types ──────────────────────────────────
+
+export interface TrendDataPoint {
+  date: string
+  count: number
+}
+
+export interface CategoryTrend {
+  category: string
+  data: TrendDataPoint[]
+}
+
+export interface ConceptTerm {
+  text: string
+  weight: number
+  type: 'company' | 'technology' | 'use_case' | 'topic'
+}
+
+// ─── Theme Types ──────────────────────────────────────
+
+export interface Theme {
+  title: string
+  category: string
+  summary: string
+  article_count: number
+  top_companies: string[]
+  categories: string[]
+  source_ids: string[]
+}
+
+export interface ThemesResponse {
+  themes: Theme[]
+  talking_points: string[]
+}
+
+// ─── Insight Builder Types ────────────────────────────
+
+export interface PinnedItem {
+  id: string
+  content_type: 'article' | 'podcast_quote' | 'earnings_quote' | 'sec_nugget' | 'paper' | 'patent'
+  title: string
+  data: Article | PodcastQuote | EarningsQuote | SecNuggetDisplay | Paper | Record<string, unknown>
+  pinned_at: string
+  user_note?: string
 }
 
 // ─── Weekly Briefing Types ────────────────────────────
@@ -478,6 +571,62 @@ export const api = {
     if (domain) sp.set('domain', domain)
     const qs = sp.toString()
     return fetchJson<CaseStudyStats>(`/case-studies/stats${qs ? '?' + qs : ''}`)
+  },
+
+  // Podcast Quotes
+  getPodcastQuotes: (params?: {
+    domain?: Domain
+    quote_type?: string
+    speaker?: string
+    podcast?: string
+    search?: string
+    limit?: number
+  }) => {
+    const sp = new URLSearchParams()
+    if (params?.domain) sp.set('domain', params.domain)
+    if (params?.quote_type) sp.set('quote_type', params.quote_type)
+    if (params?.speaker) sp.set('speaker', params.speaker)
+    if (params?.podcast) sp.set('podcast', params.podcast)
+    if (params?.search) sp.set('search', params.search)
+    if (params?.limit) sp.set('limit', String(params.limit))
+    const qs = sp.toString()
+    return fetchJson<{ quotes: PodcastQuote[]; count: number }>(`/podcasts${qs ? '?' + qs : ''}`)
+  },
+
+  // Article Trends (for analytics bar)
+  getArticleTrends: (params?: { domain?: Domain; days?: number; top_n?: number }) => {
+    const sp = new URLSearchParams()
+    if (params?.domain) sp.set('domain', params.domain)
+    if (params?.days) sp.set('days', String(params.days))
+    if (params?.top_n) sp.set('top_n', String(params.top_n))
+    const qs = sp.toString()
+    return fetchJson<{ trends: CategoryTrend[] }>(`/articles/trends${qs ? '?' + qs : ''}`)
+  },
+
+  // Concept Cloud (for analytics bar)
+  getConceptCloud: (params?: { domain?: Domain; hours?: number }) => {
+    const sp = new URLSearchParams()
+    if (params?.domain) sp.set('domain', params.domain)
+    if (params?.hours) sp.set('hours', String(params.hours))
+    const qs = sp.toString()
+    return fetchJson<{ terms: ConceptTerm[] }>(`/articles/concept-cloud${qs ? '?' + qs : ''}`)
+  },
+
+  // Themes & Talking Points
+  getThemes: (params?: { domain?: Domain; hours?: number; max_themes?: number }) => {
+    const sp = new URLSearchParams()
+    if (params?.domain) sp.set('domain', params.domain)
+    if (params?.hours) sp.set('hours', String(params.hours))
+    if (params?.max_themes) sp.set('max_themes', String(params.max_themes))
+    const qs = sp.toString()
+    return fetchJson<ThemesResponse>(`/articles/themes${qs ? '?' + qs : ''}`)
+  },
+
+  // Patents
+  getRecentPatents: (domain: Domain, limit: number = 50) => {
+    const sp = new URLSearchParams()
+    sp.set('limit', String(limit))
+    return fetchJson<{ status: string; domain: string; data: Patent[] }>(`/patents/recent/${domain}?${sp.toString()}`)
   },
 
   // Stats

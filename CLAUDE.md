@@ -122,5 +122,6 @@ Every core pipeline must have its own README. These live at the project root:
 | `README_PODCASTS.md` | Podcast pipeline (discovery, transcription, quote extraction) |
 | `README_SEC_EARNINGS.md` | SEC EDGAR filings + earnings call transcripts |
 | `README_GCP_DEPLOYMENT.md` | GCP deployment: BigQuery, Vertex AI, Cloud Run, Scheduler |
+| `EXPLORE_REDESIGN_SPEC.md` | Explore tab redesign: unified feed, analytics, Insight Builder |
 
 When adding a new pipeline or major functionality area, create a corresponding `README_<NAME>.md` at the project root.

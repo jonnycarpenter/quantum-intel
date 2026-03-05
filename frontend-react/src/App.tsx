@@ -4,23 +4,17 @@ import {
   Newspaper,
   Compass,
   TrendingUp,
-  FlaskConical,
   Lightbulb,
-  FileText,
   Settings,
   PanelRightClose,
   PanelRightOpen,
   Bot,
-  FileBadge,
 } from 'lucide-react'
 
 import BriefingPage from './pages/BriefingPage'
 import ExplorePage from './pages/ExplorePage'
 import MarketsPage from './pages/MarketsPage'
-import ResearchPage from './pages/ResearchPage'
 import CaseStudiesPage from './pages/CaseStudiesPage'
-import FilingsPage from './pages/FilingsPage'
-import PatentsPage from './pages/PatentsPage'
 import SettingsPage from './pages/SettingsPage'
 import ChatPanel from './components/ChatPanel'
 import StatusBar from './components/StatusBar'
@@ -29,11 +23,8 @@ import AdHocModal from './components/AdHocModal'
 const NAV_ITEMS = [
   { path: '/', label: 'Briefing', icon: Newspaper },
   { path: '/explore', label: 'Explore', icon: Compass },
-  { path: '/markets', label: 'Markets', icon: TrendingUp },
-  { path: '/research', label: 'Research', icon: FlaskConical },
   { path: '/case-studies', label: 'Case Studies', icon: Lightbulb },
-  { path: '/filings', label: 'Filings', icon: FileText },
-  { path: '/patents', label: 'Patents', icon: FileBadge },
+  { path: '/markets', label: 'Markets', icon: TrendingUp },
 ]
 
 export default function App() {
@@ -77,21 +68,21 @@ export default function App() {
       </header>
 
       {/* ─── Sub-nav Tabs ─── */}
-      <nav className="flex items-center gap-1 px-6 py-2 bg-bg-secondary border-b border-border">
+      <nav className="flex items-center gap-1 px-4 sm:px-6 py-2 bg-bg-secondary border-b border-border overflow-x-auto scrollbar-none">
         {NAV_ITEMS.map(({ path, label, icon: Icon }) => (
           <NavLink
             key={path}
             to={path}
             end={path === '/'}
             className={({ isActive }) =>
-              `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
+              `flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${isActive
                 ? 'bg-bg-tertiary text-accent-blue'
                 : 'text-text-muted hover:bg-bg-hover hover:text-text-secondary'
               }`
             }
           >
             <Icon className="w-4 h-4" />
-            {label}
+            <span className="hidden sm:inline">{label}</span>
           </NavLink>
         ))}
       </nav>
@@ -104,17 +95,14 @@ export default function App() {
             <Route path="/" element={<BriefingPage />} />
             <Route path="/explore" element={<ExplorePage />} />
             <Route path="/markets" element={<MarketsPage />} />
-            <Route path="/research" element={<ResearchPage />} />
             <Route path="/case-studies" element={<CaseStudiesPage />} />
-            <Route path="/filings" element={<FilingsPage />} />
-            <Route path="/patents" element={<PatentsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
         </main>
 
-        {/* Chat Panel (Right Side) */}
+        {/* Chat Panel (Right Side) — hidden on small screens */}
         {chatOpen ? (
-          <aside className="w-[380px] min-w-[380px] border-l border-border bg-bg-secondary flex flex-col">
+          <aside className="hidden md:flex w-[380px] min-w-[380px] border-l border-border bg-bg-secondary flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <div className="flex items-center gap-2">
                 <Bot className="w-4 h-4 text-accent-purple" />

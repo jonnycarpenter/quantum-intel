@@ -18,6 +18,7 @@ Usage:
 """
 
 import json
+import os
 import time
 import uuid
 from datetime import datetime, timezone
@@ -454,7 +455,8 @@ class CaseStudyExtractor:
         """Lazy-load the LLM client."""
         if self._client is None:
             from utils.llm_client import ResilientAsyncClient
-            self._client = ResilientAsyncClient()
+            api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+            self._client = ResilientAsyncClient(anthropic_api_key=api_key)
         return self._client
 
     # =========================================================================

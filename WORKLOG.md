@@ -122,6 +122,41 @@
 - **17 Cloud Run Jobs, 17 Cloud Scheduler entries — all ENABLED and Ready**
 - Full parity: every pipeline has both quantum and AI domain jobs
 
+### Session 13 (Mar 2026) — Data Pipeline Bug Fixes + Case Study Deployment
+- **Diagnosed empty `case_studies` table** — pipeline had never been run against BigQuery, no Cloud Run Job existed
+- **Diagnosed stale `podcast_quotes`** — no new quotes since Feb migration; `podcast_transcripts` table was empty
+- **Fixed podcast `published_at` bug** in `storage/bigquery.py` — empty string `""` caused BigQuery TIMESTAMP insert failures, now passes `None`
+- **Added `PodcastTranscript.from_dict()`** classmethod in `models/podcast.py` (~50 lines) — handles datetime parsing, speakers/hosts lists, EpisodeStatus enum
+- **Tested podcast pipeline end-to-end** — 1 transcript (Impact Quantum, 5886 words) + 20 quotes saved to BigQuery + embedded in Vertex AI
+- **Fixed `ResilientAsyncClient` bug** in `processing/case_study_extractor.py` — was called without `anthropic_api_key` argument (every other caller passes it)
+- **Fixed `case_study_embeddings` schema** — added missing `technology_stack` column to BigQuery DDL and live table
+- **Ran case study extraction** — 5 case studies extracted + 5 embeddings indexed (quantum + AI articles)
+- **Added case study Cloud Run Jobs** to `cloud_run_jobs.sh`, `setup_scheduler.sh`, `cloudbuild.yaml`:
+  - `quantum-case-studies` (Sun 14:00 UTC), `ai-case-studies` (Sun 14:30 UTC)
+- **19 Cloud Run Jobs, 19 Cloud Scheduler entries** (was 17)
+
+**BigQuery table status after fixes:**
+| Table | Before | After |
+|-------|--------|-------|
+| case_studies | 0 | 5 |
+| case_study_embeddings | 0 | 5 |
+| podcast_transcripts | 0 | 1 |
+| podcast_quotes | 356 | 376 |
+
+---
+
+### Session 14 (Mar 2026) — Explore Tab Redesign Spec
+- Comprehensive research of all 7 frontend pages, all API routes, all components
+- Designed new tab structure: Briefing, **Explore** (unified hub), Case Studies, Markets, Settings
+  - Consolidate Research, Filings, Patents INTO the Explore tab as content-type sub-tabs
+- Designed split-screen layout: scrollable feed (left 60%) + Insight Builder (right 40%)
+- Planned 3 analytics widgets: category breakdown chart, trend-over-time sparklines, concept cloud
+- Planned "Key Themes & Talking Points" AI-generated section
+- Planned Insight Builder: pin items → reorder → annotate → export PDF/Markdown
+- 3 new API endpoints needed: `/api/podcasts`, `/api/articles/trends`, `/api/articles/concept-cloud`
+- Phased implementation plan (6 phases across 4-6 sessions)
+- **Saved as `EXPLORE_REDESIGN_SPEC.md`** at project root
+
 ---
 
 ## Next Up
@@ -130,6 +165,14 @@
 - Monitor costs and tune Cloud Run Job resource limits
 - Markets tab — add "Last Updated [timestamp]"
 - Markets tab — AI tickers overview (similar to quantum)
-- Fix podcast_transcripts BigQuery migration (`PodcastTranscript.from_dict()` missing)
 - Fix sec_filings BigQuery dedup type mismatch (INT64 vs STRING on `fiscal_quarter`)
 - AI assistant design — personality, tools, app navigation, memory/compaction
+
+### Explore Tab Redesign
+Full spec in `EXPLORE_REDESIGN_SPEC.md`. 6 phases:
+1. Foundation — podcast API, trends endpoint, concept cloud endpoint, tab consolidation
+2. Explore Feed — content type tabs, multi-source data, PodcastQuoteCard
+3. Analytics Bar — trend chart, concept cloud, category breakdown
+4. Insight Builder — pin, reorder, annotate, export
+5. Themes & Talking Points — algorithmic theme extraction, copy/pin actions
+6. Polish & Responsive — mobile, animations, delete old standalone pages

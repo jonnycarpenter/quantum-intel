@@ -43,6 +43,21 @@ export default function ChatPanel({ currentPage, domain, onShowAdHocReport }: Pr
     setIsAutoScrolling(isAtBottom)
   }
 
+  // Listen for "Send to Chat" from Insight Builder
+  const pendingMessageRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ message: string }>).detail
+      if (detail?.message) {
+        pendingMessageRef.current = detail.message
+        setInput(detail.message)
+      }
+    }
+    window.addEventListener('ketzero-send-to-chat', handler)
+    return () => window.removeEventListener('ketzero-send-to-chat', handler)
+  }, [])
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return
 
@@ -189,6 +204,15 @@ export default function ChatPanel({ currentPage, domain, onShowAdHocReport }: Pr
       setIsLoading(false)
     }
   }
+
+  // Auto-send when input is populated by the Insight Builder event
+  useEffect(() => {
+    if (pendingMessageRef.current && input === pendingMessageRef.current && !isLoading) {
+      pendingMessageRef.current = null
+      handleSend()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input])
 
   // Helper to render message content with optional tool usage indicator
   const renderMessageContent = (msg: Message) => {

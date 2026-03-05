@@ -526,6 +526,7 @@ CREATE TABLE IF NOT EXISTS `{table}` (
   outcome_type STRING,
   readiness_level STRING,
   relevance_score FLOAT64,
+  technology_stack STRING,
   domain STRING,
   extracted_at TIMESTAMP,
   document_text STRING,

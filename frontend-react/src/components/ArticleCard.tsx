@@ -1,4 +1,4 @@
-import { ExternalLink } from 'lucide-react'
+import { ExternalLink, Pin } from 'lucide-react'
 import { PriorityBadge, CategoryBadge, TagChip, Card, timeAgo } from './ui'
 import CompanyLogo from './CompanyLogo'
 import { companyNameToDomain } from '../utils/logoUtils'
@@ -7,9 +7,11 @@ import type { Article } from '../api'
 interface Props {
   article: Article
   compact?: boolean
+  onPin?: (article: Article) => void
+  isPinned?: boolean
 }
 
-export default function ArticleCard({ article, compact = false }: Props) {
+export default function ArticleCard({ article, compact = false, onPin, isPinned }: Props) {
   return (
     <Card className="p-4 hover:border-border-light transition-colors">
       <div className="flex items-start justify-between gap-3">
@@ -69,6 +71,17 @@ export default function ArticleCard({ article, compact = false }: Props) {
             </div>
           )}
         </div>
+
+        {/* Pin button */}
+        {onPin && (
+          <button
+            onClick={() => onPin(article)}
+            className={`flex-shrink-0 transition-colors ${isPinned ? 'text-accent-teal' : 'text-text-muted hover:text-accent-teal'}`}
+            title={isPinned ? 'Pinned to Insight Builder' : 'Pin to Insight Builder'}
+          >
+            <Pin className={`w-4 h-4 ${isPinned ? 'fill-current' : ''}`} />
+          </button>
+        )}
       </div>
     </Card>
   )
