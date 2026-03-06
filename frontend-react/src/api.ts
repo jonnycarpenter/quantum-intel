@@ -340,7 +340,7 @@ export interface PinnedItem {
   id: string
   content_type: 'article' | 'podcast_quote' | 'earnings_quote' | 'sec_nugget' | 'paper' | 'patent'
   title: string
-  data: Article | PodcastQuote | EarningsQuote | SecNuggetDisplay | Paper | Record<string, unknown>
+  data: Article | PodcastQuote | EarningsQuote | SecNuggetDisplay | Paper | Patent | Record<string, unknown>
   pinned_at: string
   user_note?: string
 }

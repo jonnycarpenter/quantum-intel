@@ -100,14 +100,14 @@ export default function CategoryBreakdown({
               fontSize: '12px',
               boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
             }}
-            formatter={(value: number) => [value, 'Articles']}
+            formatter={(value: number | undefined) => [value ?? 0, 'Articles'] as [number, string]}
             labelFormatter={(label) => formatCategoryLabel(String(label))}
           />
           <Bar
             dataKey="count"
             radius={[0, 4, 4, 0]}
             cursor="pointer"
-            onClick={(entry) => {
+            onClick={(entry: {category?: string}) => {
               if (onCategoryClick && entry?.category) {
                 onCategoryClick(entry.category)
               }

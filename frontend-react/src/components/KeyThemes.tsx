@@ -70,7 +70,6 @@ export default function KeyThemes({ data, isLoading }: KeyThemesProps) {
         use_case_domains: [],
         confidence: 1,
       },
-      pinned_at: new Date().toISOString(),
     })
   }
 
