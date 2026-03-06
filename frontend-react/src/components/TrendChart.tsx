@@ -98,7 +98,7 @@ export default function TrendChart({ trends, isLoading }: TrendChartProps) {
               const d = new Date(String(val))
               return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
             }}
-            formatter={(value: number | undefined, name: string) => [value ?? 0, formatCategoryLabel(name)] as [number, string]}
+            formatter={(value: number | undefined, name: string | undefined) => [value ?? 0, formatCategoryLabel(name ?? '')] as [number, string]}
           />
           <Legend
             formatter={formatCategoryLabel}

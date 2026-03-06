@@ -107,9 +107,10 @@ export default function CategoryBreakdown({
             dataKey="count"
             radius={[0, 4, 4, 0]}
             cursor="pointer"
-            onClick={(entry: {category?: string}) => {
-              if (onCategoryClick && entry?.category) {
-                onCategoryClick(entry.category)
+            onClick={(data) => {
+              const category = (data as unknown as { category?: string }).category
+              if (onCategoryClick && category) {
+                onCategoryClick(category)
               }
             }}
           >
