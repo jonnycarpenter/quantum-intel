@@ -14,9 +14,10 @@ interface RadarData {
 
 interface RadarWidgetProps {
     domain: 'quantum' | 'ai';
+    compact?: boolean;
 }
 
-export const RadarWidget: React.FC<RadarWidgetProps> = ({ domain }) => {
+export const RadarWidget: React.FC<RadarWidgetProps> = ({ domain, compact = false }) => {
     const [data, setData] = useState<RadarData[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -84,14 +85,14 @@ export const RadarWidget: React.FC<RadarWidgetProps> = ({ domain }) => {
                 style={{ backgroundColor: domainColor }}
             />
 
-            <div className="flex items-center justify-between p-4 border-b border-charcoal-700/50">
-                <div className="flex items-center gap-2 text-white font-medium">
-                    {domain === 'quantum' ? <Zap size={16} className="text-signal-teal" /> : <Brain size={16} className="text-accent-red" />}
+            <div className={`flex items-center justify-between ${compact ? 'px-3 py-2' : 'p-4'} border-b border-charcoal-700/50`}>
+                <div className={`flex items-center gap-2 text-white ${compact ? 'text-xs font-medium' : 'font-medium'}`}>
+                    {domain === 'quantum' ? <Zap size={compact ? 12 : 16} className="text-signal-teal" /> : <Brain size={compact ? 12 : 16} className="text-accent-red" />}
                     30-Day Maturity Radar
                 </div>
             </div>
 
-            <div className="p-4 flex-1 flex flex-col items-center justify-center min-h-[300px] relative z-10">
+            <div className={`${compact ? 'p-2' : 'p-4'} flex-1 flex flex-col items-center justify-center ${compact ? 'min-h-[180px]' : 'min-h-[300px]'} relative z-10`}>
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center text-charcoal-400 gap-3">
                         <Loader2 className="animate-spin w-8 h-8" />
@@ -105,7 +106,7 @@ export const RadarWidget: React.FC<RadarWidgetProps> = ({ domain }) => {
                 ) : data.length === 0 ? (
                     <div className="text-charcoal-400 text-sm">No signals detected in the last 30 days.</div>
                 ) : (
-                    <div className="w-full h-[280px]">
+                    <div className={`w-full ${compact ? 'h-[180px]' : 'h-[280px]'}`}>
                         <ResponsiveContainer width="100%" height="100%">
                             <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
                                 <PolarGrid stroke="#374151" strokeDasharray="3 3" />
@@ -137,7 +138,7 @@ export const RadarWidget: React.FC<RadarWidgetProps> = ({ domain }) => {
             </div>
 
             {/* Footer Insight */}
-            {!isLoading && !error && data.length > 0 && (
+            {!compact && !isLoading && !error && data.length > 0 && (
                 <div className="px-4 py-3 bg-charcoal-900/30 border-t border-charcoal-700/50 text-xs text-charcoal-400 flex items-center justify-between">
                     <span>Leading Trend: <strong className="text-white">{data[0]?.subject}</strong></span>
                     <span className="text-[10px] uppercase tracking-wider font-mono opacity-50">Volume + Relevance</span>

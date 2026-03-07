@@ -23,7 +23,61 @@ import DomainToggle from '../components/DomainToggle'
 import { RadarWidget } from '../components/RadarWidget'
 import CompanyLogo from '../components/CompanyLogo'
 import { companyNameToDomain, findInlineLogos } from '../utils/logoUtils'
-import { Quote, ExternalLink, TrendingUp, TrendingDown, BookOpen } from 'lucide-react'
+import { Quote, ExternalLink, TrendingUp, TrendingDown, BookOpen, Zap } from 'lucide-react'
+
+// ─── Helpers ──────────────────────────────────────────
+
+/** Create a URL-safe slug from headline text */
+function slugify(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+/** Extract plain text from ReactNode children (for generating slugs from rendered headings) */
+function extractText(children: ReactNode): string {
+  if (typeof children === 'string') return children
+  if (typeof children === 'number') return String(children)
+  if (Array.isArray(children)) return children.map(extractText).join('')
+  if (children && typeof children === 'object' && 'props' in children) {
+    return extractText((children as any).props.children)
+  }
+  return ''
+}
+
+interface Headline {
+  text: string
+  sectionId: string
+  slug: string
+  priorityTag: string
+}
+
+/** Extract ### sub-headlines from section narratives for TL;DR */
+function extractHeadlines(sections: WeeklyBriefingSection[]): Headline[] {
+  const headlines: Headline[] = []
+  for (const section of sections) {
+    if (!section.narrative) continue
+    const regex = /^###\s+(.+)$/gm
+    let match
+    while ((match = regex.exec(section.narrative)) !== null) {
+      const text = match[1].trim()
+      headlines.push({
+        text,
+        sectionId: section.section_id,
+        slug: slugify(text),
+        priorityTag: section.priority_tag,
+      })
+    }
+    // If no sub-headlines found, use section header itself
+    if (!headlines.some(h => h.sectionId === section.section_id)) {
+      headlines.push({
+        text: section.header,
+        sectionId: section.section_id,
+        slug: `section-${slugify(section.header)}`,
+        priorityTag: section.priority_tag,
+      })
+    }
+  }
+  return headlines
+}
 
 // ─── Priority Tag Styles ──────────────────────────────
 
@@ -84,12 +138,19 @@ function injectCitations(text: string, sectionId: string): ReactNode[] {
 function NarrativeRenderer({ text, sectionId }: { text: string; sectionId: string }) {
   // Memoize the custom components to avoid re-creating on every render
   const components = useMemo(() => ({
-    // Sub-headlines within a section — render as styled story dividers
-    h3: ({ children }: { children?: ReactNode }) => (
-      <h4 className="text-sm font-semibold text-text-primary mt-5 mb-2 pt-3 border-t border-border/40 first:mt-0 first:pt-0 first:border-t-0">
-        {children}
-      </h4>
-    ),
+    // Sub-headlines within a section — render as styled story dividers with anchor IDs
+    h3: ({ children }: { children?: ReactNode }) => {
+      const text = extractText(children)
+      const slug = slugify(text)
+      return (
+        <h4
+          id={`story-${slug}`}
+          className="text-sm font-semibold text-text-primary mt-5 mb-2 pt-3 border-t border-border/40 first:mt-0 first:pt-0 first:border-t-0 scroll-mt-20"
+        >
+          {children}
+        </h4>
+      )
+    },
     // Paragraphs — inject citation badges into text content
     p: ({ children }: { children?: ReactNode }) => {
       const processed = processChildren(children, sectionId)
@@ -254,7 +315,7 @@ function BriefingSectionCard({ section }: { section: WeeklyBriefingSection }) {
   return (
     <Card className="p-5">
       {/* Section header */}
-      <div className="flex items-center gap-3 mb-4">
+      <div id={`section-${slugify(section.header)}`} className="flex items-center gap-3 mb-4 scroll-mt-20">
         <span className={`inline-flex items-center px-2.5 py-1 rounded text-xs font-bold border ${tagStyle}`}>
           {section.priority_tag}
         </span>
@@ -343,9 +404,49 @@ export default function BriefingPage() {
         <DomainToggle domain={domain} onChange={setDomain} />
       </div>
 
-      {/* Maturity Radar */}
-      <div className="mb-6">
-        <RadarWidget domain={domain} />
+      {/* TL;DR + Maturity Radar */}
+      <div className="overflow-hidden mb-6">
+        {/* Radar — floated right, compact */}
+        <div className="float-right ml-5 mb-3 w-64 lg:w-72">
+          <RadarWidget domain={domain} compact />
+        </div>
+
+        {/* TL;DR Quick Hitter Headlines */}
+        {activeSections.length > 0 && (() => {
+          const headlines = extractHeadlines(activeSections)
+          return headlines.length > 0 ? (
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="w-4 h-4 text-accent-cyan" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-text-secondary">
+                  TL;DR — This Week
+                </h2>
+              </div>
+              <ul className="space-y-1.5">
+                {headlines.map((h, i) => {
+                  const tagStyle = PRIORITY_TAG_COLORS[h.priorityTag] ?? 'bg-bg-tertiary text-text-muted border-border'
+                  return (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold border flex-shrink-0 mt-0.5 ${tagStyle}`}>
+                        {h.priorityTag}
+                      </span>
+                      <a
+                        href={`#story-${h.slug}`}
+                        className="text-sm text-text-secondary hover:text-accent-blue transition-colors cursor-pointer"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          document.getElementById(`story-${h.slug}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                        }}
+                      >
+                        {h.text}
+                      </a>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ) : null
+        })()}
       </div>
 
       {/* Priority Sections */}
